@@ -4,7 +4,7 @@
 \alias{ht_theme_markdown}
 \title{A stripe theme for huxtable object}
 \usage{
-ht_theme_markdown(ht, header_rows = 1, header_cols = 1,
+ht_theme_markdown(ht, header_rows = 1:2, header_cols = NULL,
   border_width = 0.8, border_color = grey(0.75), bg = c(grey(0.95),
   "white"))
 }
