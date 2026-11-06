@@ -3,6 +3,9 @@
 
 # C306
 
+This is an independently maintained version of C306, based on
+[oucru-biostats/C306](https://github.com/oucru-biostats/C306).
+
 C306 collects the R tools used by the Biostatistics group of the Oxford
 University Clinical Research Unit (OUCRU) to analyse and report clinical
 studies:
@@ -24,7 +27,7 @@ Install the development version from GitHub:
 
 ``` r
 # install.packages("remotes")
-remotes::install_github("oucru-biostats/C306")
+remotes::install_github("TranHung93/306")
 ```
 
 ## Quick start

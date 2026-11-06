@@ -26,12 +26,9 @@ This vignette demonstrates how to create a baseline table for a dataset using th
 
 Before proceeding, ensure that we have the `C306` (note C306 come with capital C), `flextable` and `dplyr` packages installed. If they are not installed, we can install them using the following commands:
 
-```{r}
-#install.packages("flextable")
-#install.packages("dplyr")
-#install.packages("devtools")
-#devtools::install_github("TranHung93/Testing@feature-rmst")
-
+```{r, eval = FALSE}
+install.packages(c("flextable", "dplyr", "remotes"))
+remotes::install_github("TranHung93/306")
 ```
 
 

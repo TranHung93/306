@@ -197,6 +197,10 @@ required by R CMD check). Calls with positional arguments work as before.
 
 ## Package infrastructure
 
+* This version is maintained independently at
+  <https://github.com/TranHung93/306> (based on oucru-biostats/C306); install
+  it with `remotes::install_github("TranHung93/306")`. The package name stays
+  C306.
 * Added a LICENSE file, a testthat (3rd edition) test suite, and this NEWS file.
 * `crayon`, `assertthat` and `stringr` are no longer used. `Hmisc` moved from
   Imports to Suggests (it is only used in a vignette). `lifecycle` and the
