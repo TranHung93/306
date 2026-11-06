@@ -31,8 +31,22 @@ as_sstable(x, ...)
 \item{include_footnote}{logical value specifying whether to include footnote in the output. Default is FALSE}
 }
 \value{
-A matrix of class ss_tbl if flextable == FALSE, otherwise a flextable
+If `flextable = TRUE`, a flextable. Otherwise a list with elements `table` (a
+  matrix of class `ss_tbl`) and `footer`, or only the matrix when `include_footnote = FALSE`.
 }
 \description{
 A function to coerce objects to a sstable
+}
+\examples{
+# a logistic regression summary
+fit <- glm(I(status == 2) ~ age + sex, data = survival::lung, family = binomial)
+as_sstable(logist_summary(fit))
+
+# a table assembled from header and body parts
+x <- list(header = list(c("", "Arm A", "Arm B")),
+          body = list("Age, years" = rbind(c("Mean", "50.1", "49.8"),
+                                           c("Median", "51", "49"))),
+          footer = "Example table.")
+as_sstable(x)
+as_sstable(x, flextable = TRUE)
 }

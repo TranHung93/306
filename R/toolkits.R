@@ -32,6 +32,16 @@
 #'
 #' If input is a data frame, return a data frame with relevant variables recoded.
 #'
+#' @examples
+#' # patterns are regular expressions; text that matches no pattern is kept
+#' simple_recode(c("yes", "Yes", "no", NA), map = list(Y = "^[Yy]es$", N = "^no$", Unknown = NA))
+#'
+#' # a factor stays a factor, with recoded levels
+#' simple_recode(factor(c("m", "f", "f")), map = list(Male = "^m$", Female = "^f$"))
+#'
+#' # several variables of a data frame at once
+#' df <- data.frame(sex = c("m", "f"), smoker = c("y", "n"))
+#' simple_recode(df, sex = list(Male = "m", Female = "f"), smoker = list(Yes = "y", No = "n"))
 #' @export
 simple_recode <- function(...){
   UseMethod('simple_recode')
@@ -127,7 +137,13 @@ ref_lv <- function(x){
 
 #' @rdname ref_lv
 #' @param x A factor
-#' @return A character object the represents the reference level
+#' @return `ref_lv()`: a string, the reference (first) level. `ref_lv<-`: the factor with
+#'   `value` as its first level.
+#' @examples
+#' arm <- factor(c("Placebo", "Drug", "Drug"))
+#' ref_lv(arm)
+#' ref_lv(arm) <- "Placebo"
+#' levels(arm)
 #' @export
 ref_lv.factor <- function(x){
   levels(x)[[1]]
@@ -165,6 +181,10 @@ ref_lv.factor <- function(x){
 #' If method == 'fct': the percentages of all levels
 #'
 #' If method == 'cont': the percentages of all ranges based on specified breaks
+#' @examples
+#' pct(c(TRUE, FALSE, TRUE, NA))                 # binary: % TRUE among non-missing
+#' pct(factor(c("a", "b", "b", "c")))            # one % per level
+#' pct(survival::lung$age, method = "cont", breaks = c(0, 50, 65, 100))
 #' @export
 pct <- function(x, method = c('auto', 'bin', 'cont', 'fct'), na.rm = TRUE, ...){
   method <- match.arg(method)

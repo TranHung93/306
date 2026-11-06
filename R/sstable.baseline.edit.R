@@ -35,7 +35,14 @@
 #' @param flextable a logical value specifies whether output will be a flextable-type table.
 #' @param bg a character specifies color of the odd rows in the body of flextable-type table.
 #'
-#' @return a flextable-type table or a list with values/headers/footers
+#' @return A flextable if `flextable = TRUE`, otherwise a list of class `ss_baseline` with
+#'   elements `table` and `footer` (see [sstable.baseline()]).
+#' @examples
+#' bl <- read.csv(system.file("extdata", "baseline_data.csv", package = "C306"))
+#' raw <- sstable.baseline(age + sex ~ Arm, data = bl, matrix.raw = TRUE)
+#' # ... edit `raw` here if needed, then add the header and footer:
+#' tab <- sstable.baseline.edit(raw, age + sex ~ Arm, data = bl)
+#' tab$table
 #' @export
 sstable.baseline.edit <- function(value, formula, data, bycol = TRUE, pooledGroup = FALSE, keepEmptyGroup = FALSE,
                                   statistics = "mean, median (Q1-Q3)", cont = NULL, cate = NULL, fullfreq = TRUE, digits = 1,

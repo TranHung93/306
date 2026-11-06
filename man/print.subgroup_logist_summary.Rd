@@ -17,6 +17,12 @@ invisibly return itself
 \description{
 Print method for subgroup_logist_summary
 }
+\examples{
+d <- transform(na.omit(survival::lung[, c("status", "age", "sex", "ph.ecog")]),
+               died = status == 2, ecog = factor(ph.ecog > 0, labels = c("ECOG 0", "ECOG 1+")))
+fit <- glm(died ~ age * ecog + sex * ecog, data = d, family = binomial)
+print(subgroup_effect(~ ecog, fit, method = "wald"))
+}
 \seealso{
 \link{print.data.frame}
 }

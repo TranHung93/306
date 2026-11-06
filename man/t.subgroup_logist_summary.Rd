@@ -2,12 +2,17 @@
 % Please edit documentation in R/group_effect.R
 \name{t.subgroup_logist_summary}
 \alias{t.subgroup_logist_summary}
+\alias{[.subgroup_logist_summary}
 \title{Transpose a subgroup logist summary table}
 \usage{
 \method{t}{subgroup_logist_summary}(x)
+
+\method{[}{subgroup_logist_summary}(x, ...)
 }
 \arguments{
 \item{x}{an object of class subgroup_logist_summary}
+
+\item{...}{row and column indices, as for a data frame.}
 }
 \value{
 If x is a simplified subgroup_logist_summary (aka a data.frame), return itself. Otherwise, a transposed list of class subgroup_logist_summary
@@ -15,15 +20,15 @@ If x is a simplified subgroup_logist_summary (aka a data.frame), return itself. 
 \description{
 A method to transpose logist summary table, rather than stratify by subgroup, it stratifies by covariables.
 }
+\details{
+`[` subsets a simplified `subgroup_logist_summary` like a data frame.
+}
 \examples{
-y = sample(0:1, 1000, replace = TRUE)
-x1 = sample(1:100, 1000, replace = TRUE)
-x2 = sample(c("A", "B"), 1000, replace = TRUE)
-x3 = sample(c("C", "D", "E"), 1000, replace = TRUE)
-x4 = sample(c("F", "G"), 1000, replace = TRUE)
-fakefit = glm(y ~ x1*x3 + x2*x3 + x2*x4, family = binomial())
-se = C306::subgroup_effect(~x3, fakefit)
-t(se)
+d <- transform(na.omit(survival::lung[, c("status", "age", "sex", "ph.ecog")]),
+               died = status == 2, ecog = factor(ph.ecog > 0, labels = c("ECOG 0", "ECOG 1+")))
+fit <- glm(died ~ age * ecog + sex * ecog, data = d, family = binomial)
+se <- subgroup_effect(~ ecog, fit, method = "wald")
+t(se)   # one table per covariable instead of one per ECOG group
 }
 \seealso{
 \link{t}

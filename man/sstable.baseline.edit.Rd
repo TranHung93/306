@@ -85,10 +85,18 @@ If formula is in the form of x+y ~ a|z, the function will summary z with respect
 \item{bg}{a character specifies color of the odd rows in the body of flextable-type table.}
 }
 \value{
-a flextable-type table or a list with values/headers/footers
+A flextable if `flextable = TRUE`, otherwise a list of class `ss_baseline` with
+  elements `table` and `footer` (see [sstable.baseline()]).
 }
 \description{
 Adds the header and footer to the summary matrix built by
   [sstable.baseline()] (with `matrix.raw = TRUE`), optionally as a flextable.
   Usually called by [sstable.baseline()] itself.
+}
+\examples{
+bl <- read.csv(system.file("extdata", "baseline_data.csv", package = "C306"))
+raw <- sstable.baseline(age + sex ~ Arm, data = bl, matrix.raw = TRUE)
+# ... edit `raw` here if needed, then add the header and footer:
+tab <- sstable.baseline.edit(raw, age + sex ~ Arm, data = bl)
+tab$table
 }

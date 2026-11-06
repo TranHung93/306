@@ -57,6 +57,17 @@ A function to re-encode data by using a map. Patterns are accepted. Unmentioned 
 
 Method for class data.frame supports a robust replacement for data by providing relevant map in the form of var = map.
 }
+\examples{
+# patterns are regular expressions; text that matches no pattern is kept
+simple_recode(c("yes", "Yes", "no", NA), map = list(Y = "^[Yy]es$", N = "^no$", Unknown = NA))
+
+# a factor stays a factor, with recoded levels
+simple_recode(factor(c("m", "f", "f")), map = list(Male = "^m$", Female = "^f$"))
+
+# several variables of a data frame at once
+df <- data.frame(sex = c("m", "f"), smoker = c("y", "n"))
+simple_recode(df, sex = list(Male = "m", Female = "f"), smoker = list(Yes = "y", No = "n"))
+}
 \seealso{
 \link{regex} \link[dplyr]{case_when}
 }

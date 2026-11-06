@@ -7,7 +7,18 @@
 #' @param unit a logical value specifies whether unit will be appended in the label of continuous variables.
 #' @param fit a logical value specifies whether the label will use presentation as in model fitting.
 #'
-#' @return vector of character of label
+#' @return A character vector of labels: one for a vector, one per column for a data frame
+#'   (the column name when a column has no label). With `meta`, `x` is a variable name (or a
+#'   data frame whose column names are looked up in `meta$varname`).
+#' @examples
+#' wt <- structure(c(60, 72), label = "Weight", unit = "kg", scale = 10)
+#' getlabel(wt)
+#' getlabel(wt, fit = TRUE)      # as in a model with weight per 10 kg
+#'
+#' meta <- data.frame(varname = c("age", "sex"), label = c("Age", "Sex"),
+#'                    unit = c("years", NA), scale = c(10, NA), type = c("numeric", "factor"))
+#' getlabel("age", meta = meta)
+#' getlabel(data.frame(age = 50, sex = "F"), meta = meta)
 #' @export
 getlabel <- function(x, meta = NULL, unit = TRUE, fit = FALSE){
   if (is.null(dim(x))) {

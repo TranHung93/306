@@ -75,10 +75,24 @@ If CoxPH is preferred, used Surv(t, ev == 'event-of-interest') on the LHS.}
 \item{...}{arguments that are passed to sstable.survcomp}
 }
 \value{
-a flextable-type table or a list with values/headers/footers
+A flextable if `flextable = TRUE` (the default), otherwise a list of class
+  `ss_survcomp` with elements `table` (a character matrix) and `footer`.
 }
 \description{
 A function to summarize results for a survival model by treatment arm (variable "arm") and subgroup.
+}
+\examples{
+library(survival)
+lung2 <- transform(na.omit(lung[, c("time", "status", "sex", "ph.ecog")]),
+                   arm = factor(sex, labels = c("Male", "Female")),
+                   ecog = factor(ph.ecog))
+lung2 <- droplevels(subset(lung2, ecog != "3"))
+
+# HR by ECOG status, with a test for heterogeneity
+tab <- sstable.survcomp.subgroup(Surv(time, status) ~ arm, ~ ecog, data = lung2,
+                                 flextable = FALSE)
+tab$table
+
 }
 \author{
 This function was originally written by Marcel Wolbers. Trinh Dong and Lam Phung Khanh did some modification.

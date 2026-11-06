@@ -1,6 +1,7 @@
-# One-off generator for tests/testthat/fixtures/oucru_dictionary.xlsx
-# (an OUCRU-style data dictionary: a CRFs sheet, a Grids sheet and one CRF sheet).
-out <- "tests/testthat/fixtures/oucru_dictionary.xlsx"
+# Generator for inst/extdata/oucru_dictionary.xlsx, a small OUCRU-style data
+# dictionary (a CRFs sheet, a Grids sheet and two CRF sheets) used by the
+# import.info() example and tests. Run from the package root; needs openxlsx.
+out <- "inst/extdata/oucru_dictionary.xlsx"
 dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
 crfs <- data.frame(CRF = c("ENR", "LAB"))
 grids <- data.frame(CRF = "LAB", Grid = "G1")

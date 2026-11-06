@@ -26,6 +26,18 @@ gg_ajsurvplot(
 
 \item{...}{optional parameters passed to \code{ggsurvplot}.}
 }
+\value{
+A `ggsurvplot` object (see \code{\link[survminer:ggsurvplot]{ggsurvplot}}). The curves
+  are 1 - the Aalen-Johansen cumulative incidence of `etype` in each group; use
+  `fun = "event"` to plot the cumulative incidence itself.
+}
 \description{
 Extend \link[survminer:ggsurvplot]{ggsurvplot} functionality to plot competing risk curve
+}
+\examples{
+library(survival)
+mg <- transform(mgus2, etime = ifelse(pstat == 0, futime, ptime),
+                event = factor(ifelse(pstat == 0, 2 * death, 1), 0:2,
+                               c("censor", "progression", "death")))
+gg_ajsurvplot(Surv(etime, event) ~ sex, data = mg, etype = "progression", fun = "event")
 }

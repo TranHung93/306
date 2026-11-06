@@ -7,15 +7,25 @@
 import.info(table_name, input, output)
 }
 \arguments{
-\item{table_name}{a character vector specifies names of Excel sheets (in OUCRU's data dictionary) to be imported.}
+\item{table_name}{a character vector specifies names of Excel sheets (in OUCRU's data dictionary) to be imported.
+A grid is named `<CRF>_<Grid>`; its CRF sheet must be requested too.}
 
 \item{input}{a character value specifies path to the OUCRU's data dictionary file (in Excel format).}
 
-\item{output}{a character value specifies where to save imported data.}
+\item{output}{a character value specifies the `.RData` file in which to save imported data.}
 }
 \value{
-Nothing (imported data will be saved in the pre-defined output directory)
+Nothing (called for its side effect). The file `output` contains one data frame
+  `<sheet>_info` per imported sheet, and `sheet_info_name`, the names of those data frames.
 }
 \description{
 A function to import OUCRU's data dictionary into R.
+}
+\examples{
+dict <- system.file("extdata", "oucru_dictionary.xlsx", package = "C306")
+out <- tempfile(fileext = ".RData")
+import.info(c("ENR", "LAB", "LAB_G1"), input = dict, output = out)
+load(out)
+sheet_info_name
+ENR_info
 }

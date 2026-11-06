@@ -33,13 +33,22 @@ or "wald" for CI and tests based on Wald statistics}
 \item{flextable}{logical value specifying whether to build flextable object. Default it FALSE. Set to TRUE forces sstable to TRUE and verbose to FALSE.
 Like other sstable objects, you can still create flextable or huxtable afterwards by using \link{ss_flextable} or \link{ss_huxtable}}
 
-\item{...}{additional parameters passed to \link{ss_flextable}}
+\item{...}{currently unused.}
 }
 \value{
-A data frame of additional class "logist_summary" (if sstable == FALSE), a matrix of class c("summary_tbl", "ss_tbl") otherwise
+A data frame of class `logist_summary` with columns `log.OR`, `OR`, `lower.CI`,
+  `upper.CI` and `p.value` (formatted as text), one row per model coefficient in model order,
+  and a `footer` attribute. With `sstable = TRUE`, a list with elements `table` (a matrix of
+  class `summary_tbl`) and `footer`; with `flextable = TRUE`, a flextable.
 }
 \description{
 a function to create summary table for glm logistic model
+}
+\examples{
+fit <- glm(I(status == 2) ~ age + sex + ph.ecog, data = survival::lung, family = binomial)
+logist_summary(fit)                    # likelihood ratio CIs and tests
+logist_summary(fit, method = "wald")   # Wald CIs and tests
+logist_summary(fit, flextable = TRUE)
 }
 \seealso{
 \link{ss_format}, \link{ss_huxtable}, \link{ss_flextable}

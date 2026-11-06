@@ -6,10 +6,19 @@
 #' @description A function to import OUCRU's data dictionary into R.
 #'
 #' @param table_name a character vector specifies names of Excel sheets (in OUCRU's data dictionary) to be imported.
+#'   A grid is named `<CRF>_<Grid>`; its CRF sheet must be requested too.
 #' @param input a character value specifies path to the OUCRU's data dictionary file (in Excel format).
-#' @param output a character value specifies where to save imported data.
+#' @param output a character value specifies the `.RData` file in which to save imported data.
 #'
-#' @return Nothing (imported data will be saved in the pre-defined output directory)
+#' @return Nothing (called for its side effect). The file `output` contains one data frame
+#'   `<sheet>_info` per imported sheet, and `sheet_info_name`, the names of those data frames.
+#' @examples
+#' dict <- system.file("extdata", "oucru_dictionary.xlsx", package = "C306")
+#' out <- tempfile(fileext = ".RData")
+#' import.info(c("ENR", "LAB", "LAB_G1"), input = dict, output = out)
+#' load(out)
+#' sheet_info_name
+#' ENR_info
 #' @export
 import.info <- function(table_name, input, output) {
   ### get all available sheets
@@ -79,7 +88,16 @@ import.info <- function(table_name, input, output) {
 #' @param oucru_info a data frame contains imported data of a sheet from OUCRU's data dictionary.
 #' @param oucru_category a data frame specifies how categorical variables are coded in OUCRU's database.
 #'
-#' @return A data frame contains data dictionary information in a general format.
+#' @return A data frame contains data dictionary information in a general format (columns
+#'   `varname`, `label`, `type`, `unit`, `value`, `levels`, `missing`, `scale`, `condition`,
+#'   `strict`), ready for [myformat.data()] and [inspect.data()].
+#' @examples
+#' oucru_info <- data.frame(
+#'   Category = c(NA, "SEX"), Variable = c("AGE", "SEX"), Caption = c("Age", "Sex"),
+#'   `Data type` = c("Integer", "RadioList"), Format = NA, check.names = FALSE)
+#' oucru_category <- data.frame(category = "SEX", submissionvalue = c("1", "2"),
+#'                              text = c("Male", "Female"))
+#' convert.info(oucru_info, oucru_category)
 #' @import dplyr
 #' @export
 convert.info <- function(oucru_info, oucru_category) {

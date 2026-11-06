@@ -36,7 +36,19 @@
 #' @param overall [\code{TRUE}] where to print overall model
 #' @param ... arguments that are passed to sstable.survcomp
 #'
-#' @return a flextable-type table or a list with values/headers/footers
+#' @return A flextable if `flextable = TRUE` (the default), otherwise a list of class
+#'   `ss_survcomp` with elements `table` (a character matrix) and `footer`.
+#' @examples
+#' library(survival)
+#' lung2 <- transform(na.omit(lung[, c("time", "status", "sex", "ph.ecog")]),
+#'                    arm = factor(sex, labels = c("Male", "Female")),
+#'                    ecog = factor(ph.ecog))
+#' lung2 <- droplevels(subset(lung2, ecog != "3"))
+#'
+#' # HR by ECOG status, with a test for heterogeneity
+#' tab <- sstable.survcomp.subgroup(Surv(time, status) ~ arm, ~ ecog, data = lung2,
+#'                                  flextable = FALSE)
+#' tab$table
 #'
 #' @author This function was originally written by Marcel Wolbers. Trinh Dong and Lam Phung Khanh did some modification.
 #' @import survival
@@ -316,6 +328,12 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
 #' @param ... unused; kept for compatibility with [print()]. Passing the table
 #'   as `sstable = ` is deprecated, use `x` instead.
 #' @return `x`, invisibly.
+#' @examples
+#' library(survival)
+#' tab <- sstable.survcomp(Surv(time, status) ~ sex, data = lung, medsum = FALSE,
+#'                         flextable = FALSE)$table
+#' print(tab, pretty = FALSE)
+#' if (requireNamespace("huxtable", quietly = TRUE)) print(tab)
 #' @export
 print.ss_tbl <- function(x, pretty = getOption('ss_pretty.print', TRUE), ...){
   if (missing(x)) {

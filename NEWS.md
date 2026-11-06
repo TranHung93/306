@@ -122,6 +122,9 @@ case, the other numbers in the same table were correct.
 * `getlabel()` on a data frame with `meta` no longer fails, and returns labels in
   the column order of the data.
 * `ss_flextable()` now uses its `bg` argument (it was ignored).
+* `ss_huxtable()` accepts the objects returned by `sstable.baseline()`,
+  `sstable.ae()` and `sstable.survcomp()` (it failed with "`sstable` must be a
+  matrix or data frame"; only `ss_flextable()` had a method for them).
 * `ss_header()`, `ss_body()` and `ss_section()` now return an `ss_tbl` object.
 * `rbind.ss_obj()` called directly no longer fails.
 * `sstable.survcomp()` no longer fails when only one arm is present in the

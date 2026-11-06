@@ -92,8 +92,27 @@ If formula is in the form of x+y ~ a|z, the function will summary z with respect
 \item{matrix.raw}{a logical values specifies whether output will be a draw dataframe.}
 }
 \value{
-a flextable-type table or a list with values/headers/footers
+If `flextable = TRUE`, a flextable. If `matrix.raw = TRUE`, the summary matrix without
+  header and footer. Otherwise a list of class `ss_baseline` with elements `table` (the table
+  as a character matrix, header rows first) and `footer`; use [ss_flextable()] or
+  [ss_huxtable()] to render it later.
 }
 \description{
 A function to create a simple summary baseline table.
+}
+\examples{
+bl <- read.csv(system.file("extdata", "baseline_data.csv", package = "C306"))
+
+# summary by arm, with tests
+tab <- sstable.baseline(age + sex + bmi ~ Arm, data = bl, test = TRUE)
+tab$table
+tab$footer
+
+# median (Q1-Q3), a "Total" column, and a flextable
+sstable.baseline(age + sex + icudays ~ Arm, data = bl, statistics = "median (Q1-Q3)",
+                 pooledGroup = TRUE, flextable = TRUE)
+
+# proportion of deaths (outcome == 4) by sex within each arm
+bl$died <- bl$outcome == 4
+sstable.baseline(sex ~ Arm | died, data = bl)$table
 }

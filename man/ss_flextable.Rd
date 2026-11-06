@@ -32,6 +32,12 @@ an object of class flextable
 \description{
 This function generate a flextable from a sstable.
 }
+\examples{
+bl <- read.csv(system.file("extdata", "baseline_data.csv", package = "C306"))
+tab <- sstable.baseline(age + sex ~ Arm, data = bl)   # list with table and footer
+ss_flextable(tab, add_footer = "Data: example trial.")
+ss_flextable(tab$table, footer = "A custom footer", bg = "lightblue")
+}
 \seealso{
 \link[flextable]{flextable}
 }

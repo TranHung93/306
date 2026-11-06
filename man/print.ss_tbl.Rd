@@ -23,3 +23,10 @@ Print method for objects of class `ss_tbl`. When `pretty` is
   `TRUE` and the \pkg{huxtable} package is installed, the table is printed as
   a huxtable; otherwise it is printed as a plain matrix.
 }
+\examples{
+library(survival)
+tab <- sstable.survcomp(Surv(time, status) ~ sex, data = lung, medsum = FALSE,
+                        flextable = FALSE)$table
+print(tab, pretty = FALSE)
+if (requireNamespace("huxtable", quietly = TRUE)) print(tab)
+}

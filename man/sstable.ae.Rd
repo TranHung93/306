@@ -102,8 +102,25 @@ Be aware that even when chisq.test==TRUE, if expected values are < 1, the later 
 \item{bg}{a character specifies color of the odd rows in the body of flextable-type table.}
 }
 \value{
-a flextable-type table or a list with values/headers/footers
+If `flextable = TRUE` (the default), a flextable. If `matrix.raw = TRUE`, the summary
+  matrix without header. Otherwise a list of class `ss_ae` with elements `table` and `footer`.
 }
 \description{
 A function to create a simple adverse event summary table.
+}
+\examples{
+ae <- read.csv(system.file("extdata", "ae_data.csv", package = "C306"))
+bl <- read.csv(system.file("extdata", "baseline_data.csv", package = "C306"))
+
+# number of episodes and patients by arm, with grades
+tab <- sstable.ae(ae_data = ae, fullid_data = bl, id.var = "usubjid",
+                  aetype.var = "ctcaename", grade.var = "ctcaegrade", arm.var = "Arm",
+                  flextable = FALSE)
+head(tab$table, 10)
+
+# grouped by organ class, most frequent first, as a flextable
+grp <- read.csv(system.file("extdata", "group_data.csv", package = "C306"))
+sstable.ae(ae_data = ae, fullid_data = bl, group_data = grp, id.var = "usubjid",
+           aetype.var = "ctcaename", group.var = "class", arm.var = "Arm",
+           sort.by = ~ -pt)
 }

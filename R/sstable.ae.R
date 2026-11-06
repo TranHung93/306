@@ -43,7 +43,23 @@
 #' @param na.text [`(Missing)`] in-placed text for missing AE
 #' @param matrix.raw a logical values specifies whether output will be a draw dataframe.
 #'
-#' @return a flextable-type table or a list with values/headers/footers
+#' @return If `flextable = TRUE` (the default), a flextable. If `matrix.raw = TRUE`, the summary
+#'   matrix without header. Otherwise a list of class `ss_ae` with elements `table` and `footer`.
+#' @examples
+#' ae <- read.csv(system.file("extdata", "ae_data.csv", package = "C306"))
+#' bl <- read.csv(system.file("extdata", "baseline_data.csv", package = "C306"))
+#'
+#' # number of episodes and patients by arm, with grades
+#' tab <- sstable.ae(ae_data = ae, fullid_data = bl, id.var = "usubjid",
+#'                   aetype.var = "ctcaename", grade.var = "ctcaegrade", arm.var = "Arm",
+#'                   flextable = FALSE)
+#' head(tab$table, 10)
+#'
+#' # grouped by organ class, most frequent first, as a flextable
+#' grp <- read.csv(system.file("extdata", "group_data.csv", package = "C306"))
+#' sstable.ae(ae_data = ae, fullid_data = bl, group_data = grp, id.var = "usubjid",
+#'            aetype.var = "ctcaename", group.var = "class", arm.var = "Arm",
+#'            sort.by = ~ -pt)
 #' @import dplyr
 #' @import tidyr
 #' @export

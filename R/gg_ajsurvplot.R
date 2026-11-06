@@ -6,6 +6,15 @@
 #' @param data an optional data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model
 #' @param weights,subset,na.action,etype,count,id,timefix parameter passed to finegray model. See \code{\link[survival:finegray]{finegray}},
 #' @param ... optional parameters passed to \code{ggsurvplot}.
+#' @return A `ggsurvplot` object (see \code{\link[survminer:ggsurvplot]{ggsurvplot}}). The curves
+#'   are 1 - the Aalen-Johansen cumulative incidence of `etype` in each group; use
+#'   `fun = "event"` to plot the cumulative incidence itself.
+#' @examples
+#' library(survival)
+#' mg <- transform(mgus2, etime = ifelse(pstat == 0, futime, ptime),
+#'                 event = factor(ifelse(pstat == 0, 2 * death, 1), 0:2,
+#'                                c("censor", "progression", "death")))
+#' gg_ajsurvplot(Surv(etime, event) ~ sex, data = mg, etype = "progression", fun = "event")
 #' @export
 gg_ajsurvplot <- function(formula, data, weights, subset, na.action, etype, count, id, timefix, ...){
   dot <- list(...)
@@ -40,6 +49,12 @@ gg_ajsurvplot <- function(formula, data, weights, subset, na.action, etype, coun
 #' Same as \link[ggsurvfit:ggsurvfit]{ggsurvfit} but with strata saved, so you can facet by covariables.
 #'
 #' @param x,type,linetype_aes,theme,... parameters passed directly \link[ggsurvfit:ggsurvfit]{ggsurvfit}.
+#' @return A ggplot object. Each stratum variable is a column of the plot data, so the plot
+#'   can be faceted with e.g. `ggplot2::facet_wrap(~ sex)`.
+#' @examples
+#' library(survival)
+#' fit <- survfit(Surv(time, status) ~ sex + ph.ecog, data = subset(lung, ph.ecog < 3))
+#' ggsurvfit2(fit) + ggplot2::facet_wrap(~ sex)
 #' @export
 ggsurvfit2 <- rlang::new_function(
   args = rlang::fn_fmls(ggsurvfit::ggsurvfit),
@@ -82,6 +97,12 @@ untidy_strata <- function(x, strata.col='strata') {
 #' @description
 #' Same as \link[ggsurvfit:tidy_survfit]{tidy_survfit} but with strata saved.
 #' @param x,times,type same as \link[ggsurvfit:tidy_survfit]{tidy_survfit}
+#' @return A tibble as from \link[ggsurvfit:tidy_survfit]{tidy_survfit}, with one extra column
+#'   per stratum variable (e.g. `sex`, `ph.ecog`).
+#' @examples
+#' library(survival)
+#' fit <- survfit(Surv(time, status) ~ sex + ph.ecog, data = subset(lung, ph.ecog < 3))
+#' head(tidy_survfit2(fit))
 #' @export
 tidy_survfit2 <- function(x, times=NULL, type='survival'){
   ggsurvfit::tidy_survfit(x, times=times, type) |>
@@ -97,8 +118,18 @@ tidy_survfit2 <- function(x, times=NULL, type='survival'){
 #' @param weights,subset,na.action,count,id,timefix parameter passed to finegray model. See \code{\link[survival:finegray]{finegray}},
 #' @param main.event,competing.event main and competing event to plot
 #' @param facet.by formula. default to all strata
-#' @param ... optional parameters passed to \code{ggsurvplot}.
+#' @param ... currently unused.
 #' @param .return_data [FALSE] if TRUE, get the data instead.
+#' @return A ggplot object: the cumulative incidence of `main.event` rising from the bottom and
+#'   1 - the cumulative incidence of `competing.event` falling from the top (both Aalen-Johansen
+#'   estimates for each group). With `.return_data = TRUE`, the plotted data.
+#' @examples
+#' library(survival)
+#' mg <- transform(mgus2, etime = ifelse(pstat == 0, futime, ptime),
+#'                 event = factor(ifelse(pstat == 0, 2 * death, 1), 0:2,
+#'                                c("censor", "progression", "death")))
+#' gg_ajsurvplot2(Surv(etime, event) ~ sex, data = mg,
+#'                main.event = "progression", competing.event = "death")
 #' @import ggplot2
 #' @export
 gg_ajsurvplot2 <- function(formula, data, weights, subset, na.action, main.event, competing.event, facet.by = ~strata, count, id, timefix, ..., .return_data=FALSE){

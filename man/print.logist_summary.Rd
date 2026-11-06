@@ -17,6 +17,10 @@ invisibly return itself
 \description{
 Print method for logist_summary table
 }
+\examples{
+fit <- glm(I(status == 2) ~ age + sex, data = survival::lung, family = binomial)
+print(logist_summary(fit), right = FALSE)
+}
 \seealso{
 \link{print.data.frame}
 }

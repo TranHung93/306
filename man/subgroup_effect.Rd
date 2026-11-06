@@ -50,18 +50,21 @@ Set to FALSE to avoid this behaviour.}
 Under certain circumstances defined in param simplify, a flextable, an sstable,
 a data.frame of class 'subgroup_logist_summary',
 or a 'subgroup_logist_summary'/list of logist_summary, each represents one state of X.
+Each table has columns `log.OR`, `OR`, `CI.lower`, `CI.upper` (the 95% CI of the OR) and `p.value`.
 }
 \description{
 This function calculate the OR, CI, an p.value within each value of specified covariable.
 }
 \examples{
-y = sample(0:1, 1000, replace = TRUE)
-x1 = sample(1:100, 1000, replace = TRUE)
-x2 = sample(c("A", "B"), 1000, replace = TRUE)
-x3 = sample(c("C", "D", "E"), 1000, replace = TRUE)
-x4 = sample(c("F", "G"), 1000, replace = TRUE)
-fakefit = glm(y ~ x1*x3 + x2*x3 + x2*x4, family = binomial())
-C306::subgroup_effect(~x3, fakefit)
+d <- transform(na.omit(survival::lung[, c("status", "age", "sex", "ph.ecog")]),
+               died = status == 2, ecog = factor(ph.ecog > 0, labels = c("ECOG 0", "ECOG 1+")))
+fit <- glm(died ~ age * ecog + sex * ecog, data = d, family = binomial)
+
+# OR of age and of sex within each ECOG group
+subgroup_effect(~ ecog, fit)
+
+# one covariable only: a single table with one row per ECOG group
+subgroup_effect(age ~ ecog, fit, method = "wald")
 }
 \seealso{
 \link{logist_summary}, \link{print.subgroup_logist_summary}, \link{t.subgroup_logist_summary}

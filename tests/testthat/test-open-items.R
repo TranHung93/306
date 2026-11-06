@@ -39,6 +39,15 @@ test_that("[OI-3] logist_summary without intercept: footer is accurate and LR p-
   expect_output(logist_summary(fit0, verbose = TRUE), "no intercept")
 })
 
+test_that("ss_huxtable accepts the objects returned by the sstable functions", {
+  skip_if_not_installed("huxtable")
+  tab <- sstable.baseline(x + g ~ arm, data = small_baseline())
+  expect_s3_class(tab, "ss_obj")
+  ht <- ss_huxtable(tab, add_footer = "extra note")
+  expect_s3_class(ht, "huxtable")
+  expect_true(any(grepl("extra note", unlist(ht))))
+})
+
 test_that("[OI-4] AE grades are in clinical order with missing grade last", {
   ae <- ae_fixture()
   fid <- fullid_fixture()

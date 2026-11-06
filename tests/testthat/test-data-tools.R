@@ -69,7 +69,7 @@ test_that("getlabel uses attributes, units and meta", {
 })
 
 test_that("import.info reads an OUCRU dictionary (incl. grids) and saves it", {
-  xlsx <- test_path("fixtures", "oucru_dictionary.xlsx")
+  xlsx <- system.file("extdata", "oucru_dictionary.xlsx", package = "C306")
   out <- file.path(withr_local_tempdir(), "info.RData")
   import.info(c("ENR", "LAB", "LAB_G1"), input = xlsx, output = out)
   env <- new.env()
@@ -81,7 +81,7 @@ test_that("import.info reads an OUCRU dictionary (incl. grids) and saves it", {
 })
 
 test_that("import.info works when the dictionary has grids but none is requested", {
-  xlsx <- test_path("fixtures", "oucru_dictionary.xlsx")
+  xlsx <- system.file("extdata", "oucru_dictionary.xlsx", package = "C306")
   out <- file.path(withr_local_tempdir(), "info.RData")
   expect_no_error(import.info("ENR", input = xlsx, output = out))
   env <- new.env()

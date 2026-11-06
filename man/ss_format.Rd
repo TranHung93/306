@@ -34,3 +34,13 @@ a matrix of class ss_tbl
 \description{
 This function is the combination of ss_header, ss_body, and ss_section.
 }
+\examples{
+m <- rbind(c("", "Arm A", "", "Arm B", ""),
+           c("Characteristic", "n", "Summary", "n", "Summary"),
+           c("Age", "10", "50 (40-60)", "12", "48 (41-55)"),
+           c("Sex", "", "", "", ""),
+           c("- Female", "", "5 (50\%)", "", "6 (50\%)"))
+f <- ss_format(m)          # rows guessed: 2 header rows, a section, body rows
+rownames(f)
+ss_format(m, header = 1:2, section = 4, body = c(3, 5), .guess = FALSE)
+}

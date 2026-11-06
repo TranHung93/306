@@ -1,6 +1,6 @@
 Package: C306
 Type: Package
-Title: Collection of useful R codes for data analysis from the Biostatistics group at OUCRU
+Title: Summary Tables and Tools for Clinical Trial Reporting
 Version: 0.1.5-240715
 Authors@R: 
     c(person(given = "Khanh Lam",
@@ -15,9 +15,14 @@ Authors@R:
              family = "Tran",
              role = c("aut", "cre"),
              email = "hungtt@oucru.org"))
-Description: Collection of useful R codes for data analysis from the 
-    Biostatistics group at OUCRU. This package provides specialized 
-    functions for clinical research data.
+Description: Functions used by the Biostatistics group of the Oxford
+    University Clinical Research Unit (OUCRU) to analyse and report clinical
+    studies. They create report-ready summary tables of baseline
+    characteristics, adverse events and time-to-event outcomes (Cox,
+    Fine-Gray, restricted mean survival time and cumulative incidence
+    comparisons, overall and by subgroup), summarise logistic regression
+    models, plot competing-risks curves, and import, format and check data
+    with an OUCRU-style data dictionary.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -49,7 +54,6 @@ Imports:
     survival,
     aod
 Suggests:
-    Hmisc,
     knitr,
     MASS,
     rmarkdown,

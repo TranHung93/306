@@ -17,3 +17,7 @@ a matrix of class ss_tbl
 \description{
 This function set the designated rows as body part of a sstable
 }
+\examples{
+m <- rbind(c("", "Arm A", "Arm B"), c("Age", "50", "48"))
+rownames(ss_body(ss_header(m, 1), 2))
+}

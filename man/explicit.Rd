@@ -17,6 +17,12 @@ The explicit form of `x`; see the methods.
 \description{
 A function to transform an object to its explicit form if possible
 }
+\examples{
+fit <- lm(Sepal.Width ~ Sepal.Length * Petal.Width, data = iris)
+fit_explicit <- explicit(fit)
+formula(fit_explicit)
+drop1(fit_explicit)   # the main effects can now be dropped too
+}
 \seealso{
 \link{explicit.lm}
 }

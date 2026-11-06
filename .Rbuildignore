@@ -4,3 +4,5 @@
 ^\.vscode$
 ^docs$
 ^README\.Rmd$
+^data-raw$
+^tests/testthat/fixtures$

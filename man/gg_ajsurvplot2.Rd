@@ -31,10 +31,23 @@ gg_ajsurvplot2(
 
 \item{facet.by}{formula. default to all strata}
 
-\item{...}{optional parameters passed to \code{ggsurvplot}.}
+\item{...}{currently unused.}
 
 \item{.return_data}{[FALSE] if TRUE, get the data instead.}
 }
+\value{
+A ggplot object: the cumulative incidence of `main.event` rising from the bottom and
+  1 - the cumulative incidence of `competing.event` falling from the top (both Aalen-Johansen
+  estimates for each group). With `.return_data = TRUE`, the plotted data.
+}
 \description{
 Extend \link[ggsurvfit:ggsurvfit]{ggsurvfit} functionality to plot competing risk curve, with main risk and competing risk in one plot
+}
+\examples{
+library(survival)
+mg <- transform(mgus2, etime = ifelse(pstat == 0, futime, ptime),
+                event = factor(ifelse(pstat == 0, 2 * death, 1), 0:2,
+                               c("censor", "progression", "death")))
+gg_ajsurvplot2(Surv(etime, event) ~ sex, data = mg,
+               main.event = "progression", competing.event = "death")
 }

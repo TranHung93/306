@@ -12,8 +12,11 @@ simple_sort(x, order = levels(as.factor(x)))
 \item{order}{A manually defined order vector}
 }
 \value{
-A vector
+A vector of the same type and attributes as `x`, sorted in the order of `order`.
 }
 \description{
 A function to sort a vector in an user-defined order
+}
+\examples{
+simple_sort(c("high", "low", "medium", "low"), order = c("low", "medium", "high"))
 }

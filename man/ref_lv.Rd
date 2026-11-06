@@ -21,8 +21,15 @@ ref_lv(x) <- value
 \item{value}{An existing level to be set as reference}
 }
 \value{
-A character object the represents the reference level
+`ref_lv()`: a string, the reference (first) level. `ref_lv<-`: the factor with
+  `value` as its first level.
 }
 \description{
 A function to quickly get or set the reference level of a factor
+}
+\examples{
+arm <- factor(c("Placebo", "Drug", "Drug"))
+ref_lv(arm)
+ref_lv(arm) <- "Placebo"
+levels(arm)
 }

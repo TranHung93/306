@@ -98,7 +98,9 @@ simple_relevel.default <- function(x, by, map, value = c('unsorted', 'sorted', '
 #' @description A function to sort a vector in an user-defined order
 #' @param x A vector to be sorted
 #' @param order A manually defined order vector
-#' @return A vector
+#' @return A vector of the same type and attributes as `x`, sorted in the order of `order`.
+#' @examples
+#' simple_sort(c("high", "low", "medium", "low"), order = c("low", "medium", "high"))
 #' @export
 simple_sort <- function(x, order = levels(as.factor(x))){
   stopifnot(length(order) == length(unique(x)))

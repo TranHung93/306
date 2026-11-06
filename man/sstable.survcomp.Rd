@@ -28,7 +28,9 @@ sstable.survcomp(
 
 \item{data}{a data frame to fit the survival model.}
 
-\item{add.risk}{[\code{TRUE}] a logical value specifies whether the event probability ("absolute risk") at time "infinity" should be displayed.}
+\item{add.risk}{[\code{TRUE}] a logical value specifies whether the event probability ("absolute risk", in %) at `time`
+should be displayed: 1 - Kaplan-Meier, or the Aalen-Johansen cumulative incidence of the cause of interest for
+competing risks.}
 
 \item{time}{[\code{Inf}] the truncation time, affecting the descriptive and the RMST model, set to \code{Inf} to perform analyses at maximum time available
 (minimax of the observed time across two arms in RMST model)}
@@ -72,10 +74,32 @@ If CoxPH is preferred, used Surv(t, ev == 'event-of-interest') on the LHS.}
 \item{bg}{[\code{#F2EFEE}] a character specifies color of the odd rows in the body of flextable-type table.}
 }
 \value{
-a flextable-type table or a list with values/headers/footers
+A flextable if `flextable = TRUE` (the default), otherwise a list of class
+  `ss_survcomp` with elements `table` (a character matrix) and `footer`.
 }
 \description{
 A function to summarize results for a survival model with the treatment arm (variable "arm") as the main covariate
+}
+\examples{
+library(survival)
+lung2 <- transform(na.omit(lung[, c("time", "status", "sex")]),
+                   arm = factor(sex, labels = c("Male", "Female")))
+
+# Cox model: events/n (risk \%), HR (95\% CI) and p-value, median (IQR)
+tab <- sstable.survcomp(Surv(time, status) ~ arm, data = lung2, flextable = FALSE)
+tab$table
+
+# restricted mean survival time difference at 1 year, as a flextable
+sstable.survcomp(Surv(time, status) ~ arm, data = lung2, time = 365,
+                 compare.method = "rmst")
+
+# competing risks (progression vs death): Fine-Gray model for progression
+mg <- transform(mgus2, etime = ifelse(pstat == 0, futime, ptime),
+                event = factor(ifelse(pstat == 0, 2 * death, 1), 0:2,
+                               c("censor", "progression", "death")))
+sstable.survcomp(Surv(etime, event) ~ sex, data = mg,
+                 compare.args = list(cause = "progression"), flextable = FALSE)$table
+
 }
 \author{
 This function was originally written by Marcel Wolbers. Lam Phung Khanh did some modification.

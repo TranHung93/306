@@ -31,3 +31,8 @@ If method == 'cont': the percentages of all ranges based on specified breaks
 \description{
 A function to calculate the proportion of each value range
 }
+\examples{
+pct(c(TRUE, FALSE, TRUE, NA))                 # binary: \% TRUE among non-missing
+pct(factor(c("a", "b", "b", "c")))            # one \% per level
+pct(survival::lung$age, method = "cont", breaks = c(0, 50, 65, 100))
+}

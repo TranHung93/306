@@ -3,12 +3,15 @@
 \name{ss_huxtable}
 \alias{ss_huxtable}
 \alias{ss_huxtable.list}
+\alias{ss_huxtable.ss_obj}
 \alias{ss_huxtable.default}
 \title{Create summary table using huxtable package.}
 \usage{
 ss_huxtable(sstable, ...)
 
 \method{ss_huxtable}{list}(sstable, add_footer = NULL, ...)
+
+\method{ss_huxtable}{ss_obj}(sstable, add_footer = NULL, ...)
 
 \method{ss_huxtable}{default}(
   sstable,
@@ -55,6 +58,13 @@ an object of class huxtable
 }
 \description{
 This function generate a huxtable from a sstable.
+}
+\examples{
+if (requireNamespace("huxtable", quietly = TRUE)) {
+  bl <- read.csv(system.file("extdata", "baseline_data.csv", package = "C306"))
+  tab <- sstable.baseline(age + sex ~ Arm, data = bl)
+  ss_huxtable(tab, caption = "Baseline characteristics", caption_pos = "top")
+}
 }
 \seealso{
 \link[huxtable]{huxtable}

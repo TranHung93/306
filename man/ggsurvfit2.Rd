@@ -15,6 +15,15 @@ ggsurvfit2(
 \arguments{
 \item{x, type, linetype_aes, theme, ...}{parameters passed directly \link[ggsurvfit:ggsurvfit]{ggsurvfit}.}
 }
+\value{
+A ggplot object. Each stratum variable is a column of the plot data, so the plot
+  can be faceted with e.g. `ggplot2::facet_wrap(~ sex)`.
+}
 \description{
 Same as \link[ggsurvfit:ggsurvfit]{ggsurvfit} but with strata saved, so you can facet by covariables.
+}
+\examples{
+library(survival)
+fit <- survfit(Surv(time, status) ~ sex + ph.ecog, data = subset(lung, ph.ecog < 3))
+ggsurvfit2(fit) + ggplot2::facet_wrap(~ sex)
 }

@@ -6,7 +6,9 @@
 #'
 #' @param model a formula which can be used to fit the survival model. This formula can include other covariates than arm BUT arm must be the first covariate in the model.
 #' @param data a data frame to fit the survival model.
-#' @param add.risk [\code{TRUE}] a logical value specifies whether the event probability ("absolute risk") at time "infinity" should be displayed.
+#' @param add.risk [\code{TRUE}] a logical value specifies whether the event probability ("absolute risk", in %) at `time`
+#'   should be displayed: 1 - Kaplan-Meier, or the Aalen-Johansen cumulative incidence of the cause of interest for
+#'   competing risks.
 #' @param time [\code{Inf}] the truncation time, affecting the descriptive and the RMST model, set to \code{Inf} to perform analyses at maximum time available
 #' (minimax of the observed time across two arms in RMST model)
 #' @param reference.arm [\code{B}] reference arm, default to the second arm ("B"), change to "A" for base on the first arm
@@ -36,7 +38,27 @@
 #' @param footer a [\code{NULL}] vector of strings to be used as footnote of table.
 #' @param flextable [\code{TRUE}] a logical value specifies whether output will be a flextable-type table.
 #' @param bg [\code{#F2EFEE}] a character specifies color of the odd rows in the body of flextable-type table.
-#' @return a flextable-type table or a list with values/headers/footers
+#' @return A flextable if `flextable = TRUE` (the default), otherwise a list of class
+#'   `ss_survcomp` with elements `table` (a character matrix) and `footer`.
+#' @examples
+#' library(survival)
+#' lung2 <- transform(na.omit(lung[, c("time", "status", "sex")]),
+#'                    arm = factor(sex, labels = c("Male", "Female")))
+#'
+#' # Cox model: events/n (risk %), HR (95% CI) and p-value, median (IQR)
+#' tab <- sstable.survcomp(Surv(time, status) ~ arm, data = lung2, flextable = FALSE)
+#' tab$table
+#'
+#' # restricted mean survival time difference at 1 year, as a flextable
+#' sstable.survcomp(Surv(time, status) ~ arm, data = lung2, time = 365,
+#'                  compare.method = "rmst")
+#'
+#' # competing risks (progression vs death): Fine-Gray model for progression
+#' mg <- transform(mgus2, etime = ifelse(pstat == 0, futime, ptime),
+#'                 event = factor(ifelse(pstat == 0, 2 * death, 1), 0:2,
+#'                                c("censor", "progression", "death")))
+#' sstable.survcomp(Surv(etime, event) ~ sex, data = mg,
+#'                  compare.args = list(cause = "progression"), flextable = FALSE)$table
 #'
 #' @author This function was originally written by Marcel Wolbers. Lam Phung Khanh did some modification.
 #' @import survival

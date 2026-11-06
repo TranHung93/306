@@ -20,6 +20,9 @@ ss_legit <- function(sstable){
 #'
 #' If NA, the existing template in the sstable is kept as-is. It no template built-in, will return a no-template sstable instead.
 #' @return a matrix of class ss_tbl
+#' @examples
+#' m <- rbind(c("", "Arm A", "Arm B"), c("Age", "50", "48"))
+#' class(ss_template(m, "baseline"))
 #' @export
 ss_template <- function(sstable, template =  c('baseline', 'survcomp', 'ae')){
   sstable <- ss_legit(sstable)
@@ -45,6 +48,14 @@ ss_template <- function(sstable, template =  c('baseline', 'survcomp', 'ae')){
 #' @param sstable a data frame following sstable's grammar
 #' @param rows a numeric vector
 #' @return a matrix of class ss_tbl
+#' @examples
+#' m <- rbind(c("", "Arm A", "Arm B"), c("Age", "50", "48"), c("Sex", "", ""),
+#'            c("- Female", "5 (50%)", "6 (50%)"))
+#' m <- ss_header(m, 1)
+#' m <- ss_body(m, c(2, 4))
+#' m <- ss_section(m, 3)
+#' rownames(m)
+#' ss_flextable(ss_format(m, .guess = FALSE))
 #' @export
 ss_header <- function(sstable, rows) {
   sstable <- ss_legit(sstable)
@@ -59,6 +70,9 @@ ss_header <- function(sstable, rows) {
 #' @param sstable a data frame following sstable's grammar
 #' @param rows a numeric vector
 #' @return a matrix of class ss_tbl
+#' @examples
+#' m <- rbind(c("", "Arm A", "Arm B"), c("Age", "50", "48"))
+#' rownames(ss_body(ss_header(m, 1), 2))
 #' @export
 ss_body <- function(sstable, rows){
   sstable <- ss_legit(sstable)
@@ -73,6 +87,9 @@ ss_body <- function(sstable, rows){
 #' @param sstable a data frame following sstable's grammar
 #' @param rows a numeric vector
 #' @return a matrix of class ss_tbl
+#' @examples
+#' m <- rbind(c("", "Arm A", "Arm B"), c("Sex", "", ""), c("- Female", "5", "6"))
+#' rownames(ss_section(m, 2))
 #' @export
 ss_section <- function(sstable, rows){
   sstable <- ss_legit(sstable)
@@ -94,6 +111,15 @@ ss_section <- function(sstable, rows){
 #' If NA, the existing template in the sstable is kept as-is. It no template built-in, will return a no-template sstable instead.
 #' @param .guess a logical value. If TRUE, the function will try to guess to which part each row belongs.
 #' @return a matrix of class ss_tbl
+#' @examples
+#' m <- rbind(c("", "Arm A", "", "Arm B", ""),
+#'            c("Characteristic", "n", "Summary", "n", "Summary"),
+#'            c("Age", "10", "50 (40-60)", "12", "48 (41-55)"),
+#'            c("Sex", "", "", "", ""),
+#'            c("- Female", "", "5 (50%)", "", "6 (50%)"))
+#' f <- ss_format(m)          # rows guessed: 2 header rows, a section, body rows
+#' rownames(f)
+#' ss_format(m, header = 1:2, section = 4, body = c(3, 5), .guess = FALSE)
 #' @export
 ss_format <- function(sstable, header = c(), section = c(), body = c(), template =  c('baseline', 'survcomp', 'ae'), .guess= TRUE){
   if (missing(template)) template <- NA
@@ -184,6 +210,11 @@ ss_guess_format.summary_tbl <- function(sstable){
 #' @param ... additional parameters that will be passed to ss_format if the sstable has yet to be formatted.
 #' @seealso \link[flextable]{flextable}
 #' @return an object of class flextable
+#' @examples
+#' bl <- read.csv(system.file("extdata", "baseline_data.csv", package = "C306"))
+#' tab <- sstable.baseline(age + sex ~ Arm, data = bl)   # list with table and footer
+#' ss_flextable(tab, add_footer = "Data: example trial.")
+#' ss_flextable(tab$table, footer = "A custom footer", bg = "lightblue")
 #' @export
 ss_flextable <- function(sstable, ...){
   UseMethod('ss_flextable')
@@ -295,6 +326,8 @@ ss_flextable.default <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
 #' @param ft flextable
 #' @param bg a character string, the background colour of odd body rows.
 #' @return the themed flextable.
+#' @examples
+#' ft_sstheme(flextable::flextable(head(mtcars[, 1:4])))
 #' @export
 ft_sstheme <- function(ft, bg = "#F2EFEE"){
   ### faces of header
@@ -332,6 +365,12 @@ ft_sstheme <- function(ft, bg = "#F2EFEE"){
 #' @param ... additional parameters that will be passed to ss_format if the sstable has yet to be formatted.
 #' @return an object of class huxtable
 #' @seealso \link[huxtable]{huxtable}
+#' @examples
+#' if (requireNamespace("huxtable", quietly = TRUE)) {
+#'   bl <- read.csv(system.file("extdata", "baseline_data.csv", package = "C306"))
+#'   tab <- sstable.baseline(age + sex ~ Arm, data = bl)
+#'   ss_huxtable(tab, caption = "Baseline characteristics", caption_pos = "top")
+#' }
 #' @export
 ss_huxtable <- function(sstable,...){
   UseMethod('ss_huxtable')
@@ -343,6 +382,10 @@ ss_huxtable <- function(sstable,...){
 ss_huxtable.list <- function(sstable, add_footer = NULL,...){
   ss_huxtable(sstable$table, footer = c(sstable$footer, add_footer), ...)
 }
+
+#' @rdname ss_huxtable
+#' @export
+ss_huxtable.ss_obj <- ss_huxtable.list
 
 #' @rdname ss_huxtable
 #' @export
@@ -487,6 +530,10 @@ ss_huxtable.default <- function(sstable, footer = NULL,
 #' @param border_width a number that defines huxtable border width
 #' @param border_color a character string that defines huxtable border color
 #' @return an object of class huxtable
+#' @examples
+#' if (requireNamespace("huxtable", quietly = TRUE)) {
+#'   ht_theme_markdown(huxtable::as_hux(head(mtcars[, 1:4])), header_rows = 1)
+#' }
 #' @export
 ht_theme_markdown <- function(ht, header_rows = 1:2, header_cols = NULL,
                               border_width=0.8, border_color = grey(0.75), bg = c(grey(.95),'white')){
@@ -520,6 +567,10 @@ ht_theme_markdown <- function(ht, header_rows = 1:2, header_cols = NULL,
 #' @param border_width a number that defines huxtable border width
 #' @param border_color a character string that defines huxtable border color
 #' @return an object of class huxtable
+#' @examples
+#' if (requireNamespace("huxtable", quietly = TRUE)) {
+#'   ht_theme_kable(huxtable::as_hux(head(mtcars[, 1:4])), header_rows = 1)
+#' }
 #' @export
 ht_theme_kable <- function(ht, header_rows = 1:2, header_cols = NULL,
                            border_width = 1, border_color = '#dddddd', bg = c('white', '#f9f9f9')){
@@ -558,9 +609,21 @@ ht_theme_kable <- function(ht, header_rows = 1:2, header_cols = NULL,
 #' @param flextable logical value specifying whether to return a flextable. Default is FALSE
 #' @param include_footnote logical value specifying whether to include footnote in the output. Default is FALSE
 #' @param ... additional parameters passed to \link{ss_flextable}
-#' @return A matrix of class ss_tbl if flextable == FALSE, otherwise a flextable
-#' @export
+#' @return If `flextable = TRUE`, a flextable. Otherwise a list with elements `table` (a
+#'   matrix of class `ss_tbl`) and `footer`, or only the matrix when `include_footnote = FALSE`.
+#' @examples
+#' # a logistic regression summary
+#' fit <- glm(I(status == 2) ~ age + sex, data = survival::lung, family = binomial)
+#' as_sstable(logist_summary(fit))
 #'
+#' # a table assembled from header and body parts
+#' x <- list(header = list(c("", "Arm A", "Arm B")),
+#'           body = list("Age, years" = rbind(c("Mean", "50.1", "49.8"),
+#'                                            c("Median", "51", "49"))),
+#'           footer = "Example table.")
+#' as_sstable(x)
+#' as_sstable(x, flextable = TRUE)
+#' @export
 as_sstable <- function(x,...){
   UseMethod('as_sstable')
 }
@@ -691,6 +754,15 @@ as_sstable.subgroup_logist_summary <- function(x, include_footnote = TRUE, flext
 #' @param footer the footer of the result. By default the (common) footer of the two tables;
 #'   an error is raised if their footers differ and no footer is given.
 #' @return a list with elements `table` and `footer`, like the inputs.
+#' @examples
+#' library(survival)
+#' lung2 <- transform(na.omit(lung[, c("time", "status", "sex", "ph.ecog")]), arm = factor(sex))
+#' # all patients, then patients with ECOG 0-1, in one table
+#' t1 <- sstable.survcomp(Surv(time, status) ~ arm, data = lung2, medsum = FALSE,
+#'                        flextable = FALSE)
+#' t2 <- sstable.survcomp(Surv(time, status) ~ arm, data = subset(lung2, ph.ecog < 2),
+#'                        medsum = FALSE, flextable = FALSE)
+#' rbind(t1, t2)$table
 #' @export
 rbind.ss_obj <- function(..., deparse.level = 1){
   args <- ._ss_rbind_args(list(...))

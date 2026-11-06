@@ -19,3 +19,7 @@ a matrix of class ss_tbl
 \description{
 This function set the template for sstable
 }
+\examples{
+m <- rbind(c("", "Arm A", "Arm B"), c("Age", "50", "48"))
+class(ss_template(m, "baseline"))
+}

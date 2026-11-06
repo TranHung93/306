@@ -9,6 +9,14 @@
 #'   For factors with `levels` in `info`, codes that are not in the dictionary are kept as extra
 #'   levels (after the dictionary levels) with a warning, so that [inspect.data()] reports them
 #'   as out of range.
+#' @examples
+#' info <- data.frame(varname = c("age", "sex", "visit"), label = c("Age", "Sex", "Visit date"),
+#'                    type = c("numeric", "factor", "datetime"), unit = c("years", NA, NA),
+#'                    value = c(NA, "1='Male';2='Female'", "ymd"),
+#'                    levels = c(NA, "'Male';'Female'", NA), missing = c("-99", NA, NA))
+#' raw <- data.frame(age = c(30, -99), sex = c(1, 2), visit = c("2024-01-05", "2024-02-10"))
+#' dat <- myformat.data(raw, info)
+#' str(dat)
 #' @export
 myformat.data <- function(data, info){
   # info should have these columns

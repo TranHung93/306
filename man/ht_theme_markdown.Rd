@@ -32,3 +32,8 @@ an object of class huxtable
 \description{
 This function provides a markdown stripe theme for huxtable object
 }
+\examples{
+if (requireNamespace("huxtable", quietly = TRUE)) {
+  ht_theme_markdown(huxtable::as_hux(head(mtcars[, 1:4])), header_rows = 1)
+}
+}

@@ -32,3 +32,8 @@ an object of class huxtable
 \description{
 This function provides a kable-esque theme for huxtable object
 }
+\examples{
+if (requireNamespace("huxtable", quietly = TRUE)) {
+  ht_theme_kable(huxtable::as_hux(head(mtcars[, 1:4])), header_rows = 1)
+}
+}

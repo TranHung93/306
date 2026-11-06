@@ -17,3 +17,12 @@ a matrix of class ss_tbl
 \description{
 This function set the designated rows as header rows of a sstable
 }
+\examples{
+m <- rbind(c("", "Arm A", "Arm B"), c("Age", "50", "48"), c("Sex", "", ""),
+           c("- Female", "5 (50\%)", "6 (50\%)"))
+m <- ss_header(m, 1)
+m <- ss_body(m, c(2, 4))
+m <- ss_section(m, 3)
+rownames(m)
+ss_flextable(ss_format(m, .guess = FALSE))
+}

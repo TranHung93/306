@@ -17,3 +17,6 @@ the themed flextable.
 \description{
 Theming flextable for sstable
 }
+\examples{
+ft_sstheme(flextable::flextable(head(mtcars[, 1:4])))
+}

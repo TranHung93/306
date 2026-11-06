@@ -9,6 +9,15 @@ tidy_survfit2(x, times = NULL, type = "survival")
 \arguments{
 \item{x, times, type}{same as \link[ggsurvfit:tidy_survfit]{tidy_survfit}}
 }
+\value{
+A tibble as from \link[ggsurvfit:tidy_survfit]{tidy_survfit}, with one extra column
+  per stratum variable (e.g. `sex`, `ph.ecog`).
+}
 \description{
 Same as \link[ggsurvfit:tidy_survfit]{tidy_survfit} but with strata saved.
+}
+\examples{
+library(survival)
+fit <- survfit(Surv(time, status) ~ sex + ph.ecog, data = subset(lung, ph.ecog < 3))
+head(tidy_survfit2(fit))
 }

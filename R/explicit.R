@@ -4,6 +4,11 @@
 #' @param ... additional arguments passed to methods.
 #' @return The explicit form of `x`; see the methods.
 #' @seealso \link{explicit.lm}
+#' @examples
+#' fit <- lm(Sepal.Width ~ Sepal.Length * Petal.Width, data = iris)
+#' fit_explicit <- explicit(fit)
+#' formula(fit_explicit)
+#' drop1(fit_explicit)   # the main effects can now be dropped too
 #' @export
 explicit <- function(x, ...){
   UseMethod('explicit')

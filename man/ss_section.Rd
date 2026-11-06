@@ -17,3 +17,7 @@ a matrix of class ss_tbl
 \description{
 This function set the designated rows as section title rows of an sstable
 }
+\examples{
+m <- rbind(c("", "Arm A", "Arm B"), c("Sex", "", ""), c("- Female", "5", "6"))
+rownames(ss_section(m, 2))
+}

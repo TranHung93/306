@@ -35,7 +35,25 @@
 #' @param bg a character specifies color of the odd rows in the body of flextable-type table.
 #' @param matrix.raw a logical values specifies whether output will be a draw dataframe.
 #'
-#' @return a flextable-type table or a list with values/headers/footers
+#' @return If `flextable = TRUE`, a flextable. If `matrix.raw = TRUE`, the summary matrix without
+#'   header and footer. Otherwise a list of class `ss_baseline` with elements `table` (the table
+#'   as a character matrix, header rows first) and `footer`; use [ss_flextable()] or
+#'   [ss_huxtable()] to render it later.
+#' @examples
+#' bl <- read.csv(system.file("extdata", "baseline_data.csv", package = "C306"))
+#'
+#' # summary by arm, with tests
+#' tab <- sstable.baseline(age + sex + bmi ~ Arm, data = bl, test = TRUE)
+#' tab$table
+#' tab$footer
+#'
+#' # median (Q1-Q3), a "Total" column, and a flextable
+#' sstable.baseline(age + sex + icudays ~ Arm, data = bl, statistics = "median (Q1-Q3)",
+#'                  pooledGroup = TRUE, flextable = TRUE)
+#'
+#' # proportion of deaths (outcome == 4) by sex within each arm
+#' bl$died <- bl$outcome == 4
+#' sstable.baseline(sex ~ Arm | died, data = bl)$table
 #' @export
 sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, keepEmptyGroup = FALSE,
                              statistics = "mean; median (Q1-Q3)", cont = NULL, cat = NULL, fullfreq = FALSE,

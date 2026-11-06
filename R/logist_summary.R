@@ -11,10 +11,18 @@
 #' @param sstable logical value specifying whether to return in sstable format. Default is FALSE. Set to TRUE forces verbose to FALSE
 #' @param flextable logical value specifying whether to build flextable object. Default it FALSE. Set to TRUE forces sstable to TRUE and verbose to FALSE.
 #' Like other sstable objects, you can still create flextable or huxtable afterwards by using \link{ss_flextable} or \link{ss_huxtable}
-#' @param ... additional parameters passed to \link{ss_flextable}
+#' @param ... currently unused.
 #' @author Marcel Wolbers, Lam Phung Khanh, and Trinh Dong Huu Khanh
 #' @seealso \link{ss_format}, \link{ss_huxtable}, \link{ss_flextable}
-#' @return A data frame of additional class "logist_summary" (if sstable == FALSE), a matrix of class c("summary_tbl", "ss_tbl") otherwise
+#' @return A data frame of class `logist_summary` with columns `log.OR`, `OR`, `lower.CI`,
+#'   `upper.CI` and `p.value` (formatted as text), one row per model coefficient in model order,
+#'   and a `footer` attribute. With `sstable = TRUE`, a list with elements `table` (a matrix of
+#'   class `summary_tbl`) and `footer`; with `flextable = TRUE`, a flextable.
+#' @examples
+#' fit <- glm(I(status == 2) ~ age + sex + ph.ecog, data = survival::lung, family = binomial)
+#' logist_summary(fit)                    # likelihood ratio CIs and tests
+#' logist_summary(fit, method = "wald")   # Wald CIs and tests
+#' logist_summary(fit, flextable = TRUE)
 #' @export
 logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, p_digits=4, verbose = FALSE,
                            sstable = FALSE, flextable = FALSE, ...){
@@ -97,6 +105,9 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
 #' @param ... additional params passed to print.data.frame
 #' @return invisibly return itself
 #' @seealso \link{print.data.frame}
+#' @examples
+#' fit <- glm(I(status == 2) ~ age + sex, data = survival::lung, family = binomial)
+#' print(logist_summary(fit), right = FALSE)
 #' @export
 print.logist_summary <- function(x, ...)
 {

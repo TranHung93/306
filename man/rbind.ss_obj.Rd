@@ -37,3 +37,13 @@ rows of the second table are dropped.
 Call it as `rbind(tbl1, tbl2)`. The old forms `rbind.ss_ae(tbl1, tbl2, header, footer)`,
 with arguments given by position or as `tbl1 = ` / `tbl2 = `, still work.
 }
+\examples{
+library(survival)
+lung2 <- transform(na.omit(lung[, c("time", "status", "sex", "ph.ecog")]), arm = factor(sex))
+# all patients, then patients with ECOG 0-1, in one table
+t1 <- sstable.survcomp(Surv(time, status) ~ arm, data = lung2, medsum = FALSE,
+                       flextable = FALSE)
+t2 <- sstable.survcomp(Surv(time, status) ~ arm, data = subset(lung2, ph.ecog < 2),
+                       medsum = FALSE, flextable = FALSE)
+rbind(t1, t2)$table
+}

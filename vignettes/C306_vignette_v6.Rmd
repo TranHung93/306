@@ -113,9 +113,8 @@ baseline.sstable
 If we want to change the names appearing in the table to make them easier to understand, we could label them in the raw data first. The package will detect the label. If a label is not available, it will use the name of the variable.
 
 ```{r}
-library(Hmisc) #call Hmisc package for labeling
-
-baseline_data <- baseline_data %>% 
+# a label is simply a "label" attribute (Hmisc::label() sets the same attribute)
+baseline_data <- baseline_data %>%
   mutate(
     age = structure(age, label='Age'), #label to make capital letter
     sex = structure(sex, label='Sex'),
@@ -175,9 +174,9 @@ baseline.sstable
 Customization: The flextable package offers various customization options, such as adjusting column widths, changing text alignment, and adding colors. Refer to the flextable documentation for more details.
 Exporting: we can export the table to different formats (e.g., Word, HTML, PDF) using flextable's export functions, making it easier to include the table in reports and presentations.
 
-```{r}
+```{r, eval = FALSE}
 # Example: Export the table to a Word document
-save_as_docx(baseline.sstable, path = file.path(tempdir(), "baseline_table.docx"))
+save_as_docx(baseline.sstable, path = "baseline_table.docx")
 ```
 
 Now that we know how to create a basic baseline table, we can try to create our own table with different variables in baseline_data for practice. If we are interested in creating a table with different subgroups, we can do that as well. As we can see below, we created a table grouped by gender.
