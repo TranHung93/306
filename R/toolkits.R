@@ -44,6 +44,9 @@ simple_recode <- function(...){
 simple_recode.data.frame <- function(.data, ..., ignore.case = FALSE, fixed = FALSE, perl = TRUE){
   .maps <- list(...)
   .vars <- names(.maps)
+  if (length(.maps) && (is.null(.vars) || any(!nzchar(.vars))))
+    c306_abort('Replacements must be given as `variable = map`.')
+  check_columns(.data, .vars, data_arg = ".data")
   for (.var in .vars){
     .data[[.var]] <- simple_recode.default(x = .data[[.var]], map = .maps[[.var]], ignore.case = ignore.case, fixed = fixed, perl = perl)
   }
@@ -54,12 +57,19 @@ simple_recode.data.frame <- function(.data, ..., ignore.case = FALSE, fixed = FA
 #' @method simple_recode default
 #' @export
 simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', 'character', 'logical'), ignore.case = FALSE, fixed = FALSE, perl = TRUE, ...){
-  requireNamespace('tidyr')
   as <- match.arg(as)
-  if (missing(map)) stop ('A conversion map should be provided!')
+  if (missing(map)) c306_abort('A conversion `map` should be provided.')
+  for (flag in c("ignore.case", "fixed", "perl")) check_flag(get(flag), arg = flag)
 
-  if (is.data.frame(map)) Map <- map
-  else {
+  if (is.data.frame(map)) {
+    if (!all(c("from", "to") %in% names(map)))
+      c306_abort('A data frame `map` must have columns named "from" and "to".')
+    Map <- map
+  } else {
+    if (!is.list(map) && !(is.atomic(map) && !is.null(names(map))))
+      c306_abort('`map` must be a named list (recoded_text = c(patterns)) or a data frame with columns "from" and "to".')
+    if (is.null(names(map)) || any(!nzchar(names(map))))
+      c306_abort('Every element of `map` must be named with its recoded text.')
     Map <- data.frame(
       to = unlist(lapply(names(map),
                          function(name) rep(name, length(map[[name]])))),
@@ -67,7 +77,7 @@ simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', '
       stringsAsFactors = FALSE
     )}
 
-  if (length(Map$from) != length(unique(Map$from))) stop('Patterns should be unique.')
+  if (length(Map$from) != length(unique(Map$from))) c306_abort('Patterns in `map` should be unique.')
 
   x.recoded <- x
   for (i in 1:nrow(Map)){
@@ -158,6 +168,8 @@ ref_lv.factor <- function(x){
 #' @export
 pct <- function(x, method = c('auto', 'bin', 'cont', 'fct'), na.rm = TRUE, ...){
   method <- match.arg(method)
+  check_flag(na.rm)
+  if (length(x) == 0) c306_abort("`x` must have at least one value.")
   if (method == 'auto') method <- ._pct_get_method(unlist(x))
 
   if (method == 'bin' & !is.logical(x) & !setequal(unique(x), c(0,1))){

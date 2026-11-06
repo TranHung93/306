@@ -9,15 +9,22 @@ contSummary(x, statistics = NULL, digits = 1, n = TRUE)
 \arguments{
 \item{x}{a numeric vector to be summarised.}
 
-\item{statistics}{a character specifies summary statistics for continuous row variables.}
+\item{statistics}{a single string describing the summary, e.g. `"mean (sd)"` or
+`"median (Q1-Q3)"`. The words `mean`, `median`, `sd`, `q1`, `q3`, `min` and `max`
+(in any case, as whole words) are replaced by their values; all other text is kept as is.}
 
-\item{digits}{a number specifies number of significant digits for numeric statistics.}
+\item{digits}{a number specifies number of decimal places for numeric statistics.}
 
-\item{n}{a logical value specifies whether output will contain the number of non-missing values.}
+\item{n}{currently ignored; kept for backward compatibility.}
 }
 \value{
-a string displays formatted summary statistics.
+a string displays formatted summary statistics. Statistics that cannot be computed
+  (e.g. all values missing) are shown as `NA`.
 }
 \description{
 A function to calculate summary statistics for continuous variable.
+}
+\examples{
+contSummary(c(1, 2, 3, 10), "mean; median (Q1-Q3)")
+contSummary(c(1, 2, 3, 10), "Median [IQR: Q1-Q3], range min-max", digits = 0)
 }

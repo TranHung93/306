@@ -38,25 +38,23 @@
 subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), transpose = FALSE,
                             stat_digits = 2, p_digits = 4, sstable = FALSE, flextable = FALSE, simplify = TRUE, ...)
 {
-  # browser()
   method <- match.arg(method)
+  check_formula(formula)
+  check_number(stat_digits, min = 0, whole = TRUE)
+  check_number(p_digits, min = 0, whole = TRUE)
+  for (flag in c("transpose", "sstable", "flextable", "simplify")) check_flag(get(flag), arg = flag)
   if (inherits(model, 'formula')){
     fml <- model
     model <- glm(model, ..., family = binomial)
     model$call$formula <- fml
   }
-  compatible <- FALSE
-  if (length(model$family)) {
-    if ((model$family$family=='binomial')|(model$family$link=='logit')) compatible <- TRUE
-  }
-  # browser()
-  if (!compatible) stop("This function only works for logistic regression.")
+  check_logistic(model)
   mf <- model.frame(model)
   all_ia <- ._get_interaction_terms(model)
   base_var <- formula.tools::rhs.vars(formula)
+  if (length(base_var) != 1) c306_abort('The right-hand side of `formula` must be a single variable.')
   base_lv <- levels(as.factor(mf[[base_var]]))
   summary_vars <- formula.tools::lhs.vars(formula)
-  if (length(base_var) != 1) rlang::abort('rhs must be of length 1')
   ._assert_ia(base_var, all_ia$ia.vars)
   has_base <- sapply(all_ia$ia.vars, function(ia_var) base_var %in% ia_var)
   base_ia <- sapply(all_ia, `[`, has_base, simplify = FALSE)
@@ -154,7 +152,7 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
 ._assert_ia <- function(vars, ia_vars){
   for (v in vars){
     if (!v %in% unique(unlist(ia_vars)))
-      rlang::abort(paste(v, 'not exists in interaction terms.'))
+      c306_abort(paste0('`', v, '` is not part of any interaction term in the model.'), call = NULL)
   }
 }
 

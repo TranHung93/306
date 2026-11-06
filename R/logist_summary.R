@@ -18,12 +18,10 @@
 #' @export
 logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, p_digits=4, verbose = FALSE,
                            sstable = FALSE, flextable = FALSE, ...){
-  compatible <- FALSE
-  if (length(fit$family)) {
-    if ((fit$family$family=='binomial')|(fit$family$link=='logit')) compatible <- TRUE
-  }
-  # browser()
-  if (!compatible) stop("This function only works for logistic regression.")
+  check_logistic(fit)
+  check_number(stat_digits, min = 0, whole = TRUE)
+  check_number(p_digits, min = 0, whole = TRUE)
+  for (flag in c("verbose", "sstable", "flextable")) check_flag(get(flag), arg = flag)
   method <- match.arg(method)
   if (flextable) sstable <- TRUE
   if (sstable) verbose <- FALSE

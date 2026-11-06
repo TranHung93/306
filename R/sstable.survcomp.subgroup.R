@@ -48,10 +48,18 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
                                       compare.args = list(),
                                       p.compare = TRUE,
                                       digits = 2, pdigits = 3, pcutoff = 0.001, footer = NULL, flextable = TRUE, bg = "#F2EFEE", overall = TRUE,...){
-  
-  
-  requireNamespace("survival")
-  
+
+  ## validate inputs (sstable.survcomp() checks the remaining arguments)
+  check_formula(base.model, sides = "two")
+  check_formula(subgroup.model, sides = "one")
+  if (!missing(overall.model)) check_formula(overall.model)
+  check_data_frame(data)
+  check_columns(data, c(all.vars(base.model), all.vars(subgroup.model),
+                        if (!missing(overall.model)) all.vars(overall.model)))
+  for (flag in c("p.compare", "flextable", "overall")) check_flag(get(flag), arg = flag)
+  check_number(pdigits, min = 1, whole = TRUE)
+  check_number(pcutoff, min = 0, max = 1)
+
   ## strip the tibble class which causes issue - trinhdhk
   data <- as.data.frame(data)
   NAs <- model.frame(update(base.model, .~1), data=data) |> attr('na.action') |> unname()
@@ -187,6 +195,11 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
       result <- rbind(result, "")
       result[nrow(result), 1] <- paste("-", factor.levels[j])
       d.subgroup <- subset(data, .subgroup.var == factor.levels[j])
+      if (nrow(d.subgroup) == 0) {
+        # empty subgroup level: nothing can be estimated
+        result[nrow(result), 2:(ncol(result) - 1)] <- "-"
+        next
+      }
       # if (compare.method=='rmst'){
       #   compare.args$model.censoring <- if (is.null(compare.args$model.censoring)) 'stratified'
       #   compare.args$formula.censoring <-
@@ -242,9 +255,6 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
   # flextable
   if (!overall) result <- result[-3,]
   if (flextable) {
-    requireNamespace("flextable")
-    requireNamespace("officer")
-    
     ## main table
     value <- result[-c(1, 2), ]
     tab <- flextable::flextable(as.data.frame(value))

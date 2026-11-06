@@ -48,6 +48,30 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
                              workspace = 1000000, hybrid = FALSE, keepEmptyString = FALSE,
                              footer = NULL, flextable = FALSE, bg = "#F2EFEE", matrix.raw = FALSE) {
 
+  ## validate inputs
+  check_formula(formula)
+  if (length(formula) < 3) {
+    c306_abort("Missing row-wise variable(s): `formula` must be of the form `rows ~ column`.")
+  }
+  check_data_frame(data)
+  check_columns(data, all.vars(formula))
+  for (flag in c("bycol", "pooledGroup", "keepEmptyGroup", "fullfreq", "test", "chisq.test",
+                 "correct", "simulate.p.value", "hybrid", "keepEmptyString", "flextable",
+                 "matrix.raw")) {
+    check_flag(get(flag), arg = flag)
+  }
+  check_string(statistics)
+  check_character(cont, allow_null = TRUE)
+  check_character(cat, allow_null = TRUE)
+  check_character(digits.numeric)
+  check_character(digits.nonnumeric)
+  check_character(digits.name, allow_null = TRUE)
+  check_number(pdigits, min = 1, whole = TRUE)
+  check_number(pcutoff, min = 0, max = 1)
+  check_number(B, min = 1, whole = TRUE)
+  check_character(footer, allow_null = TRUE)
+  check_string(bg)
+
   ## get information from formula
   info <- sstable.formula(formula)
 

@@ -44,7 +44,6 @@ find_match_correct_var_final <- function(cond, realvar) {
 #' @return A data frame lists all identified potential data errors.
 #' @export
 inspect.data <- function (data, info, id, check_missing = c(TRUE, FALSE), plot = FALSE, prefix = "", outdir) {
-  requireNamespace("lubridate")
   if (missing(outdir))
     outdir <- "."
   data <- data[, names(data)[tolower(names(data)) %in% tolower(info$varname)]]

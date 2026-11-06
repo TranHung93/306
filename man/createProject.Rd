@@ -7,13 +7,21 @@
 createProject(dir, structure = c("OUCRU_RCT_wInterim"))
 }
 \arguments{
-\item{dir}{a character specifies where to create the project's folder.}
+\item{dir}{a character specifies where to create the project's folder. It must not exist yet,
+or be an empty folder.}
 
 \item{structure}{a character specifies the pre-defined folder structure to be used.}
 }
 \value{
-A message to confirm that the project's folder is created at the designed place.
+The path of the created project folder, invisibly. A message confirms where the
+  project was created.
 }
 \description{
 A generic function to create a project's folder based on pre-defined folder structure.
+}
+\examples{
+proj <- file.path(tempdir(), "myStudy")
+createProject(proj)
+list.files(proj)
+unlink(proj, recursive = TRUE)
 }

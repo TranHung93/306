@@ -28,9 +28,9 @@ getsign <- function(fml){
 
 # extract information from formula for sstable ----------------------------
 
-sstable.formula <- function(formula) {
+sstable.formula <- function(formula, call = rlang::caller_env()) {
   if (length(formula) < 3) {
-    stop("Missing row-wise variable(s) !!!")
+    c306_abort("Missing row-wise variable(s): `formula` must be of the form `rows ~ column`.", call = call)
   }
 
   ## get formula to extract all required variables (formula0)
@@ -43,7 +43,7 @@ sstable.formula <- function(formula) {
 
   ## get index of each element in formula
   xlen <- length(all.vars(formula[[2]]))
-  if (xlen == 0) {stop("Missing row-wise variable(s) !!!")}
+  if (xlen == 0) c306_abort("Missing row-wise variable(s): `formula` must be of the form `rows ~ column`.", call = call)
 
   if (length(formula[[3]]) > 1) {
     if (deparse(formula[[3]][[1]]) == "|") {
@@ -58,8 +58,8 @@ sstable.formula <- function(formula) {
     zlen <- 0
   }
 
-  if (ylen > 1) {stop("Only 1 column-wise variable is allowed !!!")}
-  if (zlen > 1) {stop("Only 1 third dimension variable is allowed !!!")}
+  if (ylen > 1) c306_abort("Only 1 column-wise variable is allowed in `formula`.", call = call)
+  if (zlen > 1) c306_abort("Only 1 third dimension variable is allowed in `formula`.", call = call)
 
   ## get all formulas required for tabulation
   xs <- getvar(formula[[2]])
@@ -81,42 +81,47 @@ sstable.formula <- function(formula) {
 #' @description A function to calculate summary statistics for continuous variable.
 #'
 #' @param x a numeric vector to be summarised.
-#' @param statistics a character specifies summary statistics for continuous row variables.
-#' @param digits a number specifies number of significant digits for numeric statistics.
-#' @param n a logical value specifies whether output will contain the number of non-missing values.
+#' @param statistics a single string describing the summary, e.g. `"mean (sd)"` or
+#'   `"median (Q1-Q3)"`. The words `mean`, `median`, `sd`, `q1`, `q3`, `min` and `max`
+#'   (in any case, as whole words) are replaced by their values; all other text is kept as is.
+#' @param digits a number specifies number of decimal places for numeric statistics.
+#' @param n currently ignored; kept for backward compatibility.
 #'
-#' @return a string displays formatted summary statistics.
+#' @return a string displays formatted summary statistics. Statistics that cannot be computed
+#'   (e.g. all values missing) are shown as `NA`.
+#' @examples
+#' contSummary(c(1, 2, 3, 10), "mean; median (Q1-Q3)")
+#' contSummary(c(1, 2, 3, 10), "Median [IQR: Q1-Q3], range min-max", digits = 0)
 #' @export
-
 contSummary <- function(x, statistics = NULL, digits = 1, n = TRUE) {
   if (is.null(statistics)) {
-    stop("Please provide a string for 'statistics'")
+    c306_abort("Please provide a string for `statistics`, e.g. \"mean (sd)\".")
   }
+  check_string(statistics)
+  if (!is.numeric(x) && !is.logical(x)) {
+    c306_abort(sprintf("`x` must be a numeric vector, not %s.", obj_type(x)))
+  }
+  check_number(digits, min = 0, whole = TRUE)
 
-  # Convert the 'statistics' string to lowercase
-  statistics <- tolower(statistics)
-
-  # Define a list of supported statistics and their corresponding functions
+  x <- x[!is.na(x)]
+  # Supported statistics; NA when there is no non-missing value
   stat_list <- list(
-    mean = function(x) round(mean(x, na.rm = TRUE), digits),
-    median = function(x) round(median(x, na.rm = TRUE), digits),
-    sd = function(x) round(sd(x, na.rm = TRUE), digits),
-    q1 = function(x) round(quantile(x, 0.25, na.rm = TRUE), digits),
-    q3 = function(x) round(quantile(x, 0.75, na.rm = TRUE), digits),
-    min = function(x) round(min(x, na.rm = TRUE), digits),
-    max = function(x) round(max(x, na.rm = TRUE), digits)
+    mean = function(x) mean(x),
+    median = function(x) stats::median(x),
+    sd = function(x) stats::sd(x),
+    q1 = function(x) unname(stats::quantile(x, 0.25)),
+    q3 = function(x) unname(stats::quantile(x, 0.75)),
+    min = function(x) min(x),
+    max = function(x) max(x)
   )
 
-  # Replace statistical names with their calculated values
+  # Replace each statistic name (whole word, any case) with its value
   for (stat_name in names(stat_list)) {
-    stat_value <- stat_list[[stat_name]](x)
+    pattern <- paste0("(?i)\\b", stat_name, "\\b")
+    if (!grepl(pattern, statistics, perl = TRUE)) next
+    stat_value <- if (length(x)) round(stat_list[[stat_name]](x), digits) else NA_real_
     stat_value <- format(stat_value, nsmall = digits)
-    statistics <- gsub(stat_name, stat_value, statistics)
-  }
-
-  # Include the count if requested
-  if (n) {
-    statistics <- paste0(statistics)
+    statistics <- gsub(pattern, stat_value, statistics, perl = TRUE)
   }
 
   return(statistics)

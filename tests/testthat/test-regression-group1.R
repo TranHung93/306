@@ -222,6 +222,8 @@ test_that("[1.15] ss_header/ss_body/ss_section keep the sstable class", {
   expect_s3_class(ss_section(m, 2), "ss_tbl")
 })
 
+# Behaviour check, not a regression test: the old `length(bg > 1)` condition was
+# wrong in the code but gave the same output (striping with one colour is plain).
 test_that("[1.15] ht_theme_markdown uses a plain background when bg has length 1", {
   skip_if_not_installed("huxtable")
   ht <- huxtable::as_hux(data.frame(a = 1:3, b = 4:6))

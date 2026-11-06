@@ -226,9 +226,6 @@ sstable.baseline.edit <- function(value, formula, data, bycol = TRUE, pooledGrou
 
   ### flextable
   if (flextable) {
-    requireNamespace("flextable")
-    requireNamespace("officer")
-
     ## main table
     tab <- flextable::flextable(as.data.frame(value))
 

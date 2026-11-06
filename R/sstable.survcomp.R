@@ -50,8 +50,26 @@ sstable.survcomp <- function(
     add.prop.haz.test = TRUE, medsum = TRUE,
     p.compare = TRUE,
     digits = 2, pdigits = 3, pcutoff = 0.001, footer = NULL, flextable = TRUE, bg = "#F2EFEE"){
-  requireNamespace("survival")
-  
+  ## validate inputs
+  check_formula(model, sides = "two")
+  lhs.fun <- if (is.call(model[[2]])) deparse(model[[2]][[1]]) else ""
+  if (!lhs.fun %in% c("Surv", "survival::Surv")) {
+    c306_abort("The left-hand side of `model` must be a survival object, e.g. `Surv(time, status) ~ arm`.")
+  }
+  check_data_frame(data)
+  check_columns(data, all.vars(model))
+  for (flag in c("add.risk", "add.prop.haz.test", "medsum", "p.compare", "flextable")) {
+    check_flag(get(flag), arg = flag)
+  }
+  check_number(time, min = 0, allow_inf = TRUE)
+  if (time == 0) c306_abort("`time` must be greater than 0.")
+  if (!is.list(compare.args)) c306_abort("`compare.args` must be a list.")
+  check_number(digits, min = 0, whole = TRUE)
+  check_number(pdigits, min = 1, whole = TRUE)
+  check_number(pcutoff, min = 0, max = 1)
+  check_character(footer, allow_null = TRUE)
+  check_string(bg)
+
   # Initialise the table --------------------------
   ## strip the tibble class which causes issue - trinhdhk
   data <- as.data.frame(data)
@@ -75,7 +93,10 @@ sstable.survcomp <- function(
   ### [trinhdhk] 2024-04: reverse level of y for better summary
   data[, arm.var] <- ._lv_rev_(data[, arm.var])
   arm.names <- levels(data[, arm.var])
-  if (length(arm.names) > 2) stop('At the moment, only two-arm studies are supported. A lot of code has covered more than 2 arms but please think about what should be compared in those cases (chunk test or pairwise test for instance) before implementing / trinhdhk.')
+  # A lot of code covers more than 2 arms, but think about what should be compared
+  # in those cases (chunk test or pairwise test for instance) before implementing / trinhdhk.
+  if (length(arm.names) > 2) c306_abort(sprintf(
+    'At the moment, only two-arm studies are supported; `%s` has %d levels.', arm.var, length(arm.names)))
   
   
   # Prepare survfit
@@ -336,8 +357,12 @@ If you are running this in survcomp.subgroup, perhaps in one subgroup an event d
   output <- if (medsum & !ms) {
     result <- rbind(result, "", "", "", "")
     # add median (IQR) of time-to-event
-    qfit <- as.matrix(do.call(cbind, quantile(fit.surv0, probs = c(0.5, 0.25, 0.75))))
-    result[5:7, 1:length(arm.names)] <- apply(formatC(qfit, digits, format = "f"), 1, function(x){
+    # one row per arm present in the data (quantile() returns plain vectors,
+    # not 1-row matrices, when only one arm is present)
+    q <- quantile(fit.surv0, probs = c(0.5, 0.25, 0.75))
+    qfit <- do.call(cbind, lapply(q, function(m) if (is.matrix(m)) m else matrix(m, nrow = 1)))
+    result[5:7, 1:length(arm.names)] <- "-"
+    result[5:7, idx] <- apply(formatC(qfit, digits, format = "f"), 1, function(x){
       sapply(1:3, function(z) paste(x[z], " (", x[z + 3], ", ", x[z + 6], ")", sep = ""))
     })
     cbind(c("Endpoint", "", varlabel, "- Median (95%CI)", "- Lower IQR (95%CI)", "- Upper IQR (95%CI)"), result)
@@ -349,9 +374,6 @@ If you are running this in survcomp.subgroup, perhaps in one subgroup an event d
   #browser()
   ## flextable
   if (flextable) {
-    requireNamespace("flextable")
-    requireNamespace("officer")
-    
     ## main table
     tab <- flextable::flextable(as.data.frame(value))
     

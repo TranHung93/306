@@ -8,6 +8,9 @@
 #' @return A factor specifies whether new lab adverse event to report is identified or not.
 #' @export
 labAE <- function(data, gradecut){
+  if (!is.numeric(data) && !all(is.na(data)))
+    c306_abort(sprintf("`data` must be a numeric vector of grades, not %s.", obj_type(data)))
+  check_number(gradecut)
   cur <- data; pre <- dplyr::lag(cur, n = 1)
   out <- ifelse(is.na(cur), NA,
                 ifelse((is.na(pre) | (!is.na(pre) & (pre < cur))) & (cur >= gradecut), "Yes", "No"))

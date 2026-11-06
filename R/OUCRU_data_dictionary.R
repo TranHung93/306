@@ -12,8 +12,6 @@
 #' @return Nothing (imported data will be saved in the pre-defined output directory)
 #' @export
 import.info <- function(table_name, input, output) {
-  requireNamespace("readxl")
-
   ### get all available sheets
   crfs <- readxl::read_excel(path = input, sheet = "CRFs")
   ### check Grids table
@@ -67,9 +65,6 @@ import.info <- function(table_name, input, output) {
 #' @import dplyr
 #' @export
 convert.info <- function(oucru_info, oucru_category) {
-  requireNamespace("dplyr")
-  requireNamespace("car")
-
   ## get value & level for factors
   cat_tmp <- distinct(oucru_category) %>%
     rename(Category = category) %>%

@@ -56,10 +56,46 @@
 * `getlabel()` on a data frame with `meta` no longer fails, and returns labels in
   the column order of the data.
 * `ss_flextable()` now uses its `bg` argument (it was ignored).
-* `ht_theme_markdown()` and `ht_theme_kable()` now give a plain background when
-  `bg` has length 1.
 * `ss_header()`, `ss_body()` and `ss_section()` now return an `ss_tbl` object.
 * `rbind.ss_obj()` called directly no longer fails.
+* `sstable.survcomp()` no longer fails when only one arm is present in the
+  data with `medsum = TRUE`. The missing arm is shown as "-".
+* `sstable.survcomp.subgroup()` no longer fails when a subgroup variable has
+  an empty level; that row is shown as "-".
+* `createProject()` now creates the RStudio project file (`<dir>.Rproj`) when
+  the package is installed normally. The template `.Rproj` was left out of
+  the built package by `.Rbuildignore`, so it was only created when the
+  package was loaded from source.
+
+## Input checking
+
+* The main functions now check their inputs and stop with a clear message
+  (condition class `c306_input_error`) instead of a cryptic error, a warning,
+  or wrong output. This covers `sstable.baseline()`, `sstable.ae()`,
+  `sstable.survcomp()`, `sstable.survcomp.subgroup()`, `logist_summary()`,
+  `subgroup_effect()`, `pct()`, `simple_recode()`, `contSummary()`, `labAE()`
+  and `createProject()`. The checks include:
+  * data frames, and data with zero rows;
+  * variables missing from the data, with their names listed;
+  * the formula shape (e.g. a survival model must have `Surv()` on the left);
+  * TRUE/FALSE arguments, digits, `pcutoff`, and `time > 0`.
+  Inputs that were silently accepted and gave wrong results now give an
+  error: `pdigits = -1`, `time = -1`, an empty `fullid_data`, and character
+  grades in `labAE()`.
+* Variables used in `sstable.baseline()` formulas must be columns of `data`.
+  (Variables from the calling environment never worked.)
+* `contSummary()` now replaces only whole statistic names (any case) and keeps
+  the rest of your text as written. Before, it lower-cased the whole string
+  ("IQR" became "iqr") and replaced names inside words ("minimum" became
+  "1.0imum"). Output for the default statistics is unchanged. Statistics of
+  all-missing data are now `NA` without warnings (before: `NaN`, `Inf` and a
+  warning).
+* `createProject()` now stops with an error for an unknown `structure` or a
+  non-empty `dir`. Before, it reported success even when nothing was copied.
+  It reports with `message()` instead of printing, and returns the project
+  path invisibly.
+* `ss_huxtable()`, `ht_theme_markdown()` and `ht_theme_kable()` now say clearly
+  when the suggested package huxtable is not installed.
 
 ## Changes to function signatures
 

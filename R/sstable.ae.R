@@ -56,8 +56,28 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
                          length(aetype.var) > 1 | any(length(names(aetype.var)) > 0) | any(isTRUE(nchar(names(aetype.var)) > 0)),
                        na.text = '(Missing)', matrix.raw = FALSE,
                        footer = NULL, flextable = TRUE, bg = "#F2EFEE"){
-  requireNamespace("dplyr")
-  requireNamespace("tidyr")
+  ## validate inputs
+  check_data_frame(ae_data)
+  check_data_frame(fullid_data)
+  if (!is.null(group_data)) check_data_frame(group_data)
+  check_string(id.var)
+  check_character(aetype.var)
+  check_string(arm.var)
+  check_string(grade.var, allow_null = TRUE)
+  check_string(group.var, allow_null = TRUE)
+  check_columns(ae_data, c(id.var, aetype.var, grade.var), data_arg = "ae_data")
+  check_columns(fullid_data, c(id.var, arm.var), data_arg = "fullid_data")
+  for (flag in c("fullfreq", "test", "test.anyae.only", "chisq.test", "correct",
+                 "simulate.p.value", "hybrid", "matrix.raw", "flextable")) {
+    check_flag(get(flag), arg = flag)
+  }
+  check_number(digits, min = 0, whole = TRUE)
+  check_number(pdigits, min = 1, whole = TRUE)
+  check_number(pcutoff, min = 0, max = 1)
+  check_number(B, min = 1, whole = TRUE)
+  check_string(na.text)
+  check_character(footer, allow_null = TRUE)
+  check_string(bg)
 
   tmp <- match.call()
   print.aetype.header <- force(print.aetype.header)
@@ -103,29 +123,21 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
     return(out)
   }
 
-  ## check variable's name
-
-  if (!id.var %in% names(ae_data)){stop(paste(tmp$id.var, "does not exist in", deparse(tmp$ae_data), "!!!"))}
-  if (!id.var %in% names(fullid_data)){stop(paste(tmp$id.var, "does not exist in", deparse(tmp$fullid_data), "!!!"))}
-  if (!aetype.var %in% names(ae_data)){stop(paste(tmp$aetype.var, "does not exist in", deparse(tmp$ae_data), "!!!"))}
-  if (!is.null(grade.var)) {
-    if (!grade.var %in% names(ae_data)){stop(paste(tmp$grade.var, "does not exist in", deparse(tmp$ae_data), "!!!"))}
-  }
+  ## check variable's name (id, aetype, grade and arm were checked above)
   if (!is.null(group.var)){
-    if (!is.null(group_data)){
-      if (!group.var %in% names(group_data)) stop(paste(tmp$group.var, 'does not exist in', deparse(tmp$group_data), '!!!'))
-      if (!aetype.var %in% names(group_data)){stop(paste(tmp$aetype.var, "does not exist in", deparse(tmp$group_data), "!!!"))}
-    } else
-      if (!group.var %in% names(ae_data)) stop(paste(tmp$group.var, 'does not exist in', deparse(tmp$ae_data), '!!!'))
+    if (!is.null(group_data)) {
+      check_columns(group_data, c(group.var, aetype.var), data_arg = "group_data")
+    } else {
+      check_columns(ae_data, group.var, data_arg = "ae_data")
+    }
   }
-  if (!arm.var %in% names(fullid_data)){stop(paste(tmp$arm.var, "does not exist in", deparse(tmp$fullid_data), "!!!"))}
   if (!missing(sort.by)){
     sort.by <- rlang::enquo(sort.by)
     sort.vars <- all.vars(sort.by)
     sort.signs <- getsign(sort.by)
     if (length(sort.signs) < length(sort.vars)) sort.signs <- purrr::prepend(sort.signs, quote(`+`))
     if (length(setdiff(sort.vars, c('pt','ep','p'))))
-      stop('Sorting can only apply to `pt`, `ep`, and `p`')
+      c306_abort('Sorting can only apply to `pt`, `ep`, and `p`.')
   }
 
 
@@ -531,8 +543,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
   else
   {### flextable
   if (flextable) {
-    requireNamespace("flextable")
-    requireNamespace("officer")
     # return(ss_flextable({
     #   tab <- list(table = rbind(header1, header2, ae_value),
     #               footer = footer)

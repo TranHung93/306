@@ -203,8 +203,6 @@ ss_flextable.ss_obj <- ss_flextable.list
 #' @rdname ss_flextable
 #' @export
 ss_flextable.default <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
-  requireNamespace("flextable")
-  requireNamespace("officer")
   if (!inherits(sstable, 'formatted_sstable')) sstable <- ss_format(sstable, ..., .guess = TRUE)
   header <- which(grepl("header", rownames(sstable)))
   body <- which(grepl("body", rownames(sstable)))
@@ -347,7 +345,7 @@ ss_huxtable.default <- function(sstable, footer = NULL,
                         caption = NULL, caption_pos = c("top", "bottom", "topleft", "topcenter", "topright",
                                                         "bottomleft", "bottomcenter", "bottomright"),
                         bg = c(grey(.95), 'white'), border_width=0.8, border_color = grey(.75), wrap = FALSE,...){
-  requireNamespace('huxtable')
+  check_huxtable()
   if (missing(caption_pos)) caption_pos <- 'bottomcenter' else caption_pos <- match.arg(caption_pos)
   if (!inherits(sstable, 'formatted_sstable')) sstable <- ss_format(sstable, ..., .guess = TRUE)
   header <- which(grepl("header", rownames(sstable)))
@@ -487,6 +485,7 @@ ss_huxtable.default <- function(sstable, footer = NULL,
 #' @export
 ht_theme_markdown <- function(ht, header_rows = 1:2, header_cols = NULL,
                               border_width=0.8, border_color = grey(0.75), bg = c(grey(.95),'white')){
+  check_huxtable()
   huxtable::top_border(ht)[1, ] <- border_width
   huxtable::bottom_border(ht)[nrow(ht),] <- border_width
 
@@ -519,6 +518,7 @@ ht_theme_markdown <- function(ht, header_rows = 1:2, header_cols = NULL,
 #' @export
 ht_theme_kable <- function(ht, header_rows = 1:2, header_cols = NULL,
                            border_width = 1, border_color = '#dddddd', bg = c('white', '#f9f9f9')){
+  check_huxtable()
   huxtable::top_border(ht)[1, ] <- 0
   huxtable::bottom_border(ht)[nrow(ht),] <- border_width
 
