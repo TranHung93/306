@@ -4,10 +4,12 @@
 \alias{explicit.lm}
 \title{Transform a model to its explicit form}
 \usage{
-\method{explicit}{lm}(fit)
+\method{explicit}{lm}(x, ...)
 }
 \arguments{
-\item{fit}{An object of class "lm"}
+\item{x}{An object of class "lm"}
+
+\item{...}{unused. Passing the model as `fit = ` is deprecated, use `x` instead.}
 }
 \value{
 A model with explicit formula

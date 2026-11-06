@@ -39,7 +39,21 @@ sstable.survcomp(
 Note that if "cox" is specified and model is a mstate model, a Fine-Gray model is used.
 If CoxPH is preferred, used Surv(t, ev == 'event-of-interest') on the LHS.}
 
-\item{add.prop.haz.test}{[\code{TRUE}] (legacy, depricated), please move this to compare.args}
+\item{compare.args}{a list of additional args for compare.methods,
+
+ For compare.method = 'cox', it is
+ `add.prop.haz.test` [\code{TRUE}]: a logical value specifies whether a test for proportional hazards should be added,, additional args are fed directly to `survival::coxph`.
+ only when model is a mstate model, `cause`, default to whatever the first cause.
+
+ For compare.method = 'cuminc', args are fed to \code{\link[eventglm:cumincglm]{cumincglm}}
+ `type`: [\code{diff}] a string, "diff" for difference in cumulative incidence, "ratio' for ratio of cumulative incidence,
+ other optional args include: model.censoring, formula.censoring, ipcw.method. See \code{\link[eventglm:cumincglm]{cumincglm}} for more details.
+
+ For compare.method = 'rmst', args are fed to \code{\link[eventglm:rmeanglm]{rmeanglm}} ,
+ `type`: [\code{diff}] a string, "diff" for difference in RMST, "ratio' for ratio of RMST, "lost.diff" for difference in restricted mean time lost (RMTL, = -diff), and "lost.ratio" for ratio of RMTL
+ other optional args include: model.censoring, formula.censoring, ipcw.method. See \code{\link[eventglm:rmeanglm]{rmeanglm}} for more details.}
+
+\item{add.prop.haz.test}{[\code{TRUE}] (legacy, deprecated), please move this to compare.args}
 
 \item{medsum}{[\code{TRUE}] a logical value, specifying whether median (IQR) of time to event should be described.}
 
@@ -56,20 +70,6 @@ If CoxPH is preferred, used Surv(t, ev == 'event-of-interest') on the LHS.}
 \item{flextable}{[\code{TRUE}] a logical value specifies whether output will be a flextable-type table.}
 
 \item{bg}{[\code{#F2EFEE}] a character specifies color of the odd rows in the body of flextable-type table.}
-
-\item{compare.args:}{a list of additional args for compare.methods,
-
- For compare.method = 'cox', it is
- `add.prop.haz.test` [\code{TRUE}]: a logical value specifies whether a test for proportional hazards should be added,, additional args are fed directly to `survival::coxph`.
- only when model is a mstate model, `cause`, default to whatever the first cause.
-
- For compare.method = 'cuminc', args are fed to \code{\link[eventglm:cumincglm]{cumincglm}}
- `type`: [\code{diff}] a string, "diff" for difference in cumulative incidence, "ratio' for ratio of cumulative incidence,
- other optional args include: model.censoring, formula.censoring, ipcw.method. See \code{\link[eventglm:cumincglm]{cumincglm}} for more details.
-
- For compare.method = 'rmst', args are fed to \code{\link[eventglm:rmeanglm]{rmeanglm}} ,
- `type`: [\code{diff}] a string, "diff" for difference in RMST, "ratio' for ratio of RMST, "lost.diff" for difference in restricted mean time lost (RMTL, = -diff), and "lost.ratio" for ratio of RMTL
- other optional args include: model.censoring, formula.censoring, ipcw.method. See \code{\link[eventglm:rmeanglm]{rmeanglm}} for more details.}
 }
 \value{
 a flextable-type table or a list with values/headers/footers

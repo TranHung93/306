@@ -8,18 +8,19 @@
 \usage{
 simple_relevel(x, ...)
 
-\method{simple_relevel}{data.frame}(data, ..., by)
+\method{simple_relevel}{data.frame}(x, ..., by)
 
-\method{simple_relevel}{default}(x, by, map, value = c("unsorted", "sorted", "levels"))
+\method{simple_relevel}{default}(x, by, map, value = c("unsorted", "sorted", "levels"), ...)
 }
 \arguments{
-\item{x}{a vector that will be relevelled}
+\item{x}{For the data.frame method: a data.frame (passing it as `data = ` is deprecated).
+For the default method: a vector that will be relevelled.}
 
-\item{...}{Unquoted variable names that will be relevelled}
+\item{...}{For the data.frame method: unquoted variable names that will be relevelled.
+Unused by the default method.}
 
-\item{data}{A data.frame}
-
-\item{by}{a vector that the relevelling process will base on}
+\item{by}{For the data.frame method: an unquoted variable name the relevelling process will
+base on. For the default method: a vector that the relevelling process will base on.}
 
 \item{map}{a list that links by to x in the form of list(by.1 = c(x1.1, x1.2...), by.2 = c(x2.1, x2.2...))
 or a data.frame with two columns "from" and "to" serving the same purpose.}
@@ -39,4 +40,11 @@ A factor or a numeric vector of order
 }
 \description{
 Function to relevel a variable in accordance to a another variable of class "factor".
+}
+\examples{
+df <- data.frame(g = factor(c("b", "a", "b", "a"), levels = c("b", "a")),
+                 x = c("x1", "y1", "x2", "y2"))
+levels(simple_relevel(df, x, by = g)$x)
+simple_relevel(c("p", "q", "r"), by = factor(c("B", "A", "B"), levels = c("B", "A")),
+               map = list(A = "q", B = c("p", "r")), value = "levels")
 }

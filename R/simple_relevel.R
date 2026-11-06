@@ -2,6 +2,12 @@
 #'
 #' @description Function to relevel a variable in accordance to a another variable of class "factor".
 #' @return An object of the same class as the input
+#' @examples
+#' df <- data.frame(g = factor(c("b", "a", "b", "a"), levels = c("b", "a")),
+#'                  x = c("x1", "y1", "x2", "y2"))
+#' levels(simple_relevel(df, x, by = g)$x)
+#' simple_relevel(c("p", "q", "r"), by = factor(c("B", "A", "B"), levels = c("B", "A")),
+#'                map = list(A = "q", B = c("p", "r")), value = "levels")
 #' @export
 simple_relevel <- function(x, ...){
   UseMethod('simple_relevel')
@@ -9,16 +15,28 @@ simple_relevel <- function(x, ...){
 
 #' @rdname simple_relevel
 #'
-#' @param data A data.frame
-#' @param by A vector or unquoted variable name the relevelling process will base on
-#' @param ... Unquoted variable names that will be relevelled
+#' @param x For the data.frame method: a data.frame (passing it as `data = ` is deprecated).
+#' For the default method: a vector that will be relevelled.
+#' @param by For the data.frame method: an unquoted variable name the relevelling process will
+#' base on. For the default method: a vector that the relevelling process will base on.
+#' @param ... For the data.frame method: unquoted variable names that will be relevelled.
+#' Unused by the default method.
 #' @export
-simple_relevel.data.frame <- function(data, ..., by){
+simple_relevel.data.frame <- function(x, ..., by){
   #... variables to relevel
   # by: variable that is based on
-  require(dplyr)
-  requireNamespace('rlang')
   dep.vars <- rlang::enquos(...)
+  if ("data" %in% names(dep.vars)) {
+    # deprecated form simple_relevel.data.frame(data = df, var, by = ...):
+    # `data` lands in `...` and the first variable lands in `x`
+    lifecycle::deprecate_warn("0.1.6", "simple_relevel.data.frame(data)",
+                              "simple_relevel.data.frame(x)")
+    data.quo <- dep.vars[["data"]]
+    dep.vars <- dep.vars[names(dep.vars) != "data"]
+    if (!missing(x)) dep.vars <- c(list(rlang::enquo(x)), as.list(dep.vars))
+    x <- rlang::eval_tidy(data.quo)
+  }
+  data <- x
   dep.vars.2 <- sapply(dep.vars, function(dep.var) rlang::quo_name(dep.var))
   by <- rlang::enquo(by)
   by.2 <- rlang::quo_name(by)
@@ -41,8 +59,6 @@ simple_relevel.data.frame <- function(data, ..., by){
 
 #' @rdname simple_relevel
 #'
-#' @param x a vector that will be relevelled
-#' @param by a vector that the relevelling process will base on
 #' @param map a list that links by to x in the form of list(by.1 = c(x1.1, x1.2...), by.2 = c(x2.1, x2.2...))
 #' or a data.frame with two columns "from" and "to" serving the same purpose.
 #' @param value a string: whether to return
@@ -54,8 +70,7 @@ simple_relevel.data.frame <- function(data, ..., by){
 #' - "sorted": a sorted, relevelled factor
 #' @return A factor or a numeric vector of order
 #' @export
-simple_relevel.default <- function(x, by, map, value = c('unsorted', 'sorted', 'levels')){
-  requireNamespace('dplyr')
+simple_relevel.default <- function(x, by, map, value = c('unsorted', 'sorted', 'levels'), ...){
   value <- match.arg(value)
   if (!is.data.frame(map)){
     map <- do.call(rbind,

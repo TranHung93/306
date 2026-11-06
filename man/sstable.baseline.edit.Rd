@@ -32,11 +32,13 @@ sstable.baseline.edit(
 )
 }
 \arguments{
+\item{value}{the summary matrix returned by `sstable.baseline(..., matrix.raw = TRUE)`.}
+
 \item{formula}{a formula specifies variables for rows, variable for column and third-dimension variable.
 
 If formula is in the form of x+y ~ a, the function will summary x and y with respects to each value of a
 
-If formula is in the form of x+y ~ a|z, the function will summary z with respects to each value of {a,x} and {a, y}}
+If formula is in the form of x+y ~ a|z, the function will summary z with respects to each value of \{a, x\} and \{a, y\}}
 
 \item{data}{a data frame to derive baseline table from.}
 
@@ -51,6 +53,8 @@ If formula is in the form of x+y ~ a|z, the function will summary z with respect
 \item{cont}{a vector specifies whether each row variables is continuous.}
 
 \item{cate}{a vector specifies whether each row variables is categorical.}
+
+\item{fullfreq}{a logical value specifies whether to show total frequency as a denominator.}
 
 \item{digits}{a number specifies number of significant digits for numeric statistics.}
 
@@ -79,12 +83,12 @@ If formula is in the form of x+y ~ a|z, the function will summary z with respect
 \item{flextable}{a logical value specifies whether output will be a flextable-type table.}
 
 \item{bg}{a character specifies color of the odd rows in the body of flextable-type table.}
-
-\item{df}{a logical values specifies whether output will be a draw dataframe.}
 }
 \value{
 a flextable-type table or a list with values/headers/footers
 }
 \description{
-A function to create a simple summary baseline table.
+Adds the header and footer to the summary matrix built by
+  [sstable.baseline()] (with `matrix.raw = TRUE`), optionally as a flextable.
+  Usually called by [sstable.baseline()] itself.
 }

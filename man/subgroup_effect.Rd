@@ -55,11 +55,11 @@ or a 'subgroup_logist_summary'/list of logist_summary, each represents one state
 This function calculate the OR, CI, an p.value within each value of specified covariable.
 }
 \examples{
-y = sample(0:1, 1000, replace = T)
-x1 = sample(1:100, 1000, replace = T)
-x2 = sample(c("A", "B"), 1000, replace = T)
-x3 = sample(c("C", "D", "E"), 1000, replace = T)
-x4 = sample(c("F", "G"), 1000, replace = T)
+y = sample(0:1, 1000, replace = TRUE)
+x1 = sample(1:100, 1000, replace = TRUE)
+x2 = sample(c("A", "B"), 1000, replace = TRUE)
+x3 = sample(c("C", "D", "E"), 1000, replace = TRUE)
+x4 = sample(c("F", "G"), 1000, replace = TRUE)
 fakefit = glm(y ~ x1*x3 + x2*x3 + x2*x4, family = binomial())
 C306::subgroup_effect(~x3, fakefit)
 }

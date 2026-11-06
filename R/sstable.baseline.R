@@ -8,7 +8,7 @@
 #'
 #' If formula is in the form of x+y ~ a, the function will summary x and y with respects to each value of a
 #'
-#' If formula is in the form of x+y ~ a|z, the function will summary z with respects to each value of {a,x} and {a, y}
+#' If formula is in the form of x+y ~ a|z, the function will summary z with respects to each value of \{a, x\} and \{a, y\}
 #' @param data a data frame to derive baseline table from.
 #' @param bycol a logical value specifies whether the summary will be by column or by row.
 #' @param pooledGroup a logical value specifies whether to pool all subgroups of column variable.
@@ -72,7 +72,8 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
       if (!keepEmptyGroup) y <- droplevels(y)
       y <- addNA(y, ifany = TRUE)
     } else {
-      y <- factor(as.character(y), levels = sort(unique(as.character(y), decreasing = TRUE), na.last = TRUE), exclude = NULL)
+      ### reversed like factor arms (and like sstable.ae)
+      y <- factor(as.character(y), levels = sort(unique(as.character(y)), decreasing = TRUE, na.last = TRUE), exclude = NULL)
     }
   } else {
     y <- factor(rep("Total", nrow(dat)))
@@ -158,13 +159,20 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
     # Initialize a vector to store the results
     digits <- numeric(ncol(df))
 
+    # Criteria may refer to columns by name: evaluate them in a local
+    # environment holding the columns (never in the global environment).
+    with_columns <- function(fn) {
+      environment(fn) <- list2env(as.list(df), parent = environment(fn))
+      fn
+    }
+    criteria_results_numeric <- lapply(criteria_results_numeric, function(cr) list(with_columns(cr[[1]]), cr[[2]]))
+    criteria_results_non_numeric <- lapply(criteria_results_non_numeric, function(cr) list(with_columns(cr[[1]]), cr[[2]]))
+    criteria_results_name <- lapply(criteria_results_name, function(cr) list(with_columns(cr[[1]]), cr[[2]]))
+
   # Iterate over each variable in the data frame
   for (i in seq_along(df)) {
     variable_name <- colnames(df)[i]
     variable <- df[[i]]
-
-    # Create a variable named after the column
-    assign(variable_name, variable, envir = .GlobalEnv)
 
       # Determine if the variable is numeric or not
       if (is.numeric(variable)) {
@@ -230,24 +238,8 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
   varname <- if (ncol(xlabel) == 1) getlabel(xlabel[, 1]) else getlabel(xlabel)
 
 
-  # Initialize an empty vector to store labels or variable names
-  label_list <- character(length(varlist))
-
-  # Loop through the variables in varlist
-  for (i in seq_along(varlist)) {
-    var_name <- varlist[i]
-
-    # Retrieve the variable label if available
-    var_label <- attr(data[[var_name]], "label")
-
-    # Check if the variable has a label or use the variable name
-
-    if (!is.null(var_label) && var_label != "") {
-      label_list[i] <- var_label
-    } else {
-      label_list[i] <- var_name
-    }
-  }
+  # Row label of each variable: its "label" attribute, or else its name
+  label_list <- ._baseline_labels(varlist, data)
 
   ## get summary
   value <- do.call(rbind,
@@ -391,7 +383,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
   # add option to call dataframe before adding header, footer -hungtt
   if (matrix.raw) { tab <- value}
   else { tab <- sstable.baseline.edit(value = value, formula = formula, data =data, bycol = bycol, pooledGroup = pooledGroup , keepEmptyGroup = keepEmptyGroup,
-                                      statistics = statistics, cont = cont, cat = cat, fullfreq = fullfreq, digits = digits,
+                                      statistics = statistics, cont = cont, cate = cat, fullfreq = fullfreq, digits = digits,
                                       test = test, pdigits = pdigits, pcutoff = pcutoff, keepEmptyString = keepEmptyString,
                                       chisq.test = chisq.test, correct = correct, simulate.p.value = simulate.p.value, B = B,
                                       workspace = workspace, hybrid = hybrid, footer = footer, flextable = flextable, bg = bg)
@@ -400,6 +392,20 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
   return (tab)
 }
 
+
+# Row label of each variable: its "label" attribute if non-empty, else its name.
+# Shared by sstable.baseline() and sstable.baseline.edit() so that both build
+# exactly the same labels (sstable.baseline.edit() matches rows on them).
+._baseline_labels <- function(vars, data) {
+  vapply(vars, function(v) {
+    lbl <- attr(data[[v]], "label")
+    if (!is.null(lbl) && length(lbl) && !is.na(lbl[[1]]) && nzchar(lbl[[1]])) {
+      as.character(lbl[[1]])
+    } else {
+      v
+    }
+  }, character(1), USE.NAMES = FALSE)
+}
 
 sstable.baseline.each <- function(varname, label_list, x, y, z, bycol = TRUE, pooledGroup = FALSE,
                                   statistics = "mean, median (Q1-Q3)", continuous = NA, fullfreq = TRUE, test = FALSE,

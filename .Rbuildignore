@@ -1,2 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.RDataTmp$
+^\.vscode$
+^docs$
+^README\.Rmd$

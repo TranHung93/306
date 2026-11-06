@@ -2,9 +2,42 @@
 % Please edit documentation in R/gg_boxcox.R
 \name{gg_boxcox}
 \alias{gg_boxcox}
+\alias{gg_boxcox.formula}
+\alias{gg_boxcox.lm}
+\alias{gg_boxcox.default}
 \title{Compute and draw Box-Cox transformation plot for linear models using ggplot2}
 \usage{
 gg_boxcox(object, ...)
+
+\method{gg_boxcox}{formula}(
+  object,
+  lambda = seq(-2, 2, 1/10),
+  interp = (m < 100),
+  eps = 1/50,
+  xlab = expression(lambda),
+  ylab = "log-Likelihood",
+  ...
+)
+
+\method{gg_boxcox}{lm}(
+  object,
+  lambda = seq(-2, 2, 1/10),
+  interp = (m < 100),
+  eps = 1/50,
+  xlab = expression(lambda),
+  ylab = "log-Likelihood",
+  ...
+)
+
+\method{gg_boxcox}{default}(
+  object,
+  lambda = seq(-2, 2, 1/10),
+  interp = (m < 100),
+  eps = 1/50,
+  xlab = expression(lambda),
+  ylab = "log-Likelihood",
+  ...
+)
 }
 \arguments{
 \item{object}{a formula or fitted model object. Currently only lm and aov objects are handled.}

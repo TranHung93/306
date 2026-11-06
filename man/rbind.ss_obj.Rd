@@ -7,23 +7,33 @@
 \alias{rbind.ss_baseline}
 \title{Row-binding two sstables}
 \usage{
-\method{rbind}{ss_obj}(tbl1, tbl2, footer = NULL, ...)
+\method{rbind}{ss_obj}(..., deparse.level = 1)
 
-\method{rbind}{ss_ae}(tbl1, tbl2, header = 1:3, footer)
+\method{rbind}{ss_ae}(..., deparse.level = 1, header = 1:3, footer)
 
-\method{rbind}{ss_survcomp}(tbl1, tbl2, header = 1:3, footer)
+\method{rbind}{ss_survcomp}(..., deparse.level = 1, header = 1:3, footer)
 
-\method{rbind}{ss_baseline}(tbl1, tbl2, header = 1:2, footer)
+\method{rbind}{ss_baseline}(..., deparse.level = 1, header = 1:2, footer)
 }
 \arguments{
-\item{tbl1, tbl2, }{two object of class sstables of the same template. Only export for technical use.}
+\item{...}{the two sstable objects (`tbl1`, `tbl2`) of the same template.}
 
-\item{footer}{[NULL] default is the joint footer of two ss_tbl}
+\item{deparse.level}{unused; kept for compatibility with [rbind()].}
 
-\item{...}{args passed to the downstream method}
+\item{header}{the rows considered to be the header area. This area is removed from the
+second table before binding.}
 
-\item{header}{define the number of row considered to be header area. This area is removed when rbind for tbl2}
+\item{footer}{the footer of the result. By default the (common) footer of the two tables;
+an error is raised if their footers differ and no footer is given.}
+}
+\value{
+a list with elements `table` and `footer`, like the inputs.
 }
 \description{
-Row-binding two sstables
+Row-bind two sstable objects (as returned by [sstable.ae()], [sstable.baseline()] or
+[sstable.survcomp()] with `flextable = FALSE`) built with the same settings. The header
+rows of the second table are dropped.
+
+Call it as `rbind(tbl1, tbl2)`. The old forms `rbind.ss_ae(tbl1, tbl2, header, footer)`,
+with arguments given by position or as `tbl1 = ` / `tbl2 = `, still work.
 }

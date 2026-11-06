@@ -1,6 +1,8 @@
 #' Transform an object to its explicit form
 #' @description A function to transform an object to its explicit form if possible
 #' @param x An object
+#' @param ... additional arguments passed to methods.
+#' @return The explicit form of `x`; see the methods.
 #' @seealso \link{explicit.lm}
 #' @export
 explicit <- function(x, ...){
@@ -11,17 +13,22 @@ explicit <- function(x, ...){
 #' @description
 #' A function to transform an lm model formula to its explicit form.
 #' This is useful when you want to use stats::drop1 to drop additional terms in interaction models.
-#' @param fit An object of class "lm"
+#' @param x An object of class "lm"
+#' @param ... unused. Passing the model as `fit = ` is deprecated, use `x` instead.
 #' @examples
 #' iris.model <- lm(Sepal.Width ~ Sepal.Length*Petal.Width, data=iris)
 #' explicit(iris.model)
 #' @return A model with explicit formula
 #' @seealso \link[stats]{add1}
 #' @export
-explicit.lm <- function(fit){
-  ._explicit_lm(fit, data = data, .meta = FALSE)
-  # if (length(data)) new_fit$call$data <- rlang::sym(deparse(substitute(data)))
-  # new_fit
+explicit.lm <- function(x, ...){
+  if (missing(x)) {
+    dots <- list(...)
+    if (is.null(dots$fit)) rlang::abort("Argument `x` is missing, with no default.")
+    lifecycle::deprecate_warn("0.1.6", "explicit.lm(fit)", "explicit.lm(x)")
+    x <- dots$fit
+  }
+  ._explicit_lm(x, .meta = FALSE)
 }
 
 ._explicit_lm <- function(lm, .meta = FALSE, ...)

@@ -49,8 +49,7 @@ ss_header <- function(sstable, rows) {
   sstable <- ss_legit(sstable)
   if (!length(rownames(sstable))) rownames(sstable) <- 1:nrow(sstable)
   rownames(sstable)[rows] <- paste("header", seq_along(rows), sep=".")
-  ss_table <- ss_template(sstable, template = NA)
-  sstable
+  ss_template(sstable, template = NA)
 }
 
 #' Designation of body part for custom sstable
@@ -64,8 +63,7 @@ ss_body <- function(sstable, rows){
   sstable <- ss_legit(sstable)
   if (!length(rownames(sstable))) rownames(sstable) <- 1:nrow(sstable)
   rownames(sstable)[rows] <- paste("body", seq_along(rows), sep=".")
-  ss_table <- ss_template(sstable, template = NA)
-  sstable
+  ss_template(sstable, template = NA)
 }
 
 #' Designation of section title rows for custom sstable
@@ -79,8 +77,7 @@ ss_section <- function(sstable, rows){
   sstable <- ss_legit(sstable)
   if (!length(rownames(sstable))) rownames(sstable) <- 1:nrow(sstable)
   rownames(sstable)[rows] <- paste("section", seq_along(rows), sep=".")
-  ss_table <- ss_template(sstable, template = NA)
-  sstable
+  ss_template(sstable, template = NA)
 }
 
 #' Quick format a sstable in preparation for create flextable/huxtable
@@ -133,6 +130,7 @@ ss_guess_format <- function(sstable){
   UseMethod('ss_guess_format')
 }
 
+#' @exportS3Method ss_guess_format default
 ss_guess_format.default <- function(sstable){
   guess <- sapply(1:nrow(sstable),
                   function(i){
@@ -145,6 +143,7 @@ ss_guess_format.default <- function(sstable){
   return(guess)
 }
 
+#' @exportS3Method ss_guess_format ae_tbl
 ss_guess_format.ae_tbl <- function(sstable){
   guess <- sapply(1:nrow(sstable),
                   function(i){
@@ -156,16 +155,19 @@ ss_guess_format.ae_tbl <- function(sstable){
   return(guess)
 }
 
+#' @exportS3Method ss_guess_format baseline_tbl
 ss_guess_format.baseline_tbl <- function(sstable){
   guess <- c(rep('header',2), rep('body', nrow(sstable)-2))
   return(guess)
 }
 
+#' @exportS3Method ss_guess_format survcomp_tbl
 ss_guess_format.survcomp_tbl <- function(sstable){
   guess <- c(rep('header',2), rep('body', nrow(sstable)-2))
   return(guess)
 }
 
+#' @exportS3Method ss_guess_format summary_tbl
 ss_guess_format.summary_tbl <- function(sstable){
   guess <- c('header', rep('body', nrow(sstable)-1))
   return(guess)
@@ -252,7 +254,7 @@ ss_flextable.default <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
   ft <- flextable::set_header_labels(ft, values = ss.header2[[1]])
   if (length(ss.header2) > 1)
     for (i in seq_along(ss.header2)[-1])
-      ft <- flextable::add_header_row(ft, values = ss.header2[[i]], top = F)
+      ft <- flextable::add_header_row(ft, values = ss.header2[[i]], top = FALSE)
 
   ft <- flextable::merge_h(ft, i = 1:(length(ss.header2)-1), part = "header")
   ft <- flextable::merge_v(ft, part = "header")
@@ -280,7 +282,7 @@ ss_flextable.default <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
   ### alignment
   ft <- flextable::align(ft, j = 1, align = "left", part = "all")
 
-  ft_sstheme(ft, bg = "#F2EFEE" )
+  ft_sstheme(ft, bg = bg)
 }
 
 
@@ -288,6 +290,8 @@ ss_flextable.default <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
 #'
 #' @description Theming flextable for sstable
 #' @param ft flextable
+#' @param bg a character string, the background colour of odd body rows.
+#' @return the themed flextable.
 #' @export
 ft_sstheme <- function(ft, bg = "#F2EFEE"){
   ### faces of header
@@ -475,6 +479,7 @@ ss_huxtable.default <- function(sstable, footer = NULL,
 #' @description This function provides a markdown stripe theme for huxtable object
 #' @param ht an object of class huxtable
 #' @param header_rows a numeric vector that delimits the header zone.
+#' @param header_cols a numeric vector of columns to be shown in bold, or NULL.
 #' @param bg a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripe background, otherwise plain.
 #' @param border_width a number that defines huxtable border width
 #' @param border_color a character string that defines huxtable border color
@@ -496,7 +501,7 @@ ht_theme_markdown <- function(ht, header_rows = 1:2, header_cols = NULL,
     huxtable::bold(ht)[, header_col] <- TRUE
   }
   ht <- huxtable::set_all_border_colors(ht, border_color)
-  if (length(bg > 1)) ht <- huxtable::map_background_color(ht, do.call(huxtable::by_rows, as.list(bg)))
+  if (length(bg) > 1) ht <- huxtable::map_background_color(ht, do.call(huxtable::by_rows, as.list(bg)))
   else huxtable::background_color(ht) <- bg
   ht
 }
@@ -506,6 +511,7 @@ ht_theme_markdown <- function(ht, header_rows = 1:2, header_cols = NULL,
 #' @description This function provides a kable-esque theme for huxtable object
 #' @param ht an object of class huxtable
 #' @param header_rows a numeric vector that delimits the header zone.
+#' @param header_cols a numeric vector of columns to be shown in bold, or NULL.
 #' @param bg a character vector that defines background color of the flextable. If length(bg) >= 2, the table will have stripe background, otherwise plain.
 #' @param border_width a number that defines huxtable border width
 #' @param border_color a character string that defines huxtable border color
@@ -519,7 +525,7 @@ ht_theme_kable <- function(ht, header_rows = 1:2, header_cols = NULL,
   for (header_row in header_rows){
     huxtable::bold(ht)[header_row, ] <- TRUE
     for (col in 1:ncol(ht)){
-      if (!is.na(ht[header_row, col]) & stringr::str_trim(ht[header_row, col]) != ''){
+      if (!is.na(ht[header_row, col]) & trimws(ht[header_row, col]) != ''){
         huxtable::bottom_border(ht)[header_row, col] <- border_width
       }
     }
@@ -534,7 +540,7 @@ ht_theme_kable <- function(ht, header_rows = 1:2, header_cols = NULL,
   }
 
   ht <- huxtable::set_all_border_colors(ht, border_color)
-  if (length(bg > 1)){
+  if (length(bg) > 1){
     ht <- huxtable::map_background_color(ht, do.call(huxtable::by_rows, append(as.list(bg), c(from = max(header_rows)+1))))
     huxtable::background_color(ht)[header_rows,] <- bg[[1]]
   } else huxtable::background_color(ht) <- bg
@@ -625,7 +631,7 @@ as_sstable.logist_summary <- function(x, include_footnote = TRUE, flextable = FA
 }
 
 #' @rdname as_sstable
-#' @param include_footsnote logical value specifying whether to include footnote in the output. Default is FALSE
+#' @param include_footnote logical value specifying whether to include footnote in the output. Default is FALSE
 #' @export
 as_sstable.overlap_summary <- function(x, include_footnote = TRUE, flextable = FALSE, ...){
   out <- list()
@@ -669,18 +675,26 @@ as_sstable.subgroup_logist_summary <- function(x, include_footnote = TRUE, flext
 
 #' Row-binding two sstables
 #' @description
-#' Row-binding two sstables
-#' @param tbl1,tbl2, two object of class sstables of the same template. Only export for technical use.
-#' @param footer [NULL] default is the joint footer of two ss_tbl
-#' @param header define the number of row considered to be header area. This area is removed when rbind for tbl2
-#' @param ... args passed to the downstream method
+#' Row-bind two sstable objects (as returned by [sstable.ae()], [sstable.baseline()] or
+#' [sstable.survcomp()] with `flextable = FALSE`) built with the same settings. The header
+#' rows of the second table are dropped.
+#'
+#' Call it as `rbind(tbl1, tbl2)`. The old forms `rbind.ss_ae(tbl1, tbl2, header, footer)`,
+#' with arguments given by position or as `tbl1 = ` / `tbl2 = `, still work.
+#' @param ... the two sstable objects (`tbl1`, `tbl2`) of the same template.
+#' @param deparse.level unused; kept for compatibility with [rbind()].
+#' @param header the rows considered to be the header area. This area is removed from the
+#'   second table before binding.
+#' @param footer the footer of the result. By default the (common) footer of the two tables;
+#'   an error is raised if their footers differ and no footer is given.
+#' @return a list with elements `table` and `footer`, like the inputs.
 #' @export
-rbind.ss_obj <- function(tbl1, tbl2, footer=NULL, ...){
-  if (!identical(class(tbl1$table), class(tbl2$table)))
-    stop('tbl1 and tbl2 must be of the same class.')
-  if (ncol(tbl1$table) != ncol(tbl2$table))
-    stop('Unmatched number of columns between tbl1 and tbl2.')
-  NextMethod('rbind')
+rbind.ss_obj <- function(..., deparse.level = 1){
+  args <- ._ss_rbind_args(list(...))
+  method <- utils::getS3method("rbind", class(args$tbl1)[[1]], optional = TRUE)
+  if (is.null(method) || identical(class(args$tbl1)[[1]], "ss_obj"))
+    return(._do_rbind(args$tbl1, args$tbl2, header = 1))
+  do.call(method, c(list(args$tbl1, args$tbl2), args$extra))
 }
 
 ._do_rbind <- function(tbl1, tbl2, header=1){
@@ -691,38 +705,51 @@ rbind.ss_obj <- function(tbl1, tbl2, footer=NULL, ...){
   new_tbl
 }
 
-#' @rdname rbind.ss_obj
-#' @method rbind ss_ae
-#' @export
-rbind.ss_ae <- function(tbl1, tbl2, header=1:3, footer){
-  if (!isTRUE(all.equal(tbl1$footer, tbl2$footer)) & missing(footer))
-    stop('Two footers mismatched. Perhaps two tbl are using different config? \n
-         To ignore this, set a specific footer.')
-  out <- ._do_rbind(tbl1, tbl2, header=header)
-  if (!missing(footer)) out$footer <- footer
+# Split the `...` of an rbind method into the two tables and any extra
+# (legacy positional) arguments, and check that the tables are compatible.
+._ss_rbind_args <- function(dots){
+  is_tbl <- vapply(dots, inherits, logical(1), what = "ss_obj")
+  if (sum(is_tbl) != 2)
+    rlang::abort("Exactly two sstable objects (`tbl1` and `tbl2`) must be supplied.")
+  tbl1 <- dots[is_tbl][[1]]
+  tbl2 <- dots[is_tbl][[2]]
+  if (!identical(class(tbl1$table), class(tbl2$table)))
+    rlang::abort("tbl1 and tbl2 must be of the same class.")
+  if (ncol(tbl1$table) != ncol(tbl2$table))
+    rlang::abort("Unmatched number of columns between tbl1 and tbl2.")
+  list(tbl1 = tbl1, tbl2 = tbl2, extra = unname(dots[!is_tbl]))
+}
+
+._ss_rbind_method <- function(dots, header, footer, footer_missing){
+  args <- ._ss_rbind_args(dots)
+  # legacy positional arguments: rbind.ss_xx(tbl1, tbl2, header, footer)
+  if (length(args$extra) >= 1) header <- args$extra[[1]]
+  if (length(args$extra) >= 2) {
+    footer <- args$extra[[2]]
+    footer_missing <- FALSE
+  }
+  if (footer_missing && !isTRUE(all.equal(args$tbl1$footer, args$tbl2$footer)))
+    rlang::abort(c("Two footers mismatched. Perhaps two tbl are using different config?",
+                   i = "To ignore this, set a specific footer."))
+  out <- ._do_rbind(args$tbl1, args$tbl2, header = header)
+  if (!footer_missing) out$footer <- footer
   out
 }
 
 #' @rdname rbind.ss_obj
-#' @method rbind ss_survcomp
 #' @export
-rbind.ss_survcomp <- function(tbl1, tbl2, header=1:3, footer){
-  if (!isTRUE(all.equal(tbl1$footer, tbl2$footer)) & missing(footer))
-    stop('Two footers mismatched. Perhaps two tbl are using different config? \n
-         To ignore this, set a specific footer.')
-  out <- ._do_rbind(tbl1, tbl2, header=header)
-  if (!missing(footer)) out$footer <- footer
-  out
+rbind.ss_ae <- function(..., deparse.level = 1, header = 1:3, footer){
+  ._ss_rbind_method(list(...), header, if (missing(footer)) NULL else footer, missing(footer))
 }
 
 #' @rdname rbind.ss_obj
-#' @method rbind ss_baseline
 #' @export
-rbind.ss_baseline <- function(tbl1, tbl2, header=1:2, footer){
-  if (!isTRUE(all.equal(tbl1$footer, tbl2$footer)) & missing(footer))
-    stop('Two footers mismatched. Perhaps two tbl are using different config? \n
-         To ignore this, set a specific footer.')
-  out <- ._do_rbind(tbl1, tbl2, header=header)
-  if (!missing(footer)) out$footer <- footer
-  out
+rbind.ss_survcomp <- function(..., deparse.level = 1, header = 1:3, footer){
+  ._ss_rbind_method(list(...), header, if (missing(footer)) NULL else footer, missing(footer))
+}
+
+#' @rdname rbind.ss_obj
+#' @export
+rbind.ss_baseline <- function(..., deparse.level = 1, header = 1:2, footer){
+  ._ss_rbind_method(list(...), header, if (missing(footer)) NULL else footer, missing(footer))
 }

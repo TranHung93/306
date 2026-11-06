@@ -6,7 +6,6 @@
 #' @param overall.model an optional one-sided formula for additional terms for overall population only
 #' @param subgroup.model a formula of the form "~subgrouping.variable1+subgrouping.variable2" (!! subgrouping.variable must be factors and there should be nothing on the left-hand side of the formula).
 #' @param data a data frame to fit the survival model.
-#' @param add.risk [\code{TRUE}] a logical value specifies whether the event probability ("absolute risk") at time "infinity" should be displayed.
 #' @param time [\code{Inf}] the truncation time, affecting the descriptive and the RMST model, set to \code{Inf} to perform analyses at maximum time available
 #' (minimax of the observed time across two arms in RMST model)
 #' @param reference.arm [\code{B}] reference arm, default to the second arm ("B"), change to "A" for base on the first arm
@@ -14,7 +13,7 @@
 #' Note that if "cox" is specified and model is a mstate model, a Fine-Gray model is used.
 #' If CoxPH is preferred, used Surv(t, ev == 'event-of-interest') on the LHS.
 #'
-#' @param compare.args: a list of additional args for compare.methods,
+#' @param compare.args a list of additional args for compare.methods,
 #'
 #'  For compare.method = 'cox', it is
 #'  `add.prop.haz.test` [\code{TRUE}]: a logical value specifies whether a test for proportional hazards should be added,, additional args are fed directly to `survival::coxph`.
@@ -86,7 +85,7 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
                              medsum = FALSE, digits = digits,
                              compare.method = compare.method, compare.args = compare.args,
                              p.compare = p.compare,
-                             pdigits = 3, pcutoff = pcutoff, flextable = FALSE, ...)$table[,-1]
+                             pdigits = pdigits, pcutoff = pcutoff, flextable = FALSE, ...)$table[,-1]
   result <- cbind(c("Subgroup", "", "All patients"), result, c("Test for heterogeneity", "p-value", ""))
   
   # Preparation of models and data
@@ -131,7 +130,7 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
         type <- if (is.null(ia.args$type)) 'diff' else ia.args$type
         ia.args$type <- NULL
         ia.args$link <- switch(type, "diff" = 'identity', "ratio" = 'log', 'lost.ratio' = 'log')
-        ia.args$model.censoring <- if (is.null(ia.args$model.censoring)) 'stratified'
+        if (is.null(ia.args$model.censoring)) ia.args$model.censoring <- 'stratified'
         ia.args$formula.censoring <-
           if (is.null(ia.args$formula.censoring)) update(main.model, NULL ~.) else
             update(ia.args$formula.censoring, as.formula(paste("NULL ~ . +", subgroup.char[k], sep = "")))
@@ -196,6 +195,7 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
       # }
       # browser()
       result[nrow(result), 2:(ncol(result) - 1)] <- sstable.survcomp(model = base.model, data = d.subgroup, time=time,
+                                                                     reference.arm = reference.arm,
                                                                      compare.method = compare.method, compare.args = compare.args,
                                                                      p.compare = p.compare,
                                                                      medsum = FALSE, digits = digits, pdigits = pdigits, pcutoff = pcutoff,
@@ -295,15 +295,33 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
   return(tab)
 }
 
+#' Print an sstable matrix
+#'
+#' @description Print method for objects of class `ss_tbl`. When `pretty` is
+#'   `TRUE` and the \pkg{huxtable} package is installed, the table is printed as
+#'   a huxtable; otherwise it is printed as a plain matrix.
+#' @param x an object of class `ss_tbl`.
+#' @param pretty a logical value: print as a huxtable? Defaults to the
+#'   `ss_pretty.print` option, or `TRUE` if that option is unset.
+#' @param ... unused; kept for compatibility with [print()]. Passing the table
+#'   as `sstable = ` is deprecated, use `x` instead.
+#' @return `x`, invisibly.
 #' @export
-print.ss_tbl <- function(sstable, pretty=getOption('ss_pretty.print', TRUE)){
-  if (!pretty) return(print.default(sstable))
+print.ss_tbl <- function(x, pretty = getOption('ss_pretty.print', TRUE), ...){
+  if (missing(x)) {
+    dots <- list(...)
+    if (is.null(dots$sstable)) rlang::abort("Argument `x` is missing, with no default.")
+    lifecycle::deprecate_warn("0.1.6", "print.ss_tbl(sstable)", "print.ss_tbl(x)")
+    x <- dots$sstable
+  }
+  if (!isTRUE(pretty) || !requireNamespace("huxtable", quietly = TRUE)) {
+    print.default(x)
+    return(invisible(x))
+  }
   tryCatch(
-    {
-      print(huxtable::as_hux(sstable) |> huxtable::theme_article())
-    },
-    error = function(e) {print.default(sstable)}
+    print(huxtable::theme_article(huxtable::as_hux(x))),
+    error = function(e) print.default(x)
   )
-  invisible(sstable)
+  invisible(x)
 }
 

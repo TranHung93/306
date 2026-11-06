@@ -95,27 +95,11 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
     out <- ._do_rbind(tbl1, tbl2, header=c(1:(3+n.grade)))
     # rownames(out)[c(3,4,5,8)] <- 'section'
     if (flextable) {
-      out <- ss_flextable(out)
-      out <- delete_part(out, part = "footer")
-      out <- flextable::add_footer_lines(out,
-                                         values = as_paragraph(
-                                           as_chunk("n episode", props = fp_text_default(bold = TRUE)),
-                                           as_chunk(": total number of events")
-                                         )
-      )
-      
-      out <- flextable::add_footer_lines(out,
-                                         values = as_paragraph(
-                                           as_chunk("n patient", props = fp_text_default(bold = TRUE)),
-                                           as_chunk(": number of patients with at least one event")
-                                         )
-      )
-      
-      out <- flextable::add_footer_lines(out, "p-values are based on chi-square test if expected value under null hypothesis > 1 in each cell; otherwise Fisher’s exact test is used")
-      
-      out <- flextable::add_footer_lines(out, footer)
-
-      return(out)}
+      out <- ss_flextable(out, bg = bg)
+      out <- flextable::delete_part(out, part = "footer")
+      out <- ._ae_add_footer(out, test = test, chisq.test = chisq.test, footer = footer)
+      return(out)
+    }
     return(out)
   }
 
@@ -154,20 +138,14 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
                 group_data <- unique(ae_data[,c(aetype.var, group.var)])
                name_counts <- table(group_data[[aetype.var]])
                misclassified_names <- names(name_counts[name_counts > 1])
-               misclassifications_list <- list()
-               warning_messages <- c()
-               options (warn = 1)
+               warning_messages <- character(0)
                if (length(misclassified_names) > 0) {
-                 cat("Misclassifications found:\n")
                  for (name in misclassified_names) {
-                   cat("Name:", name, "\n")
                    ae.soc <- unique(group_data[group_data[[aetype.var]] == name, group.var])
-                   cat("In classes:", paste(ae.soc, collapse = ", "), "\n")
-                   misclassifications_list[[name]] <- ae.soc
                    warning_messages <- c(warning_messages, paste(name, ":", paste(ae.soc, collapse = ", "), ";"))
                  }
                  warning_message <- paste("Adverse events are being classified into two different SOCs.", paste(warning_messages, collapse = " "), sep = "\n")
-                 warning(warning_message)}
+                 warning(warning_message, call. = FALSE)}
               }}
 
   group_data <- as.data.frame(group_data)
@@ -545,7 +523,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
   #             if (any(value == "-")) "- : value cannot be estimated." else NULL,
   #             if (test) {paste("p-values are based on",
   #                              ifelse(chisq.test == FALSE, "Fisher's exact test",
-  #                                     "chi-square test if expected value under null hypothesis > 1 in each cell; otherwise Fisher’s exact test is used"))} else NULL,
+  #                                     "chi-square test if expected value under null hypothesis > 1 in each cell; otherwise Fisher's exact test is used"))} else NULL,
   #             footer)
 
 
@@ -586,32 +564,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
     tab <- flextable::merge_v(tab, part = "header")
 
     ## footer
-    tab <- flextable::add_footer_lines(tab,
-      values = as_paragraph(
-        as_chunk("n episode", props = fp_text_default(bold = TRUE)),
-        as_chunk(": total number of events")
-      )
-    )
-    
-    tab <- flextable::add_footer_lines(tab,
-      values = as_paragraph(
-        as_chunk("n patient", props = fp_text_default(bold = TRUE)),
-        as_chunk(": number of patients with at least one event")
-      )
-    )
-    
-    tab <- flextable::add_footer_lines(tab, "p-values are based on chi-square test if expected value under null hypothesis > 1 in each cell; otherwise Fisher’s exact test is used")
-
-    if (!is.null(footer))
-    {
-      for (k in (1:length(footer))) {
-        tab <- flextable::add_footer_lines(tab, footer[k], top = FALSE)
-        tab <- flextable::merge_at(tab,
-                                   i = k,
-                                   j = 1:length(header1),
-                                   part = "footer")
-      }
-    }
+    tab <- ._ae_add_footer(tab, test = test, chisq.test = chisq.test, footer = footer)
 
     ## format
     ### width
@@ -651,4 +604,29 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
   }
   if (!flextable) class(tab) <- c('ss_ae','ss_obj')}
   return(tab)
+}
+
+# Footer of the AE flextable ------------------------------------------------
+# The p-value note follows `test` / `chisq.test`; user footers come last.
+._ae_test_note <- function(chisq.test) {
+  if (isTRUE(chisq.test)) {
+    "p-values are based on chi-square test if expected value under null hypothesis > 1 in each cell; otherwise Fisher's exact test is used"
+  } else {
+    "p-values are based on Fisher's exact test"
+  }
+}
+
+._ae_add_footer <- function(ft, test, chisq.test, footer = NULL) {
+  bold <- flextable::fp_text_default(bold = TRUE)
+  ft <- flextable::add_footer_lines(ft, values = flextable::as_paragraph(
+    flextable::as_chunk("n episode", props = bold),
+    flextable::as_chunk(": total number of events")
+  ))
+  ft <- flextable::add_footer_lines(ft, values = flextable::as_paragraph(
+    flextable::as_chunk("n patient", props = bold),
+    flextable::as_chunk(": number of patients with at least one event")
+  ))
+  if (isTRUE(test)) ft <- flextable::add_footer_lines(ft, ._ae_test_note(chisq.test))
+  for (f in footer) ft <- flextable::add_footer_lines(ft, f)
+  ft
 }

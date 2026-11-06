@@ -8,6 +8,11 @@ ft_sstheme(ft, bg = "#F2EFEE")
 }
 \arguments{
 \item{ft}{flextable}
+
+\item{bg}{a character string, the background colour of odd body rows.}
+}
+\value{
+the themed flextable.
 }
 \description{
 Theming flextable for sstable

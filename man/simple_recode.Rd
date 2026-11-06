@@ -29,9 +29,11 @@ For default method: Additional parameters passed to factor()}
 
 \item{.data}{A data frame to modify}
 
-\item{ignore.case, perl}{Parameters passed to gsub().}
+\item{ignore.case}{Specify whether the pattern is case-insensitive. Default is FALSE (case sensitive). Passed to [gsub()].}
 
-\item{perl}{Are patterns follow the Perl-style regular expression.}
+\item{fixed}{If TRUE, patterns are matched as is rather than as regular expressions. Passed to [gsub()].}
+
+\item{perl}{Are patterns follow the Perl-style regular expression. Passed to [gsub()].}
 
 \item{x}{a vector}
 
@@ -41,13 +43,11 @@ Map can be a list in the form of recoded_text = c(to_be_recoded_text)
 
 Or as a data frame having 2 columns named "from" and "to".}
 
-\item{as}{A character string defining the post-recoded data type of x. Default is keeping as-is.}
-
-\item{ignore.case}{Specify whether the pattern is case-insensitive. Default is FALSE (case sensitive)}
+\item{as}{A character string defining the post-recoded data type of x. Default is keeping as-is:
+numeric input stays numeric when possible, and factor input stays a factor (a 2-level factor
+recoded to "TRUE"/"FALSE" becomes logical).}
 }
 \value{
-A data frame with recoded variables.
-
 If input is a vector, return a vector of the same length.
 
 If input is a data frame, return a data frame with relevant variables recoded.
@@ -58,5 +58,5 @@ A function to re-encode data by using a map. Patterns are accepted. Unmentioned 
 Method for class data.frame supports a robust replacement for data by providing relevant map in the form of var = map.
 }
 \seealso{
-\link{regex} \link{case_when}
+\link{regex} \link[dplyr]{case_when}
 }

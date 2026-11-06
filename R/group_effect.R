@@ -27,11 +27,11 @@
 #' @author Trinh Dong Huu Khanh
 #' @seealso \link{logist_summary}, \link{print.subgroup_logist_summary}, \link{t.subgroup_logist_summary}
 #' @examples
-#' y = sample(0:1, 1000, replace = T)
-#' x1 = sample(1:100, 1000, replace = T)
-#' x2 = sample(c("A", "B"), 1000, replace = T)
-#' x3 = sample(c("C", "D", "E"), 1000, replace = T)
-#' x4 = sample(c("F", "G"), 1000, replace = T)
+#' y = sample(0:1, 1000, replace = TRUE)
+#' x1 = sample(1:100, 1000, replace = TRUE)
+#' x2 = sample(c("A", "B"), 1000, replace = TRUE)
+#' x3 = sample(c("C", "D", "E"), 1000, replace = TRUE)
+#' x4 = sample(c("F", "G"), 1000, replace = TRUE)
 #' fakefit = glm(y ~ x1*x3 + x2*x3 + x2*x4, family = binomial())
 #' C306::subgroup_effect(~x3, fakefit)
 #' @export
@@ -56,8 +56,7 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
   base_var <- formula.tools::rhs.vars(formula)
   base_lv <- levels(as.factor(mf[[base_var]]))
   summary_vars <- formula.tools::lhs.vars(formula)
-  assertthat::assert_that(length(base_var) == 1,
-                          msg = 'rhs must be of length 1')
+  if (length(base_var) != 1) rlang::abort('rhs must be of length 1')
   ._assert_ia(base_var, all_ia$ia.vars)
   has_base <- sapply(all_ia$ia.vars, function(ia_var) base_var %in% ia_var)
   base_ia <- sapply(all_ia, `[`, has_base, simplify = FALSE)
@@ -119,11 +118,11 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
   #         switch(method, wald = 'Wald', lik.ratio = 'Likelihood ratio'),
   #         ' test with 95% level of confidence.')
   if (all(sapply(out, nrow) == 1) & simplify){
-    msg <- paste('- Effect table for', crayon::green(rownames(out[[1]])))
+    msg <- paste('- Effect table for', rownames(out[[1]]))
     grp <- names(out)
     out <- do.call(rbind, out)
     rownames(out) <- grp
-    lgs <- ._as_logist_summary(out, method = method, stringsAsFactor = FALSE)
+    lgs <- ._as_logist_summary(out, method = method, stringsAsFactors = FALSE)
     class(lgs) <- c('subgroup_logist_summary', class(lgs))
     attr(lgs, 'base_var') <- base_var
     attr(lgs, 'summary_vars') <- summary_vars
@@ -154,10 +153,8 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
 
 ._assert_ia <- function(vars, ia_vars){
   for (v in vars){
-    assertthat::assert_that(
-      v %in% unique(unlist(ia_vars)),
-      msg = paste(deparse(substitute(v)), 'not exists in interaction terms.')
-    )
+    if (!v %in% unique(unlist(ia_vars)))
+      rlang::abort(paste(v, 'not exists in interaction terms.'))
   }
 }
 
@@ -207,8 +204,8 @@ print.subgroup_logist_summary <- function(x, ...){
   else {
     method <- attr(x[[1]], 'method')
     base_var <- attr(x, 'base_var')
-    cat(crayon::silver('- Method:', switch(method, lik.ratio = 'Likelihood ratio', wald = 'Wald')), '\n')
-    cat(crayon::silver('- CIs are calculated at 95% level of confidence.\n\n'))
+    cat('- Method:', switch(method, lik.ratio = 'Likelihood ratio', wald = 'Wald'), '\n')
+    cat('- CIs are calculated at 95% level of confidence.\n\n')
     for (i in seq_along(x)){
       name <- if (length(base_var)) paste0(base_var, ' = ', names(x)[i]) else names(x)[i]
       this <- cbind(rn = rownames(x[[i]]), x[[i]])
@@ -226,15 +223,14 @@ print.subgroup_logist_summary <- function(x, ...){
 #' @return
 #' If x is a simplified subgroup_logist_summary (aka a data.frame), return itself. Otherwise, a transposed list of class subgroup_logist_summary
 #' @seealso \link{t}
-#' @S3method t subgroup_logist_summary 
 #' @author Trinh Dong Huu Khanh
 #' @export
 #' @examples
-#' y = sample(0:1, 1000, replace = T)
-#' x1 = sample(1:100, 1000, replace = T)
-#' x2 = sample(c("A", "B"), 1000, replace = T)
-#' x3 = sample(c("C", "D", "E"), 1000, replace = T)
-#' x4 = sample(c("F", "G"), 1000, replace = T)
+#' y = sample(0:1, 1000, replace = TRUE)
+#' x1 = sample(1:100, 1000, replace = TRUE)
+#' x2 = sample(c("A", "B"), 1000, replace = TRUE)
+#' x3 = sample(c("C", "D", "E"), 1000, replace = TRUE)
+#' x4 = sample(c("F", "G"), 1000, replace = TRUE)
 #' fakefit = glm(y ~ x1*x3 + x2*x3 + x2*x4, family = binomial())
 #' se = C306::subgroup_effect(~x3, fakefit)
 #' t(se)

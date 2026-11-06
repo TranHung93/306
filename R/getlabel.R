@@ -73,19 +73,26 @@ getlabel.data <- function(data, meta = NULL, unit = TRUE, fit = FALSE){
   out <- names(data)
 
   if (!is.null(meta)) {
-    namedat <- merge(data.frame(varname = out), meta, by = 'varname', all.x = TRUE)
+    # meta rows in the column order of data (NA where a column has no meta)
+    idx <- match(out, meta$varname)
+    meta_col <- function(col, default) {
+      v <- if (is.null(meta[[col]])) rep(NA, length(idx)) else meta[[col]][idx]
+      ifelse(is.na(v), default, v)
+    }
 
     # extract meta info
-    namedat <- transform(.label = ifelse(is.na(label), varname, label),
-                         .unit = ifelse(is.na(unit), '', unit),
-                         .scale = ifelse(is.na(scale),  1, scale))
+    .label <- meta_col('label', NA)
+    .label <- ifelse(is.na(.label), out, as.character(.label))
+    .unit <- meta_col('unit', '')
+    .scale <- meta_col('scale', 1)
+    .type <- meta_col('type', '')
 
     # create label
     if (unit == FALSE) {
-      out <- as.character(namedat$.label)
+      out <- .label
     } else {
-      if (fit) {namedat$.unit <- with(namedat, paste('+', .scale, ' ', .unit, sep = ''))}
-      out <- with(namedat, ifelse(type == 'factor', as.character(.label), as.character(paste0(.label, ' [', .unit, ']'))))
+      if (fit) .unit <- paste('+', .scale, ' ', .unit, sep = '')
+      out <- ifelse(.type == 'factor', .label, paste0(.label, ' [', .unit, ']'))
     }
   } else {
     if (ncol(data) == 1) {

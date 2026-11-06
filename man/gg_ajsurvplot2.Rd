@@ -25,7 +25,7 @@ gg_ajsurvplot2(
 
 \item{data}{an optional data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model}
 
-\item{weights, subset, na.action, , count, id, timefix}{parameter passed to finegray model. See \code{\link[survival:finegray]{finegray}},}
+\item{weights, subset, na.action, count, id, timefix}{parameter passed to finegray model. See \code{\link[survival:finegray]{finegray}},}
 
 \item{main.event, competing.event}{main and competing event to plot}
 

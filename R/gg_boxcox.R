@@ -18,6 +18,7 @@ gg_boxcox <- function(object,...){
   UseMethod('gg_boxcox')
 }
 
+#' @rdname gg_boxcox
 #' @export
 gg_boxcox.formula <- function (object, lambda = seq(-2, 2, 1/10),
           interp = (m < 100), eps = 1/50, xlab = expression(lambda),
@@ -28,6 +29,7 @@ gg_boxcox.formula <- function (object, lambda = seq(-2, 2, 1/10),
   NextMethod()
 }
 
+#' @rdname gg_boxcox
 #' @export
 gg_boxcox.lm <- function(object, lambda = seq(-2, 2, 1/10),
                          interp = (m < 100), eps = 1/50, xlab = expression(lambda),
@@ -39,6 +41,7 @@ gg_boxcox.lm <- function(object, lambda = seq(-2, 2, 1/10),
  NextMethod()
 }
 
+#' @rdname gg_boxcox
 #' @export
 gg_boxcox.default <- function (object, lambda = seq(-2, 2, 1/10),
                        interp = (m < 100), eps = 1/50, xlab = expression(lambda),

@@ -14,7 +14,7 @@
 #' Note that if "cox" is specified and model is a mstate model, a Fine-Gray model is used.
 #' If CoxPH is preferred, used Surv(t, ev == 'event-of-interest') on the LHS.
 #'
-#' @param compare.args: a list of additional args for compare.methods,
+#' @param compare.args a list of additional args for compare.methods,
 #'
 #'  For compare.method = 'cox', it is
 #'  `add.prop.haz.test` [\code{TRUE}]: a logical value specifies whether a test for proportional hazards should be added,, additional args are fed directly to `survival::coxph`.
@@ -27,7 +27,7 @@
 #'  For compare.method = 'rmst', args are fed to \code{\link[eventglm:rmeanglm]{rmeanglm}} ,
 #'  `type`: [\code{diff}] a string, "diff" for difference in RMST, "ratio' for ratio of RMST, "lost.diff" for difference in restricted mean time lost (RMTL, = -diff), and "lost.ratio" for ratio of RMTL
 #'  other optional args include: model.censoring, formula.censoring, ipcw.method. See \code{\link[eventglm:rmeanglm]{rmeanglm}} for more details.
-#' @param add.prop.haz.test [\code{TRUE}] (legacy, depricated), please move this to compare.args
+#' @param add.prop.haz.test [\code{TRUE}] (legacy, deprecated), please move this to compare.args
 #' @param medsum [\code{TRUE}] a logical value, specifying whether median (IQR) of time to event should be described.
 #' @param p.compare [\code{TRUE}] a logical value, specifying whether we should report p-value for the main comparison
 #' @param digits [\code{2}] a number specifies number of significant digits for numeric statistics.
@@ -158,9 +158,16 @@ If you are running this in survcomp.subgroup, perhaps in one subgroup an event d
   n.event <- if (ms) fit.surv$n.event[,this_cause] else fit.surv$n.event
   events.n <- paste(n.event, fit.surv$n, sep = "/")
   if (add.risk) {
-    cumhaz <- if (ms) fit.surv$cumhaz[, this_cause-1] else fit.surv$cumhaz
+    # Absolute risk at the truncation time: 1 - Kaplan-Meier for a single event,
+    # Aalen-Johansen probability of the cause of interest for competing risks.
+    # (Before 0.1.6 this was the cumulative hazard, which is not a risk.)
+    risk <- if (ms) {
+      fit.surv$pstate[, match(compare.args$cause, fit.surv$states), drop = TRUE]
+    } else {
+      1 - fit.surv$surv
+    }
     events.n <- paste(events.n,
-                      " (", formatC(100*(cumhaz), digits, format = "f"), ")", sep="")
+                      " (", formatC(100 * risk, digits, format = "f"), ")", sep = "")
   }
   idx <- which(arm.names %in% unique(data[, arm.var]))
   result[3, 1:length(arm.names)] <- rep("-", length(arm.names))

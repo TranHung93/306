@@ -48,6 +48,7 @@ ggsurvfit2 <- rlang::new_function(
 environment(ggsurvfit2) <- asNamespace('ggsurvfit')
 
 #' Untidy the tidy_survfit
+#' @noRd
 untidy_strata <- function(x, strata.col='strata') {
   if (!'strata' %in% names(x)) return(x)
   x2 <- x |>
@@ -80,7 +81,7 @@ tidy_survfit2 <- function(x, times=NULL, type='survival'){
 #'
 #' @param formula A standard model formula, with survival on the left and covariates on the right
 #' @param data an optional data frame, list or environment (or object coercible by as.data.frame to a data frame) containing the variables in the model
-#' @param weights,subset,na.action,,count,id,timefix parameter passed to finegray model. See \code{\link[survival:finegray]{finegray}},
+#' @param weights,subset,na.action,count,id,timefix parameter passed to finegray model. See \code{\link[survival:finegray]{finegray}},
 #' @param main.event,competing.event main and competing event to plot
 #' @param facet.by formula. default to all strata
 #' @param ... optional parameters passed to \code{ggsurvplot}.

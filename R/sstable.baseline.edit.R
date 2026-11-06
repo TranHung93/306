@@ -2,13 +2,16 @@
 
 #' Create baseline table
 #'
-#' @description A function to create a simple summary baseline table.
+#' @description Adds the header and footer to the summary matrix built by
+#'   [sstable.baseline()] (with `matrix.raw = TRUE`), optionally as a flextable.
+#'   Usually called by [sstable.baseline()] itself.
 #'
+#' @param value the summary matrix returned by `sstable.baseline(..., matrix.raw = TRUE)`.
 #' @param formula a formula specifies variables for rows, variable for column and third-dimension variable.
 #'
 #' If formula is in the form of x+y ~ a, the function will summary x and y with respects to each value of a
 #'
-#' If formula is in the form of x+y ~ a|z, the function will summary z with respects to each value of {a,x} and {a, y}
+#' If formula is in the form of x+y ~ a|z, the function will summary z with respects to each value of \{a, x\} and \{a, y\}
 #' @param data a data frame to derive baseline table from.
 #' @param bycol a logical value specifies whether the summary will be by column or by row.
 #' @param pooledGroup a logical value specifies whether to pool all subgroups of column variable.
@@ -17,6 +20,7 @@
 #' @param statistics a character specifies summary statistics for continuous row variables.
 #' @param cont a vector specifies whether each row variables is continuous.
 #' @param cate a vector specifies whether each row variables is categorical.
+#' @param fullfreq a logical value specifies whether to show total frequency as a denominator.
 #' @param digits a number specifies number of significant digits for numeric statistics.
 #' @param test a logical value specifies whether a statistical test will be performed to compare between treatment arms.
 #' @param pdigits a number specifies number of significant digits for p value.
@@ -30,11 +34,9 @@
 #' @param footer a vector of strings to be used as footnote of table.
 #' @param flextable a logical value specifies whether output will be a flextable-type table.
 #' @param bg a character specifies color of the odd rows in the body of flextable-type table.
-#' @param df a logical values specifies whether output will be a draw dataframe.
 #'
 #' @return a flextable-type table or a list with values/headers/footers
 #' @export
-# function to format data frame to baseline table -hungtt
 sstable.baseline.edit <- function(value, formula, data, bycol = TRUE, pooledGroup = FALSE, keepEmptyGroup = FALSE,
                                   statistics = "mean, median (Q1-Q3)", cont = NULL, cate = NULL, fullfreq = TRUE, digits = 1,
                                   test = FALSE, pdigits = 3, pcutoff = 0.0001, keepEmptyString = T,
@@ -64,7 +66,8 @@ sstable.baseline.edit <- function(value, formula, data, bycol = TRUE, pooledGrou
       if (!keepEmptyGroup) y <- droplevels(y)
       y <- addNA(y, ifany = TRUE)
     } else {
-      y <- factor(as.character(y), levels = sort(unique(as.character(y), decreasing = TRUE), na.last = TRUE), exclude = NULL)
+      ### reversed like factor arms (and like sstable.ae)
+      y <- factor(as.character(y), levels = sort(unique(as.character(y)), decreasing = TRUE, na.last = TRUE), exclude = NULL)
     }
   } else {
     y <- factor(rep("Total", nrow(dat)))
@@ -131,13 +134,13 @@ sstable.baseline.edit <- function(value, formula, data, bycol = TRUE, pooledGrou
   # }
 
   ## get variable name
-  varname <- if (ncol(xlabel) == 1) getlabel(xlabel[, 1]) else getlabel(xlabel)
-  varname <- unique(varname)
+  ## (same labels as the first column built by sstable.baseline)
+  varname <- unique(._baseline_labels(getvar(formula)[seq_len(ncol(x))], data))
 
   # update order of variable customize for sstable.baseline.edit - hungtt
   value <- as.data.frame(value)
   dummy_df <- data.frame(V1= varname, order =seq(1:length(varname))*1000)
-  value <- full_join(value, dummy_df)
+  value <- full_join(value, dummy_df, by = "V1")
 
   for (i in 1:nrow(value))
     {if (is.na(value[i,ncol(value)])) {value[i,ncol(value)] <- (value[i-1,ncol(value)]) + 1}}

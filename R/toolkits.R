@@ -13,18 +13,19 @@
 #'
 #' Or as a data frame having 2 columns named "from" and "to".
 #'
-#' @param as A character string defining the post-recoded data type of x. Default is keeping as-is.
-#' @param ignore.case,perl Parameters passed to gsub().
+#' @param as A character string defining the post-recoded data type of x. Default is keeping as-is:
+#' numeric input stays numeric when possible, and factor input stays a factor (a 2-level factor
+#' recoded to "TRUE"/"FALSE" becomes logical).
 #' @param .data A data frame to modify
 #' @param ...
 #' For method for data.frame: Replacement in the form of var = map. Maps must follow the syntax stipulated in the map parameter.
 #'
 #' For default method: Additional parameters passed to factor()
 #'
-#' @param ignore.case Specify whether the pattern is case-insensitive. Default is FALSE (case sensitive)
-#' @param perl Are patterns follow the Perl-style regular expression.
-#' @return A data frame with recoded variables.
-#' @seealso \link{regex} \link{case_when}
+#' @param ignore.case Specify whether the pattern is case-insensitive. Default is FALSE (case sensitive). Passed to [gsub()].
+#' @param fixed If TRUE, patterns are matched as is rather than as regular expressions. Passed to [gsub()].
+#' @param perl Are patterns follow the Perl-style regular expression. Passed to [gsub()].
+#' @seealso \link{regex} \link[dplyr]{case_when}
 #'
 #' @return
 #' If input is a vector, return a vector of the same length.
@@ -84,14 +85,20 @@ simple_recode.default <- function(x, map, as = c('as_is', 'numeric', 'factor', '
              logical = as.logical(x.recoded))
   } else {
     if (is.factor(x)) {
-      tryCatch(if(length(levels(x))==2) x.recoded <- as.logical(x.recoded),
-               error = function(e){
-                 levels.x <- levels(x)
-                 levels.recoded <- simple_recode(levels.x, map=Map)
-                 x.recoded <- factor(x.recoded, levels = levels.recoded)
-               })
+      recoded.values <- unique(x.recoded[!is.na(x.recoded)])
+      if (length(levels(x)) == 2 && length(recoded.values) &&
+          all(recoded.values %in% c("TRUE", "FALSE"))) {
+        # a 2-level factor mapped onto TRUE/FALSE becomes logical
+        x.recoded <- as.logical(x.recoded)
+      } else {
+        # otherwise stay a factor, with levels recoded in their original order
+        levels.recoded <- unique(simple_recode.default(levels(x), map = Map, ignore.case = ignore.case,
+                                                       fixed = fixed, perl = perl))
+        x.recoded <- factor(x.recoded, levels = levels.recoded)
+      }
+    } else if (is.numeric(x)) {
+      x.recoded <- tryCatch(as.numeric(x.recoded), warning = function(w) x.recoded)
     }
-    if (is.numeric(x)) x.recode <- tryCatch(as.numeric(x.recoded), warning = function(w) x.recoded)
   }
   return(x.recoded)
 }
@@ -182,12 +189,14 @@ pct <- function(x, method = c('auto', 'bin', 'cont', 'fct'), na.rm = TRUE, ...){
 }
 
 ._pct_fct <- function(x, na.rm = TRUE){
-  n <- if (na.rm) sum(!is.na(x)) else length(x)
-  lvs <- if (na.rm) levels(x) else levels(addNA(x, ifany = TRUE))
-  sapply(lvs,
+  if (!is.factor(x)) x <- factor(x)
+  x.chr <- as.character(x) # NA levels (exclude = NULL) become NA here
+  n <- if (na.rm) sum(!is.na(x.chr)) else length(x.chr)
+  lvs <- if (na.rm) levels(x)[!is.na(levels(x))] else levels(addNA(x, ifany = TRUE))
+  vapply(lvs,
          function(lv){
-           sum(x == lv)/n*100
-         })
+           if (is.na(lv)) sum(is.na(x.chr))/n*100 else sum(x.chr == lv, na.rm = TRUE)/n*100
+         }, numeric(1))
 }
 
 ._pct_cont <- function(x, na.rm = TRUE, ...){

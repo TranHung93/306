@@ -35,5 +35,5 @@ Create variables summarising exisiting variables, by using summarisation functio
 df <- data.frame(baz = 1:10, foo = c(rep(1, 5), rep(2, 5)), bar =4:13)
 df \%>\%
    dplyr::group_by(foo) \%>\%
-   summarise_f((function(baz) list(a = cumsum(baz), b = baz*2))(baz), rangemisc::overlap_collapse(bar, baz))
+   summarise_f(list(mean_baz = mean(baz), max_bar = max(bar)))
 }

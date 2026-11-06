@@ -30,6 +30,11 @@ S3method(simple_relevel,default)
 S3method(ss_flextable,default)
 S3method(ss_flextable,list)
 S3method(ss_flextable,ss_obj)
+S3method(ss_guess_format,ae_tbl)
+S3method(ss_guess_format,baseline_tbl)
+S3method(ss_guess_format,default)
+S3method(ss_guess_format,summary_tbl)
+S3method(ss_guess_format,survcomp_tbl)
 S3method(ss_huxtable,default)
 S3method(ss_huxtable,list)
 S3method(summarise_f,data.frame)
@@ -81,4 +86,56 @@ import(dplyr)
 import(ggplot2)
 import(survival)
 import(tidyr)
-importFrom(data.table,":=")
+importFrom(data.table,
+  ":=",
+  setDT
+)
+importFrom(grDevices,
+  dev.off,
+  grey,
+  pdf
+)
+importFrom(graphics,
+  barplot,
+  boxplot,
+  layout,
+  text
+)
+importFrom(methods,as)
+importFrom(stats,
+  anova,
+  as.formula,
+  binomial,
+  coef,
+  confint,
+  confint.default,
+  fisher.test,
+  formula,
+  glm,
+  glm.fit,
+  kruskal.test,
+  lm,
+  logLik,
+  median,
+  model.frame,
+  model.matrix,
+  model.response,
+  na.omit,
+  naprint,
+  pchisq,
+  pnorm,
+  qchisq,
+  qnorm,
+  quantile,
+  relevel,
+  sd,
+  spline,
+  terms,
+  update,
+  update.formula,
+  vcov
+)
+importFrom(utils,
+  head,
+  write.csv
+)

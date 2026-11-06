@@ -2,32 +2,20 @@
 title: "Creating and Displaying a Baseline Table with sstable in C306 package"
 author: "Hung Tran"
 vignette: >
-  %\VignetteIndexEntry{Creating and Displaying a Baseline Table with `sstable.baseline` and `flextable`}
+  %\VignetteIndexEntry{Creating and Displaying a Baseline Table with sstable in C306 package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 date: '`r format(Sys.time(), "%d %B, %Y")`'
 output:
-  word_document:
+  rmarkdown::html_vignette:
     toc: yes
-  pdf_document:
-    includes:
-      in_header: header.tex
-    number_sections: yes
-    toc: yes
-  html_document:
-    theme: cerulean
-    toc: yes
-    toc_float: yes
-geometry: margin=2cm
-editor_options: 
+editor_options:
   chunk_output_type: inline 
 ---
 
 ```{r setup, include=FALSE, results="hide"}
 ### proportional odds: https://www.rdatagen.net/post/2021-01-19-should-we-continue-recruiting-patients-an-application-of-bayesian-predictive-probabilities/
-rm(list = ls()[!ls()%in%c('project.dir', 'dummy')]) #clear everything up before work.
 knitr::opts_chunk$set( message = FALSE, warning = FALSE)
-options(tinytex.verbose = TRUE)
 ```
 
 # Introduction
@@ -189,7 +177,7 @@ Exporting: we can export the table to different formats (e.g., Word, HTML, PDF) 
 
 ```{r}
 # Example: Export the table to a Word document
-save_as_docx(baseline.sstable, path = "baseline_table.docx")
+save_as_docx(baseline.sstable, path = file.path(tempdir(), "baseline_table.docx"))
 ```
 
 Now that we know how to create a basic baseline table, we can try to create our own table with different variables in baseline_data for practice. If we are interested in creating a table with different subgroups, we can do that as well. As we can see below, we created a table grouped by gender.

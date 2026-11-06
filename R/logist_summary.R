@@ -92,9 +92,6 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
   # return(result)
 }
 
-# provide a method for family to get the family of glm.fit
-family.list <- function(object,...) object$family
-
 
 #' Print method for logist_summary
 #' @description Print method for logist_summary table
@@ -106,7 +103,7 @@ family.list <- function(object,...) object$family
 print.logist_summary <- function(x, ...)
 {
   method <- attr(x, 'method')
-  cat(crayon::silver('- Method:', switch(method, lik.ratio = 'Likelihood ratio', wald = 'Wald')), '\n')
-  cat(crayon::silver('- CIs are calculated at 95% level of confidence.\n\n'))
+  cat('- Method:', switch(method, lik.ratio = 'Likelihood ratio', wald = 'Wald'), '\n')
+  cat('- CIs are calculated at 95% level of confidence.\n\n')
   print.data.frame(x, ...)
 }

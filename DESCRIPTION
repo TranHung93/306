@@ -26,7 +26,12 @@ Depends:
     dplyr,
     R (>= 4.1)
 Imports:
-    Hmisc,
+    stats,
+    utils,
+    graphics,
+    grDevices,
+    methods,
+    lifecycle,
     stringi,
     lubridate,
     car,
@@ -43,9 +48,12 @@ Imports:
     ggsurvfit,
     survival,
     aod
-RoxygenNote: 7.3.2
-Suggests: 
+Suggests:
+    Hmisc,
     knitr,
     rmarkdown,
-    huxtable
+    huxtable,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.1

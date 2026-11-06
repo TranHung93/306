@@ -8,6 +8,11 @@ explicit(x, ...)
 }
 \arguments{
 \item{x}{An object}
+
+\item{...}{additional arguments passed to methods.}
+}
+\value{
+The explicit form of `x`; see the methods.
 }
 \description{
 A function to transform an object to its explicit form if possible

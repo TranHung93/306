@@ -18,6 +18,8 @@ ht_theme_markdown(
 
 \item{header_rows}{a numeric vector that delimits the header zone.}
 
+\item{header_cols}{a numeric vector of columns to be shown in bold, or NULL.}
+
 \item{border_width}{a number that defines huxtable border width}
 
 \item{border_color}{a character string that defines huxtable border color}
