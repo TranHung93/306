@@ -457,7 +457,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
     colnames(ae_value) <- c('aetype', col.name, dummy.col.name, if (test) 'p')
     ae_value <-
       mutate_at(as.data.frame(ae_value, stringsAsFactors = FALSE),
-                vars(matches('(^pt.\\d)|(^ep.\\d)'), dummy.col.name), as.numeric) %>%
+                vars(matches('(^pt.\\d)|(^ep.\\d)'), dplyr::all_of(dummy.col.name)), as.numeric) %>%
       mutate(
         pt.all = by(select(., starts_with('pt.')), 1:nrow(.), sum),
         ep.all = by(select(., starts_with('ep.')), 1:nrow(.), sum)
@@ -492,14 +492,14 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
                                         if (is.grouped){
                                           rbind(
                                             grouped_ae[1, ],
-                                            do.call(arrange, rlang::flatten(list(
-                                              .data=as.data.frame(grouped_ae, stringsAsFactors = FALSE)[-1, ],
-                                              unlist(arrange.params))))
+                                            do.call(arrange, c(
+                                              list(.data = as.data.frame(grouped_ae, stringsAsFactors = FALSE)[-1, ]),
+                                              as.list(arrange.params)))
                                           )
                                         } else {
-                                          do.call(arrange, rlang::flatten(list(
-                                            .data=as.data.frame(grouped_ae, stringsAsFactors = FALSE),
-                                            unlist(arrange.params))))
+                                          do.call(arrange, c(
+                                            list(.data = as.data.frame(grouped_ae, stringsAsFactors = FALSE)),
+                                            as.list(arrange.params)))
                                         }
                                       }))
     ## - bind the head again

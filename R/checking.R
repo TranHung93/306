@@ -49,7 +49,9 @@ inspect.data <- function (data, info, id, check_missing = c(TRUE, FALSE), plot =
   data <- data[, names(data)[tolower(names(data)) %in% tolower(info$varname)]]
   info <- info[match(tolower(names(data)), tolower(info$varname)), ]
 
-  if (missing(check_missing) | (!missing(check_missing) & check_missing == TRUE)) {
+  # the default c(TRUE, FALSE) means TRUE
+  check_missing <- if (missing(check_missing)) TRUE else isTRUE(check_missing[[1]])
+  if (check_missing) {
     info$check_missing <- TRUE
 
     if ("strict" %in% names(info)) {
@@ -142,7 +144,7 @@ inspect.data <- function (data, info, id, check_missing = c(TRUE, FALSE), plot =
     return(output)
   }
   else {
-    cat("No error was found !")
+    message("No error was found!")
   }
 }
 

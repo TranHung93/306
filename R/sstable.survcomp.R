@@ -109,12 +109,13 @@ sstable.survcomp <- function(
   if (ms) {
     all_causes <- attr(mf[[1]], 'states')
     if(length(unique(mf[[1]][,2]))<2)
-      stop('You wanted to use a mstate model. But only one event happened.')
-    
+      c306_abort('You wanted to use a multi-state (competing risks) model, but only one event type happened.')
+
     if (is.null(compare.args$cause)) compare.args$cause <- all_causes[[1]]
     if (!compare.args$cause %in% all_causes)
-      stop('Specified cause is not available in the list of causes.
-If you are running this in survcomp.subgroup, perhaps in one subgroup an event did not happen. I don\'t know how to fix this.')
+      c306_abort(c(sprintf('`compare.args$cause` ("%s") is not one of the event types: %s.', compare.args$cause,
+                           paste0('"', all_causes, '"', collapse = ", ")),
+                   i = 'In sstable.survcomp.subgroup(), perhaps that event did not happen in one subgroup.'))
     this_cause <- which(all_causes == compare.args$cause)+1
   }
   
@@ -127,14 +128,14 @@ If you are running this in survcomp.subgroup, perhaps in one subgroup an event d
                          else switch(compare.args$type,
                                      diff = 'Cumul.inc difference',
                                      ratio = 'Cumul.inc ratio',
-                                     stop('Illegal type for cumulative incidence comparison model')),
+                                     c306_abort('Illegal type for cumulative incidence comparison model: use "diff" or "ratio".')),
                          rmst = if (is.null(compare.args$type)) 'RMST difference'
                          else switch(compare.args$type,
                                      diff = 'RMST difference',
                                      lost.diff = 'RMTL difference',
                                      ratio = 'RMST ratio',
                                      lost.ratio = 'RMTL ratio',
-                                     stop('Illegal type for RMST comparison model')))
+                                     c306_abort('Illegal type for RMST comparison model: use "diff", "ratio", "lost.diff" or "lost.ratio".')))
   
   header2 <- c(rep(ifelse(add.risk, "events/n (risk [%])", "events/n"), length(arm.names)), paste(compare.stat, if (p.compare) "(95%CI); p-value" else "(95%CI)"))
   header <- rbind(header1, header2)
@@ -303,7 +304,7 @@ If you are running this in survcomp.subgroup, perhaps in one subgroup an event d
       # If type == lost.ratio then reverse the time
       # i.e. Surv(tau - ev_time, ev) ~ .
       if (type == 'lost.ratio') {
-        if (compare.method == 'cuminc') stop('type lost.ratio is meaningless in cuminc comparison.')
+        if (compare.method == 'cuminc') c306_abort('type "lost.ratio" is meaningless in a cumulative incidence comparison.')
         model.lhs <- formula.tools::lhs(model)
         for (i in 2:(length(model.lhs)-1)) {
           old <- model.lhs[[i]];

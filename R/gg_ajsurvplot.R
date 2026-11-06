@@ -11,8 +11,10 @@ gg_ajsurvplot <- function(formula, data, weights, subset, na.action, etype, coun
   dot <- list(...)
   fgargs <- match.call()[-1]
   fgargs <- as.list(fgargs[setdiff(names(fgargs), names(dot))])
+  # evaluate in the caller's environment (data may not be a global variable)
+  fgargs <- lapply(fgargs, eval, envir = parent.frame())
+  fgargs$formula <- ._aj_censoring_strata(fgargs$formula)
   fg <- do.call(survival::finegray, fgargs)
-  # browser()
   fml <- force(update(formula, Surv(fgstart,fgstop,fgstatus)~.))
   sf <- eval(substitute(survival::survfit(fml, data = fg,  weights=fgwt), list(fml=fml)))
   survminer::ggsurvplot(
@@ -20,6 +22,17 @@ gg_ajsurvplot <- function(formula, data, weights, subset, na.action, etype, coun
     data=fg,
     ...
   )
+}
+
+# For descriptive curves, estimate the censoring distribution separately in each
+# group plotted (strata of all right-hand-side variables): the Fine-Gray
+# weighted Kaplan-Meier curve of a group then equals its Aalen-Johansen
+# estimate. With pooled censoring weights (the finegray() default) the curves
+# drift away from Aalen-Johansen when censoring differs between groups.
+._aj_censoring_strata <- function(formula) {
+  rhs <- all.vars(formula[[3]])
+  if (!length(rhs)) return(formula)
+  stats::update(formula, stats::as.formula(paste(". ~ . + strata(", paste(rhs, collapse = ", "), ")")))
 }
 
 #' ggsurvfit with strata saved
@@ -94,6 +107,9 @@ gg_ajsurvplot2 <- function(formula, data, weights, subset, na.action, main.event
   fgargs$facet.by <- NULL
   fgargs$.return_data <- NULL
   fgargs <- as.list(fgargs[setdiff(names(fgargs), names(dot))])
+  # evaluate in the caller's environment (data may not be a global variable)
+  fgargs <- lapply(fgargs, eval, envir = parent.frame())
+  fgargs$formula <- ._aj_censoring_strata(fgargs$formula)
 
   etypes <- with(fgargs, list(main.event, competing.event))
   fgargs.each <- lapply(etypes, function(etype) {

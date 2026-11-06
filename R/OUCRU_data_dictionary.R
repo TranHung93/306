@@ -36,7 +36,7 @@ import.info <- function(table_name, input, output) {
   #browser()
   if (!is.null(sheet_grid)) {
     grids <- grids[grids$sheet_grid %in% sheet_final, ]
-    for (i in (1:nrow(grids))) {
+    for (i in seq_len(nrow(grids))) {
       tmp <- rbind(subset(get(paste(grids$CRF[i], "info", sep = "_")),
                           Grid == grids$Grid[i]),
                    c(paste(grids$CRF[i], grids$Grid[i], "SEQ", sep = "_"), "", "Number", rep("", 5)),
@@ -52,7 +52,25 @@ import.info <- function(table_name, input, output) {
   save(list = c(sheet_info_name, "sheet_info_name"), file = output)
 }
 
-# convert OUCRU’s data dictionary to a general data dictionary -----------------
+# Category label made safe for recode strings: transliterated to ASCII, then
+# only printable ASCII is kept and colons are removed. (The former pattern
+# "[\x01-\x1f\x7f-\xff:]" is invalid in UTF-8 locales.)
+._ascii_label <- function(x) {
+  x <- stringi::stri_trans_general(x, id = "Latin-ASCII")
+  gsub(":", "", gsub("[^ -~]", "", x))
+}
+
+# OUCRU data types -> C306 types (any other type gives NA)
+._oucru_types <- c(
+  Category = "factor", ExCategory = "factor", RadioList = "factor",
+  `Free Text` = "character", Title = "character", CombinedKey = "character",
+  Time = "character", Check = "character", Other = "character",
+  EDateTime = "datetime", SDateTime = "datetime", DateTime = "datetime",
+  DateTime2 = "datetime", DateTime3 = "datetime",
+  Integer = "numeric", Float = "numeric", Number = "numeric"
+)
+
+# convert OUCRU's data dictionary to a general data dictionary -----------------
 
 #' Convert imported OUCRU's data dictionary into a general data dictionary
 #'
@@ -72,8 +90,7 @@ convert.info <- function(oucru_info, oucru_category) {
                                     paste0("'", submissionvalue, "'", sep = ""),
                                     submissionvalue),
            text = paste0("'", gsub(pattern = "=", replacement = " equal ",
-                                   x = gsub(pattern = "[\x01-\x1f\x7f-\xff:]", replacement = "",
-                                            x = gsub(pattern = ";", replacement = ",", x = text))), "'")) %>%
+                                   x = ._ascii_label(gsub(pattern = ";", replacement = ",", x = text))), "'")) %>%
     group_by(Category) %>%
     summarise(value = paste(submissionvalue, text, sep = "=", collapse = ";"),
               level = paste(text, collapse = ";")) %>%
@@ -84,12 +101,7 @@ convert.info <- function(oucru_info, oucru_category) {
     mutate(Format = tolower(Format)) %>%
     transmute(varname = Variable,
               label   = Caption,
-              type    = car::Recode(`Data type`,
-                               recodes = "c('Category', 'ExCategory', 'RadioList') = 'factor';
-                               c('Free Text', 'Title', 'CombinedKey', 'Time', 'Check', 'Other') = 'character';
-                               c('EDateTime', 'SDateTime', 'DateTime', 'DateTime2', 'DateTime3') = 'datetime';
-                               c('Integer', 'Float', 'Number') = 'numeric';
-                               else = NA"),
+              type    = unname(._oucru_types[`Data type`]),
               unit    = NA,
               value   = ifelse(is.na(type), NA,
                                ifelse(type == "factor", value,

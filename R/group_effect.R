@@ -97,8 +97,9 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
     list(
       log.OR = do.call(c, as.list(unlist(est))),
       OR = do.call(c, as.list(exp(unlist(est)))),
-      CI.lower = do.call(c, as.list(unlist(ci.lower))),
-      CI.upper = do.call(c, as.list(unlist(ci.upper))),
+      # CI of the OR (confint() gives it on the log-odds scale), as in logist_summary()
+      CI.lower = do.call(c, as.list(exp(unlist(ci.lower)))),
+      CI.upper = do.call(c, as.list(exp(unlist(ci.upper)))),
       p.value = do.call(c, as.list(unlist(p))))
   }, simplify = FALSE)
   # browser()

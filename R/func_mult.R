@@ -54,7 +54,7 @@ mutate_f.data.frame <- function(.data, ...){
     data_tbl <- rlang::eval_tidy(.expr)
   }
   new_cols <- names(data_tbl)[!names(data_tbl) %in% union(group_names, names(.data))]
-  data_tbl <- cbind(as.data.frame(.data), as.data.frame(data_tbl)[,new_cols])
+  data_tbl <- cbind(as.data.frame(.data), as.data.frame(data_tbl)[, new_cols, drop = FALSE])
   data_tbl
 }
 

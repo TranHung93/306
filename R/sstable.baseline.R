@@ -88,7 +88,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
   if (!is.null(y)) {
     if (all(!c("character", "factor", "logical") %in% class(y)) |
         (any(c("numeric", "integer") %in% class(y)) & length(unique(na.omit(y))) > 5)) {
-      stop("Column-wise variable must be categorical !!!")
+      c306_abort("Column-wise variable must be categorical (character, factor, logical, or numeric with at most 5 values).")
     }
     if (is.factor(y)){
       ### [trinhdhk] 2024-04: reverse level of y for better summary
@@ -130,11 +130,11 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
   }
 
   ## if z exists, x must be categorical
-  if (!is.null(z) & any(continuous == TRUE)) stop("Row-wise variable must be categorical when third dimension variable exists !!!")
+  if (!is.null(z) & any(continuous == TRUE)) c306_abort("Row-wise variable must be categorical when a third dimension variable exists.")
 
   ## if use by-row layout, x must be categorical
   #browser()
-  if (bycol == FALSE & any(sapply(1:ncol(x), function(i) is.factor(x[,i])) == FALSE)) stop("Row-wise variable must be categorical in by-row layout !!!")
+  if (bycol == FALSE & any(sapply(1:ncol(x), function(i) is.factor(x[,i])) == FALSE)) c306_abort("Row-wise variable must be categorical in by-row layout (`bycol = FALSE`).")
 
   ## determine type of z
   if (!is.null(z)) {

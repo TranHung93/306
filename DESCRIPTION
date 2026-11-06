@@ -43,7 +43,7 @@ Imports:
     purrr,
     formula.tools,
     eventglm,
-    ggplot2,
+    ggplot2 (>= 3.4.0),
     survminer,
     ggsurvfit,
     survival,
@@ -51,6 +51,7 @@ Imports:
 Suggests:
     Hmisc,
     knitr,
+    MASS,
     rmarkdown,
     huxtable,
     testthat (>= 3.0.0)

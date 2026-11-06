@@ -25,6 +25,25 @@
   `"cuminc"`: a `model.censoring` given in `compare.args` was silently
   replaced by the eventglm default for the heterogeneity test. It is now used.
 
+* **`subgroup_effect()`: the `CI.lower` / `CI.upper` columns are now the 95%
+  confidence interval of the odds ratio**, matching the `OR` column next to
+  them and `logist_summary()`. Since the function was added (2019-12-26,
+  commit 5b44416) they showed the confidence interval of the *log* odds
+  ratio, e.g. OR 1.06 with "CI" (-0.20, 0.32) instead of (0.82, 1.37). This
+  affects tables built with `sstable = TRUE` or `flextable = TRUE` too. ORs,
+  log ORs and p-values are unchanged.
+
+* `gg_ajsurvplot()` and `gg_ajsurvplot2()` now plot the exact Aalen–Johansen
+  cumulative incidence of each group. The censoring weights are now estimated
+  within each plotted group. Before, they were pooled over all groups, so
+  when censoring differed between groups the curves drifted from
+  Aalen–Johansen in late follow-up (by up to 2.5 percentage points in
+  `survival::mgus2` by sex). Early parts of the curves are essentially
+  unchanged. Fine–Gray hazard ratios in `sstable.survcomp()` are not affected.
+
+* `pct(method = "cont")` with exactly two ranges now returns the percentage of
+  each range. Before, it returned a single number (the second range only).
+
 * `sstable.baseline()`: when the column variable is a character vector, its
   columns are now in reverse alphabetical order (e.g. B then A), the same as
   for factor arms and as in `sstable.ae()`. Previously character arms were in
@@ -62,6 +81,28 @@
   data with `medsum = TRUE`. The missing arm is shown as "-".
 * `sstable.survcomp.subgroup()` no longer fails when a subgroup variable has
   an empty level; that row is shown as "-".
+* `logist_summary(flextable = TRUE)` and `subgroup_effect(flextable = TRUE)`
+  work. They always failed with "invalid row selection", because
+  `ss_flextable()` failed on tables with a single header row.
+* `logist_summary()` works for models with a single coefficient.
+* `ss_flextable()` merges and bolds the right row for section rows (it used the
+  row number of the whole table, including headers, as the body row number).
+* `as_sstable()` on a list with a list `body` works (it always failed with
+  "the condition has length > 1").
+* `ss_format(.guess = FALSE)` gives its intended message when rows are not
+  classified, instead of "invalid 'type' (list) of argument".
+* `inspect.data()` works without an explicit `check_missing` (it always failed
+  with "the condition has length > 1" on R >= 4.2). It reports "No error was
+  found!" with `message()`.
+* `convert.info()` works in UTF-8 locales (the default on Windows since
+  R 4.2, and on Linux/macOS). It always failed with "'pattern' is invalid".
+  Category labels are now transliterated to ASCII (e.g. "Nữ" becomes "Nu")
+  instead of losing their non-ASCII letters.
+* `import.info()` works when the dictionary has grids but none is requested.
+* `gg_ajsurvplot()` and `gg_ajsurvplot2()` work when `data` is not a global
+  variable (e.g. inside a function); they failed with "object not found".
+* `mutate_f()` on an ungrouped data frame keeps the name of a single new
+  column.
 * `createProject()` now creates the RStudio project file (`<dir>.Rproj`) when
   the package is installed normally. The template `.Rproj` was left out of
   the built package by `.Rbuildignore`, so it was only created when the

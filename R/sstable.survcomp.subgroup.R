@@ -221,14 +221,14 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
                          cuminc = if (is.null(compare.args$type)) 'Cumul.inc difference'
                          else switch(compare.args$type,
                                      diff = 'Cumul.inc difference', ratio = 'Cumul.inc ratio',
-                                     stop('Illegal type for cumulative incidence comparison model')),
+                                     c306_abort('Illegal type for cumulative incidence comparison model: use "diff" or "ratio".')),
                          rmst = if (is.null(compare.args$type)) 'RMST difference'
                          else switch(compare.args$type,
                                      diff = 'RMST difference',
                                      lost.diff = 'RMTL difference',
                                      ratio = 'RMST ratio',
                                      lost.ratio = 'RMTL ratio',
-                                     stop('Illegal type for RMST comparison model')))
+                                     c306_abort('Illegal type for RMST comparison model: use "diff", "ratio", "lost.diff" or "lost.ratio".')))
   compare.note <- switch(
     compare.stat,
     'HR' = 'HR = hazard ratio',

@@ -173,7 +173,7 @@ pct <- function(x, method = c('auto', 'bin', 'cont', 'fct'), na.rm = TRUE, ...){
   if (method == 'auto') method <- ._pct_get_method(unlist(x))
 
   if (method == 'bin' & !is.logical(x) & !setequal(unique(x), c(0,1))){
-    if (length(unique(x)) > 2) stop('Forcing binary method for factor variable is meaningless.')
+    if (length(unique(x)) > 2) c306_abort('Forcing the binary method for a variable with more than 2 values is meaningless.')
     if (length(unique(x)) == 1) return(100)
     if (length(unique(x)) != length(levels(x))) x <- factor(x, levels = unique(x), exclude=NULL)
     if (all(!is.na(levels(x))))
@@ -217,8 +217,8 @@ pct <- function(x, method = c('auto', 'bin', 'cont', 'fct'), na.rm = TRUE, ...){
   lv <- levels(addNA(as.factor(x), ifany = TRUE))
   if (any(is.na(lv))) lv <- c(NA, lv[!is.na(lv)])
   x2 <- factor(x, levels = lv, exclude = NULL)
-  # browser()
-  pct(x2, method = 'auto', na.rm = FALSE)
+  # one percentage per range ('auto' would pick the binary method for 2 ranges)
+  pct(x2, method = 'fct', na.rm = FALSE)
 }
 
 # Reverse levels

@@ -7,7 +7,8 @@
 ## Check legitibility
 ss_legit <- function(sstable){
   # requireNamespace('tibble')
-  if (!is.matrix(sstable) & !is.data.frame(sstable)) stop('sstable must be of type matrix or data frame.')
+  if (!is.matrix(sstable) & !is.data.frame(sstable))
+    c306_abort('`sstable` must be a matrix or data frame.', call = NULL)
   return(as.matrix(sstable))
 }
 #' Set template for sstable
@@ -119,8 +120,9 @@ ss_format <- function(sstable, header = c(), section = c(), body = c(), template
   if (length(header)) sstable <- ss_header(sstable, rows = header)
   if (length(body)) sstable <- ss_body(sstable, rows = body)
   if (length(section)) sstable <- ss_section(sstable, rows = section)
-  if (sum(sapply(c('header', 'section', 'body'), grepl, x=rownames(sstable), fixed=TRUE)) != nrow(sstable))
-    stop('Some row are not classified as header, section, or body. Perhaps you want to set .guess to TRUE?')
+  rn <- rownames(sstable)
+  if (is.null(rn) || !all(grepl('header|section|body', rn)))
+    c306_abort('Some rows are not classified as header, section, or body. Perhaps you want to set `.guess = TRUE`?')
   class(sstable) <- c('formatted_sstable', class(sstable))
   sstable
 }
@@ -254,7 +256,9 @@ ss_flextable.default <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
     for (i in seq_along(ss.header2)[-1])
       ft <- flextable::add_header_row(ft, values = ss.header2[[i]], top = FALSE)
 
-  ft <- flextable::merge_h(ft, i = 1:(length(ss.header2)-1), part = "header")
+  # merge all header rows but the last (none when there is a single header row)
+  if (length(ss.header2) > 1)
+    ft <- flextable::merge_h(ft, i = seq_len(length(ss.header2) - 1), part = "header")
   ft <- flextable::merge_v(ft, part = "header")
 
   ## footer format
@@ -265,13 +269,14 @@ ss_flextable.default <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
 
   ## section format
   for (k in section){
+    k.body <- k - length(header) # row index within the body part of the flextable
 
     ### merging cells that from the left if the whole row is empty
     if (all(sstable[k, -1] == '') %in% TRUE)
-      ft <- flextable::merge_at(ft, i = k, j = 1:ncol(sstable), part = 'body')
-    else ft <- flextable::merge_h(ft, i = k , part = 'body')
+      ft <- flextable::merge_at(ft, i = k.body, j = 1:ncol(sstable), part = 'body')
+    else ft <- flextable::merge_h(ft, i = k.body, part = 'body')
 
-    ft <- flextable::bold(ft, i = k-length(header), j = 1, part = 'body')
+    ft <- flextable::bold(ft, i = k.body, j = 1, part = 'body')
   }
 
   ## format flextable
@@ -588,12 +593,10 @@ as_sstable.list <- function(x, flextable = FALSE, ...){
   if (inherits(x$body, 'list')){
     body <- lapply(seq_along(x$body), function(i){
       cont <- x$body[[i]]
-      title <- names(x$body)[[i]]
-      if (is.null(title)) title <- ''
-      title <- rep(title, ncol(cont))
-      sec <- rbind(title, cont)
+      title <- if (is.null(names(x$body))) '' else names(x$body)[[i]]
+      sec <- rbind(rep(title, ncol(cont)), cont)
       rownames(sec) = c(paste0('section', i), paste0('body',i,  seq_len(nrow(cont))))
-      if (title == '' & i == 1) sec <- sec[-1,]
+      if (title == '' && i == 1) sec <- sec[-1, , drop = FALSE]
       sec
     })
     body <- do.call(rbind, body)

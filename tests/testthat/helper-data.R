@@ -33,6 +33,33 @@ small_baseline <- function() {
              stringsAsFactors = FALSE)
 }
 
+# All numbers in a formatted table cell, e.g. "0.59 (0.42, 0.82); p=0.0015" ->
+# c(0.59, 0.42, 0.82, 0.0015). "NA" gives NA. A "-" directly after a digit is a
+# range separator ("12-17" -> 12, 17), otherwise it is a minus sign.
+cell_num <- function(s) {
+  m <- regmatches(s, gregexpr("NA|(?<![0-9.])-?[0-9]+(\\.[0-9]+)?(e-?[0-9]+)?", s, perl = TRUE))[[1]]
+  suppressWarnings(as.numeric(m))
+}
+
+# Row of a table (matrix or data frame) whose first column equals `label`
+tab_row <- function(tab, label) {
+  m <- as.matrix(tab)
+  i <- which(m[, 1] == label)
+  if (length(i) != 1) stop("row '", label, "' found ", length(i), " times")
+  unname(m[i, ])
+}
+
+# A fresh, empty folder under tempdir() for functions that write files
+withr_local_tempdir <- function() {
+  d <- tempfile("c306test_")
+  dir.create(d)
+  d
+}
+
+baseline_fixture <- function() {
+  utils::read.csv(system.file("extdata", "baseline_data.csv", package = "C306"))
+}
+
 # Text of each footer line of a flextable
 ft_footer_text <- function(ft) {
   info <- flextable::information_data_chunk(ft)

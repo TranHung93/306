@@ -54,6 +54,8 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
 ._lik.ratio_summary <- function(fit, stat_digits=2, p_digits=4, verbose = FALSE, sstable = FALSE){
   est <- coef(fit)
   ci <- suppressMessages(confint(fit))
+  # confint() returns a plain vector when the model has a single coefficient
+  if (is.null(dim(ci))) ci <- matrix(ci, nrow = 1, dimnames = list(names(est), names(ci)))
   result <- data.frame(log.OR = est, OR = exp(est),
                        lower.CI = exp(ci[,1]), upper.CI = exp(ci[,2]))
 
@@ -64,7 +66,7 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
   x <- names(coef(fit))
   y <- model.response(model.frame(fit, drop.unused.levels = TRUE))
   p <- sapply(seq_along(x), function(i){
-    fit.i <- glm.fit(x = model.matrix(fit)[,-i], y = y, family = binomial())
+    fit.i <- glm.fit(x = model.matrix(fit)[, -i, drop = FALSE], y = y, family = binomial())
     logLik.i <-logLik(structure(fit.i, class = 'glm'))
     1 - pchisq(2 * (logLik.full - logLik.i), 1)
   })

@@ -20,7 +20,7 @@ myformat.data <- function(data, info){
   ## recognize variable in data
   allvars <- tolower(names(data))
   flag <- names(data)[tolower(names(data)) %in% tolower(na.omit(info$varname))]
-  if (length(flag) == 0){stop("No variable in this data present in info !!!")}
+  if (length(flag) == 0) c306_abort("No variable in this data is present in `info$varname`.")
   info <- info[na.omit(match(tolower(flag), tolower(info$varname))),]
 
   ## select variables mentioned in info
@@ -58,7 +58,8 @@ myformat.each <- function(x, label = NA, type, unit = NA, scale = NA, center = N
 
   ## check type
   if (!type %in% c("numeric", "datetime", "character", "factor")){
-    stop("This type of data is not implemented yet !!!")
+    c306_abort(sprintf("Type \"%s\" is not implemented yet (use numeric, factor, character or datetime).", type),
+               call = NULL)
   }
 
   ## numeric data
