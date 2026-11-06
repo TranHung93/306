@@ -100,6 +100,7 @@ test_that("Cumulative incidence difference matches 1 - Kaplan-Meier at `time`", 
 })
 
 test_that("Competing risks: risk % (Aalen-Johansen) and Fine-Gray HR match survival", {
+  skip_on_cran() # slow (finegray on 1384 subjects)
   d <- mgus_data()
   tab <- suppressWarnings(
     sstable.survcomp(Surv(etime, event) ~ arm, d, compare.args = list(cause = "pcm"),

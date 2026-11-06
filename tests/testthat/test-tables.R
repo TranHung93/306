@@ -165,6 +165,7 @@ test_that("sstable.survcomp layout", {
 })
 
 test_that("sstable.survcomp.subgroup: rmst and cuminc methods, overall model, flextable", {
+  skip_on_cran() # slow (several eventglm fits per subgroup)
   d <- lung_data()
   d <- droplevels(d[d$ph.ecog != "3", ])
   d$age <- survival::lung$age[as.numeric(rownames(d))]

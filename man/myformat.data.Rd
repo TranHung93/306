@@ -12,7 +12,10 @@ myformat.data(data, info)
 \item{info}{a data frame specifies how variables will be formatted. This data frame should have the following columns: varname (character variable specifies name of each variable), label (character variable specifies label of each variables), type (character variable specifies type of each variable [numeric, factor, character, datetime], unit (character variable specifies units of each continuous variable), value (character variable specifies values of each variable [format of datetime variables/values of categorical variables], levels (character variable specifies order of levels of each categorical variable), missing (character variable specifies coding for missing values for each variable).}
 }
 \value{
-a data frame with variables are formatted according information specified in info
+a data frame with variables are formatted according information specified in info.
+  For factors with `levels` in `info`, codes that are not in the dictionary are kept as extra
+  levels (after the dictionary levels) with a warning, so that [inspect.data()] reports them
+  as out of range.
 }
 \description{
 A function to format each variable in data frame based on pre-defined information.

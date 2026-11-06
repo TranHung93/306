@@ -163,9 +163,12 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
   group_data <- as.data.frame(group_data)
   is.grouped <- !missing(group.var)
 
-  # Check if grade.var is not NULL and has any NA values - hungtt
-  if (!is.null(grade.var) && any(is.na(ae_data[[grade.var]]))) {
-    # Replace NA values with "Grade NA"
+  # Grades as character (keeping the level order of a factor); missing grades
+  # become "Grade N/A" - hungtt
+  grade.levels <- NULL
+  if (!is.null(grade.var)) {
+    if (is.factor(ae_data[[grade.var]])) grade.levels <- levels(ae_data[[grade.var]])
+    ae_data[[grade.var]] <- as.character(ae_data[[grade.var]])
     ae_data[[grade.var]][is.na(ae_data[[grade.var]])] <- "Grade N/A"
   }
 
@@ -234,7 +237,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
 
   # Extract grades of ae (assuming grade.var exists)
   if (!is.null(grade.var)) {
-    grade <- sort(unique(na.omit(ae_data[, grade.var])))
+    grade <- ._grade_order(ae_data[, grade.var], levels = grade.levels)
     grade2 <- ifelse(grepl(pattern = "grade", ignore.case = TRUE, x = grade), grade, paste("Grade", grade))
     ae_grade <- do.call(rbind,
                         lapply(1:length(grade), function(i) {
@@ -614,6 +617,23 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
   }
   if (!flextable) class(tab) <- c('ss_ae','ss_obj')}
   return(tab)
+}
+
+# Clinical order of AE grades ------------------------------------------------
+# Factor grades keep their level order. Otherwise grades are ordered by their
+# number, written as digits ("1", "Grade 2") or Roman numerals ("III",
+# "Grade IV"); other values follow alphabetically; "Grade N/A" is always last.
+._grade_order <- function(g, levels = NULL) {
+  g <- unique(as.character(g[!is.na(g)]))
+  if (!is.null(levels)) {
+    rank <- match(g, levels)
+  } else {
+    key <- toupper(trimws(sub("^\\s*grade\\s*", "", g, ignore.case = TRUE)))
+    rank <- suppressWarnings(as.numeric(key))
+    is.roman <- is.na(rank) & grepl("^[IVX]+$", key)
+    rank[is.roman] <- as.integer(utils::as.roman(key[is.roman]))
+  }
+  g[order(g == "Grade N/A", is.na(rank), rank, g)]
 }
 
 # Footer of the AE flextable ------------------------------------------------

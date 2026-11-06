@@ -61,7 +61,7 @@ test_that("subgroup_effect: one summary variable gives a simplified table; formu
   se <- subgroup_effect(x1 ~ x3, fit, method = "wald")
   expect_s3_class(se, "data.frame")
   expect_identical(rownames(se), c("C", "D", "E"))
-  expect_message(print(se), "Effect table for x1")
+  expect_message(expect_output(print(se), "OR"), "Effect table for x1")
   expect_identical(t(se), se)
 
   d <- model.frame(fit)

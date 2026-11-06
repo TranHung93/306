@@ -49,6 +49,29 @@ tab_row <- function(tab, label) {
   unname(m[i, ])
 }
 
+# Data dictionary (C306 format) and matching raw data. `sex = 3` is a code that
+# is not in the dictionary; `AGE` differs in case from the dictionary name.
+dict_info <- function() {
+  data.frame(
+    varname = c("id", "age", "sex", "visit"),
+    label = c("ID", "Age", "Sex", "Visit date"),
+    type = c("character", "numeric", "factor", "datetime"),
+    unit = c(NA, "years", NA, NA),
+    value = c(NA, "0;100", "1='Male';2='Female'", "ymd"),
+    levels = c(NA, NA, "'Male';'Female'", NA),
+    missing = c(NA, "-99", NA, NA),
+    stringsAsFactors = FALSE
+  )
+}
+
+raw_data <- function() {
+  data.frame(id = c("a1", "a2", "a3", "a4"),
+             AGE = c(30, -99, 150, 45),
+             sex = c(1, 2, 2, 3),
+             visit = c("2024-01-05", "2024-02-10", NA, "2024-03-01"),
+             extra = 1:4, stringsAsFactors = FALSE)
+}
+
 # A fresh, empty folder under tempdir() for functions that write files
 withr_local_tempdir <- function() {
   d <- tempfile("c306test_")

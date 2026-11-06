@@ -5,7 +5,10 @@
 #' @param data a data frame contains variables to be formatted
 #' @param info a data frame specifies how variables will be formatted. This data frame should have the following columns: varname (character variable specifies name of each variable), label (character variable specifies label of each variables), type (character variable specifies type of each variable [numeric, factor, character, datetime], unit (character variable specifies units of each continuous variable), value (character variable specifies values of each variable [format of datetime variables/values of categorical variables], levels (character variable specifies order of levels of each categorical variable), missing (character variable specifies coding for missing values for each variable).
 #'
-#' @return a data frame with variables are formatted according information specified in info
+#' @return a data frame with variables are formatted according information specified in info.
+#'   For factors with `levels` in `info`, codes that are not in the dictionary are kept as extra
+#'   levels (after the dictionary levels) with a warning, so that [inspect.data()] reports them
+#'   as out of range.
 #' @export
 myformat.data <- function(data, info){
   # info should have these columns
@@ -44,11 +47,13 @@ myformat.data <- function(data, info){
                            value = info$value,
                            levels = info$levels,
                            missing = info$missing,
+                           varname = names(tmp),
                            SIMPLIFY = FALSE),
                     stringsAsFactors = FALSE))
 }
 
-myformat.each <- function(x, label = NA, type, unit = NA, scale = NA, center = NA, value = NA, levels = NA, missing = NA){
+myformat.each <- function(x, label = NA, type, unit = NA, scale = NA, center = NA, value = NA, levels = NA, missing = NA,
+                          varname = ""){
   type <- tolower(type)
   ## missing data
   if (!is.na(missing)){
@@ -92,8 +97,16 @@ myformat.each <- function(x, label = NA, type, unit = NA, scale = NA, center = N
     if (is.na(levels)|levels == ""){
       tmp <- car::Recode(var = x, recodes = value, as.factor = TRUE)
     } else {
-      tmp <- car::Recode(var = x, recodes = value, as.factor = TRUE,
-                         levels = gsub("['']", "", unlist(strsplit(levels, split = ";"))))
+      dict.levels <- gsub("['']", "", unlist(strsplit(levels, split = ";")))
+      recoded <- as.character(car::Recode(var = x, recodes = value, as.factor = FALSE, as.numeric = FALSE))
+      # codes that are not in the dictionary are kept as extra levels (not turned
+      # into NA), so that inspect.data() reports them as out of range
+      unknown <- sort(unique(recoded[!is.na(recoded) & !recoded %in% dict.levels]))
+      if (length(unknown)) {
+        warning(sprintf("%s: value(s) not in the dictionary kept as extra level(s): %s.",
+                        varname, paste(unknown, collapse = ", ")), call. = FALSE)
+      }
+      tmp <- factor(recoded, levels = c(dict.levels, unknown))
     }
     tmp <- structure(tmp, label = ifelse(is.na(label), "", label))
   }

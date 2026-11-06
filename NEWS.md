@@ -1,53 +1,98 @@
 # C306 0.1.6 (development version)
 
-## Changes that alter results of previous reports
+## Impact on previous reports
 
-* **`sstable.survcomp()` and `sstable.survcomp.subgroup()`: the "risk [%]"
-  column now shows the absolute risk.** It is 1 − Kaplan–Meier for a single
-  event type, and the Aalen–Johansen probability of the cause of interest for
-  competing risks. Since 2024-07-09 (commit 40aeabd, "Adding mstate model to
-  survcomp"; included in 0.1.5-240715) the column showed 100 × the cumulative
-  hazard instead (e.g. 232% instead of 92%). **Every risk percentage in
-  reports made with those versions is wrong and will change** when the report
-  is re-run. Versions before that commit used 1 − Kaplan–Meier and are not
-  affected. Event counts, HRs, RMST/cumulative-incidence estimates, CIs and
-  p-values are not affected by this change.
+Five bugs gave wrong numbers in tables or plots. Reports made in the periods
+below with the affected arguments should be re-run with this version. In each
+case, the other numbers in the same table were correct.
 
-* `sstable.survcomp.subgroup()` with `reference.arm = "A"`: the subgroup rows
-  ignored `reference.arm` and were always computed with arm B as the
-  reference, so their estimates were inverted relative to the "All patients"
-  row. Subgroup rows now use the requested reference arm.
+1. **Risk % in survival tables**
+   * Functions: `sstable.survcomp()`, `sstable.survcomp.subgroup()` (all rows),
+     and tables built from them (`ss_flextable()`, `ss_huxtable()`, `rbind()`).
+   * Affected: `add.risk = TRUE` (the default), with any `compare.method`.
+     `sstable.survcomp.subgroup()` always uses it.
+   * Period: 2024-07-09 (commit 40aeabd, "Adding mstate model to survcomp";
+     versions 0.1.5-022405 to 0.1.5-240715) until this version.
+   * What was wrong: the "risk [%]" figure was 100 × the cumulative hazard,
+     not the absolute risk (e.g. 232% instead of 92%). It is now 1 − Kaplan–Meier,
+     or the Aalen–Johansen probability of the cause of interest for competing
+     risks. Competing-risks tables were wrong from the start (same commit).
+     Before 2024-07-09 the column was correct. Event counts, HRs,
+     RMST/cumulative-incidence estimates, CIs and p-values were not affected.
+
+2. **Subgroup rows with `reference.arm = "A"`**
+   * Function: `sstable.survcomp.subgroup()`.
+   * Affected: `reference.arm = "A"`, subgroup rows only (not "All patients").
+   * Period: 2024-06-17 (commit cbe10dc, when `reference.arm` was added) until
+     this version.
+   * What was wrong: subgroup rows ignored `reference.arm` and always used arm B
+     as the reference, so their HR / RMST / cumulative-incidence comparisons
+     were inverted relative to the "All patients" row (e.g. HR 0.54 shown
+     instead of 1.85).
+
+3. **`model.censoring` dropped from the heterogeneity test**
+   * Function: `sstable.survcomp.subgroup()`.
+   * Affected: `compare.method = "rmst"` or `"cuminc"` with `model.censoring`
+     given in `compare.args`; the "Test for heterogeneity" p-value only.
+   * Period: 2024-06-13 (commit 869429c, "add RMST to survcomp") until this
+     version.
+   * What was wrong: the user's `model.censoring` was replaced by the eventglm
+     default (`"independent"`) in the interaction test, so the heterogeneity
+     p-value used a different censoring model from the one requested (e.g.
+     0.795 instead of 0.375).
+
+4. **Confidence intervals of `subgroup_effect()`**
+   * Function: `subgroup_effect()`, including `sstable = TRUE`,
+     `flextable = TRUE` and `transpose = TRUE` output.
+   * Affected: all calls, both `method = "lik.ratio"` and `"wald"`; the
+     `CI.lower` / `CI.upper` columns only.
+   * Period: 2019-12-26 (commit 5b44416, when the function was added) until
+     this version.
+   * What was wrong: the CI was that of the *log* odds ratio, printed next to
+     the odds ratio (e.g. OR 1.06 with "CI" (-0.20, 0.32) instead of
+     (0.82, 1.37)). It is now the CI of the OR, as in `logist_summary()`. ORs,
+     log ORs and p-values were correct.
+
+5. **Drift of the competing-risks curves**
+   * Functions: `gg_ajsurvplot()` (from 2024-06-20, commit 17a757d) and
+     `gg_ajsurvplot2()`, including `.return_data = TRUE` (from 2024-06-25,
+     commit b89f64b), until this version.
+   * Affected: plots with groups on the right-hand side of the formula whose
+     censoring patterns differ.
+   * What was wrong: the censoring weights were pooled over all groups, so the
+     curves were not the Aalen–Johansen estimate of each group. They drifted
+     in late follow-up (by up to 2.5 percentage points in `survival::mgus2` by
+     sex). Early follow-up was essentially unchanged. The curves are now
+     exact Aalen–Johansen estimates. Fine–Gray hazard ratios in
+     `sstable.survcomp()` were not affected (they correctly use pooled weights).
+
+## Other changes to output
 
 * `sstable.survcomp.subgroup()`: the "All patients" row now uses `pdigits`
-  (it was fixed at 3).
-
-* `sstable.survcomp.subgroup()` with `compare.method = "rmst"` or
-  `"cuminc"`: a `model.censoring` given in `compare.args` was silently
-  replaced by the eventglm default for the heterogeneity test. It is now used.
-
-* **`subgroup_effect()`: the `CI.lower` / `CI.upper` columns are now the 95%
-  confidence interval of the odds ratio**, matching the `OR` column next to
-  them and `logist_summary()`. Since the function was added (2019-12-26,
-  commit 5b44416) they showed the confidence interval of the *log* odds
-  ratio, e.g. OR 1.06 with "CI" (-0.20, 0.32) instead of (0.82, 1.37). This
-  affects tables built with `sstable = TRUE` or `flextable = TRUE` too. ORs,
-  log ORs and p-values are unchanged.
-
-* `gg_ajsurvplot()` and `gg_ajsurvplot2()` now plot the exact Aalen–Johansen
-  cumulative incidence of each group. The censoring weights are now estimated
-  within each plotted group. Before, they were pooled over all groups, so
-  when censoring differed between groups the curves drifted from
-  Aalen–Johansen in late follow-up (by up to 2.5 percentage points in
-  `survival::mgus2` by sex). Early parts of the curves are essentially
-  unchanged. Fine–Gray hazard ratios in `sstable.survcomp()` are not affected.
-
-* `pct(method = "cont")` with exactly two ranges now returns the percentage of
-  each range. Before, it returned a single number (the second range only).
-
+  (it was fixed at 3; only the number of digits shown changes).
 * `sstable.baseline()`: when the column variable is a character vector, its
   columns are now in reverse alphabetical order (e.g. B then A), the same as
   for factor arms and as in `sstable.ae()`. Previously character arms were in
-  alphabetical order, so their column order changes.
+  alphabetical order.
+* `sstable.ae()`: grade rows are in clinical order (Grade 1, 2, ... 10, or
+  I, II, ... V; a factor keeps its level order), with "Grade N/A" last.
+  Before, they were in alphabetical order ("Grade 10" before "Grade 2",
+  "Grade N/A" first).
+* `logist_summary(method = "lik.ratio")`: rows are in model term order, as
+  with `method = "wald"` (they were sorted alphabetically).
+* `logist_summary()` for a model without intercept: the footer said that
+  likelihood ratio p-values were not calculated, but they are (and are valid).
+  It now says what they test.
+* `myformat.data()`: factor codes that are not in the dictionary are kept as
+  extra levels, with a warning, instead of becoming `NA`. `inspect.data()`
+  then reports them as "Out of range" instead of "Missing value".
+* `pct(method = "cont")` with exactly two ranges returns the percentage of
+  each range (before: a single number, the second range only).
+* `contSummary()` replaces only whole statistic names (any case) and keeps the
+  rest of your text as written. Before, it lower-cased the whole string ("IQR"
+  became "iqr") and replaced names inside words ("minimum" became "1.0imum").
+  Output for the default statistics is unchanged. Statistics of all-missing
+  data are `NA` without warnings (before: `NaN`, `Inf` and a warning).
 
 ## Bug fixes
 
@@ -64,6 +109,8 @@
   has no p-value note when `test = FALSE`, and says "Fisher's exact test" when
   `chisq.test = FALSE`. User footers are no longer merged into the wrong
   footer row.
+* `sstable.ae()` with a factor `grade.var` containing `NA` shows the missing
+  grades as "Grade N/A" (they were dropped with a warning).
 * `simple_recode()`: numeric input stays numeric (it was returned as
   character). A factor stays a factor with recoded levels; previously a
   2-level factor came back as all `NA` and other factors as character. A
@@ -125,12 +172,6 @@
   grades in `labAE()`.
 * Variables used in `sstable.baseline()` formulas must be columns of `data`.
   (Variables from the calling environment never worked.)
-* `contSummary()` now replaces only whole statistic names (any case) and keeps
-  the rest of your text as written. Before, it lower-cased the whole string
-  ("IQR" became "iqr") and replaced names inside words ("minimum" became
-  "1.0imum"). Output for the default statistics is unchanged. Statistics of
-  all-missing data are now `NA` without warnings (before: `NaN`, `Inf` and a
-  warning).
 * `createProject()` now stops with an error for an unknown `structure` or a
   non-empty `dir`. Before, it reported success even when nothing was copied.
   It reports with `message()` instead of printing, and returns the project
@@ -157,6 +198,7 @@ required by R CMD check). Calls with positional arguments work as before.
 * `crayon`, `assertthat` and `stringr` are no longer used. `Hmisc` moved from
   Imports to Suggests (it is only used in a vignette). `lifecycle` and the
   base packages `stats`, `utils`, `graphics`, `grDevices` and `methods` were
-  added to Imports.
+  added to Imports. `MASS` was added to Suggests (tests only). ggplot2 >= 3.4.0
+  is required.
 * Vignettes now build as HTML vignettes and no longer write files into the
   working directory.

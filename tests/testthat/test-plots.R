@@ -36,6 +36,7 @@ test_that("tidy_survfit2 keeps strata as columns; ggsurvfit2 plots by stratum", 
 })
 
 test_that("gg_ajsurvplot2 data: risk of the main event is the Aalen-Johansen estimate", {
+  skip_on_cran() # slow (two finegray expansions of 1384 subjects)
   d <- mgus_data()
   dt <- suppressWarnings(gg_ajsurvplot2(Surv(etime, event) ~ arm, data = d, main.event = "pcm",
                                         competing.event = "death", .return_data = TRUE))

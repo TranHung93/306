@@ -15,6 +15,7 @@ test_that("[1.1] survcomp risk column is 1 - Kaplan-Meier, not the cumulative ha
 })
 
 test_that("[1.1] survcomp risk column is the Aalen-Johansen probability for competing risks", {
+  skip_on_cran() # slow (finegray on 1384 subjects)
   d <- mgus_data()
   tab <- suppressWarnings(
     sstable.survcomp(Surv(etime, event) ~ arm, data = d, flextable = FALSE,

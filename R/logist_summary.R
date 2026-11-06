@@ -70,26 +70,24 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
     logLik.i <-logLik(structure(fit.i, class = 'glm'))
     1 - pchisq(2 * (logLik.full - logLik.i), 1)
   })
-  names(p) <- x
-  result <- merge(result, data.frame(p.value = p), all.x = TRUE, by='row.names')
-  rownames(result) <- result[,'Row.names']
-  result <- result[, -1]
+  # rows stay in model term order (same as the Wald summary)
+  result$p.value <- unname(p)
 
   for (i in 1:4) result[,i] <- formatC(result[,i], digits = stat_digits, format = 'f')
   if (length(result$p.value)) result$p.value <- formatC(result$p.value, p_digits, format = 'f')
   result$p.value <- ifelse(grepl('NA', result$p.value), '', result$p.value)
   if (naprint(fit$na.action)!="") message("\nNote:",naprint(fit$na.action))
+  no.intercept.note <- paste("The model has no intercept: each p-value is a likelihood ratio test",
+                             "of the model with versus without that coefficient.")
   if (verbose) {
     cat("\nNote: 95% confidence intervals and p-values are based on likelihood ratio statistics.\n\n")
-    if (!has.intercept) cat("\nNote: p-values of LR-tests not calculated because model has no intercept.\n\n")
+    if (!has.intercept) cat("\nNote:", no.intercept.note, "\n\n")
   }
 
   return(list(table = result,
               footer = c(
                 "Note: 95% confidence intervals and p-values are based on likelihood ratio statistics.",
-                if (!has.intercept)
-                  "p-values of LR-tests not calculated because model has no intercept.")))
-  # return(result)
+                if (!has.intercept) no.intercept.note)))
 }
 
 

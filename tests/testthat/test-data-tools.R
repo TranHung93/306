@@ -1,36 +1,16 @@
 # Data dictionary tools: myformat.data(), inspect.data(), getlabel(),
 # import.info(), convert.info(). Files are only written to tempdir().
-
-dict_info <- function() {
-  data.frame(
-    varname = c("id", "age", "sex", "visit"),
-    label = c("ID", "Age", "Sex", "Visit date"),
-    type = c("character", "numeric", "factor", "datetime"),
-    unit = c(NA, "years", NA, NA),
-    value = c(NA, "0;100", "1='Male';2='Female'", "ymd"),
-    levels = c(NA, NA, "'Male';'Female'", NA),
-    missing = c(NA, "-99", NA, NA),
-    stringsAsFactors = FALSE
-  )
-}
-
-raw_data <- function() {
-  data.frame(id = c("a1", "a2", "a3", "a4"),
-             AGE = c(30, -99, 150, 45),          # case of names differs from info
-             sex = c(1, 2, 2, 3),
-             visit = c("2024-01-05", "2024-02-10", NA, "2024-03-01"),
-             extra = 1:4, stringsAsFactors = FALSE)
-}
+# (dict_info() and raw_data() are in helper-data.R)
 
 test_that("myformat.data formats each type, codes missing values and keeps labels", {
-  out <- myformat.data(raw_data(), dict_info())
+  # sex = 3 is not in the dictionary: kept as an extra level, with a warning
+  expect_warning(out <- myformat.data(raw_data(), dict_info()), "not in the dictionary")
   expect_named(out, c("id", "AGE", "sex", "visit")) # `extra` (not in info) is dropped
   expect_identical(out$AGE, structure(c(30, NA, 150, 45), label = "Age", unit = "years",
                                       scale = 1, center = 0))
   expect_s3_class(out$sex, "factor")
-  expect_identical(levels(out$sex), c("Male", "Female"))
-  # a code that is not in the dictionary becomes NA (existing behaviour)
-  expect_identical(as.character(out$sex), c("Male", "Female", "Female", NA))
+  expect_identical(levels(out$sex), c("Male", "Female", "3"))
+  expect_identical(as.character(out$sex), c("Male", "Female", "Female", "3"))
   expect_identical(as.character(as.Date(out$visit)), c("2024-01-05", "2024-02-10", NA, "2024-03-01"))
   expect_identical(attr(out$visit, "label"), "Visit date")
 })
@@ -44,7 +24,7 @@ test_that("myformat.data rejects data without any variable from info and unknown
 
 test_that("inspect.data reports missing and out-of-range values and writes its files to outdir", {
   info <- dict_info()
-  dat <- myformat.data(raw_data(), info)
+  dat <- suppressWarnings(myformat.data(raw_data(), info)) # sex = 3 kept as a level
   dat$sex <- as.character(raw_data()$sex) # unformatted codes, to see the range check
   outdir <- withr_local_tempdir()
   res <- inspect.data(dat, info, id = "id", prefix = "t", outdir = outdir, plot = TRUE)
@@ -58,7 +38,7 @@ test_that("inspect.data reports missing and out-of-range values and writes its f
 
 test_that("inspect.data honours check_missing = FALSE and conditions", {
   info <- dict_info()
-  dat <- myformat.data(raw_data(), info)
+  dat <- suppressWarnings(myformat.data(raw_data(), info)) # sex = 3 kept as a level
   outdir <- withr_local_tempdir()
   res <- inspect.data(dat, info, check_missing = FALSE, prefix = "t", outdir = outdir)
   expect_false(any(grepl("^Missing", res$error)))
