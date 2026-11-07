@@ -7,3 +7,4 @@
 ^data-raw$
 ^tests/testthat/fixtures$
 ^\.lintr$
+^LICENSE\.md$
