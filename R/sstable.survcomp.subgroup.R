@@ -167,7 +167,6 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
           ia.args$data <- dplyr::slice(data, seq_len(nrow(data))[-NAs])
         }
         
-        # browsere)
         # Perform multivariate wald test for interaction term
         tryCatch({
           fitter <- switch(compare.method,

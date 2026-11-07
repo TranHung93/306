@@ -161,8 +161,6 @@ gg_ajsurvplot2 <- function(formula, data, weights, subset, na.action, main.event
   dt <- rbind(tidy1, tidy2)
   if (.return_data) return(dt)
 
-  # facet <- if (formula.tools::is.formula(facet.by)) if (length(formula.tools::lhs.vars(facet.by)))
-    # facet_grid(facet.by) else facet_wrap(facet.by)
   facet <- if (!is.null(facet.by))
     if (length(formula.tools::lhs.vars(facet.by))) facet_grid(facet.by) else facet_wrap(facet.by)
 

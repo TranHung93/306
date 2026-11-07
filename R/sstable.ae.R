@@ -358,7 +358,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
                                              return(c(
                                                sum(as.numeric(unlist(.x[, 2*i]))),
                                                ''))
-                                             # paste(sum(as.numeric(unlist(.x[, length(arm_lev)*2+i+1])))))
                                            })),
                              rep('',ncol(ae_value)-1-2*length(arm_lev))
       ),.x))
@@ -413,18 +412,10 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
       idx <- seq(from = i, to = length(patient_n), by = nrow(value))
       mat <- matrix(c(patient_n[idx], patient_N[idx] - patient_n[idx]), nrow = 2, byrow = TRUE)
       out <- if (chisq.test) {
-        # tryCatch(format.pval(chisq.test(x = mat, correct = correct,
-        #                                 simulate.p.value = simulate.p.value, B = B)$p.value,
-        #                      eps = pcutoff, digits = pdigits, scientific = FALSE),
-        #          error = function(c) NA)
         do_chisq(mat, correct = correct,
                  simulate.p.value = simulate.p.value, B = B,
                  workspace = workspace, hybrid = hybrid)
       } else {
-        # tryCatch(format.pval(fisher.test(x = mat, workspace = workspace, hybrid = hybrid,
-        #                                  simulate.p.value = simulate.p.value, B = B)$p.value,
-        #                      eps = pcutoff, digits = pdigits, scientific = FALSE),
-        #          error = function(c) NA)
         do_fisher(mat, workspace = workspace, hybrid = hybrid,
                   simulate.p.value = simulate.p.value, B = B)
       }
