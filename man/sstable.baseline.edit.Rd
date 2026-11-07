@@ -19,7 +19,7 @@ sstable.baseline.edit(
   test = FALSE,
   pdigits = 3,
   pcutoff = 1e-04,
-  keepEmptyString = T,
+  keepEmptyString = TRUE,
   chisq.test = FALSE,
   correct = FALSE,
   simulate.p.value = FALSE,

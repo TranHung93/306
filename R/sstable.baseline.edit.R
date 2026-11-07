@@ -46,7 +46,7 @@
 #' @export
 sstable.baseline.edit <- function(value, formula, data, bycol = TRUE, pooledGroup = FALSE, keepEmptyGroup = FALSE,
                                   statistics = "mean, median (Q1-Q3)", cont = NULL, cate = NULL, fullfreq = TRUE, digits = 1,
-                                  test = FALSE, pdigits = 3, pcutoff = 0.0001, keepEmptyString = T,
+                                  test = FALSE, pdigits = 3, pcutoff = 0.0001, keepEmptyString = TRUE,
                                   chisq.test = FALSE, correct = FALSE, simulate.p.value = FALSE, B = 2000,
                                   workspace = 1000000, hybrid = FALSE, footer = NULL, flextable = FALSE, bg = "#F2EFEE") {
   ## data, row variables (x), column variable (y), third dimension (z)

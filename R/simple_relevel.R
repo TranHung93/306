@@ -29,7 +29,7 @@ simple_relevel.data.frame <- function(x, ..., by){
   if ("data" %in% names(dep.vars)) {
     # deprecated form simple_relevel.data.frame(data = df, var, by = ...):
     # `data` lands in `...` and the first variable lands in `x`
-    lifecycle::deprecate_warn("0.1.6", "simple_relevel.data.frame(data)",
+    lifecycle::deprecate_warn("0.2.0", "simple_relevel.data.frame(data)",
                               "simple_relevel.data.frame(x)")
     data.quo <- dep.vars[["data"]]
     dep.vars <- dep.vars[names(dep.vars) != "data"]

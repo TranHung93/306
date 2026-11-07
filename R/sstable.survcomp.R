@@ -169,7 +169,7 @@ sstable.survcomp <- function(
   if (add.risk) {
     # Absolute risk at the truncation time: 1 - Kaplan-Meier for a single event,
     # Aalen-Johansen probability of the cause of interest for competing risks.
-    # (Before 0.1.6 this was the cumulative hazard, which is not a risk.)
+    # (Before 0.2.0 this was the cumulative hazard, which is not a risk.)
     risk <- if (ms) {
       fit.surv$pstate[, match(compare.args$cause, fit.surv$states), drop = TRUE]
     } else {

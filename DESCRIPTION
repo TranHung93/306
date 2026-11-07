@@ -1,7 +1,7 @@
 Package: C306
 Type: Package
 Title: Summary Tables and Tools for Clinical Trial Reporting
-Version: 0.1.5-240715
+Version: 0.2.0
 Authors@R: 
     c(person(given = "Khanh Lam",
              family = "Phung",

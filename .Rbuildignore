@@ -8,3 +8,4 @@
 ^tests/testthat/fixtures$
 ^\.lintr$
 ^LICENSE\.md$
+^TODO\.md$

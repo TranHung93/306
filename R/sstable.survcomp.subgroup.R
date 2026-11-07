@@ -260,7 +260,7 @@ print.ss_tbl <- function(x, pretty = getOption('ss_pretty.print', TRUE), ...){
   if (missing(x)) {
     dots <- list(...)
     if (is.null(dots$sstable)) rlang::abort("Argument `x` is missing, with no default.")
-    lifecycle::deprecate_warn("0.1.6", "print.ss_tbl(sstable)", "print.ss_tbl(x)")
+    lifecycle::deprecate_warn("0.2.0", "print.ss_tbl(sstable)", "print.ss_tbl(x)")
     x <- dots$sstable
   }
   if (!isTRUE(pretty) || !requireNamespace("huxtable", quietly = TRUE)) {

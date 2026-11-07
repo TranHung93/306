@@ -1,4 +1,10 @@
-# C306 0.1.6 (development version)
+# C306 0.2.0
+
+First release of the independently maintained version of C306 at
+<https://github.com/TranHung93/306> (based on oucru-biostats/C306). Install it
+with `remotes::install_github("TranHung93/306")`; the package name is
+unchanged. Several bugs gave wrong numbers in tables or plots: check the
+section below before relying on reports made with earlier versions.
 
 ## Impact on previous reports
 

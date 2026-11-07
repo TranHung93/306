@@ -30,7 +30,7 @@ explicit.lm <- function(x, ...){
   if (missing(x)) {
     dots <- list(...)
     if (is.null(dots$fit)) rlang::abort("Argument `x` is missing, with no default.")
-    lifecycle::deprecate_warn("0.1.6", "explicit.lm(fit)", "explicit.lm(x)")
+    lifecycle::deprecate_warn("0.2.0", "explicit.lm(fit)", "explicit.lm(x)")
     x <- dots$fit
   }
   ._explicit_lm(x, .meta = FALSE)
