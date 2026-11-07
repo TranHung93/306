@@ -144,40 +144,16 @@ sstable.survcomp <- function(
   
   # Table header
   header1 <- c(paste(arm.names, " (n=", table(data[, arm.var]), ")", sep = ""), "Comparison")
-  compare.stat <- switch(compare.method,
-                         cox = 'HR',
-                         cuminc = if (is.null(compare.args$type)) 'Cumul.inc difference'
-                         else switch(compare.args$type,
-                                     diff = 'Cumul.inc difference',
-                                     ratio = 'Cumul.inc ratio',
-                                     c306_abort('Illegal type for cumulative incidence comparison model: use "diff" or "ratio".')),
-                         rmst = if (is.null(compare.args$type)) 'RMST difference'
-                         else switch(compare.args$type,
-                                     diff = 'RMST difference',
-                                     lost.diff = 'RMTL difference',
-                                     ratio = 'RMST ratio',
-                                     lost.ratio = 'RMTL ratio',
-                                     c306_abort('Illegal type for RMST comparison model: use "diff", "ratio", "lost.diff" or "lost.ratio".')))
-  
+  labels <- ._survcomp_labels(compare.method, compare.args$type, ms)
+  compare.stat <- labels$stat
+
   header2 <- c(rep(ifelse(add.risk, "events/n (risk [%])", "events/n"), length(arm.names)), paste(compare.stat, if (p.compare) "(95%CI); p-value" else "(95%CI)"))
   header <- rbind(header1, header2)
   result <- rbind(header, "")
   
   ## footer
-  compare.note <- switch(
-    compare.stat,
-    'HR' = 'HR = hazard ratio',
-    'Cumul.inc difference' = 'Cumul.inc : Cumulative incidence',
-    'Cumul.inc ratio' = 'Cumul.inc : Cumulative incidence',
-    'RMST difference' = 'RMST: Restricted mean survival time',
-    'RMTL difference' = 'RMTL: Restricted mean time loss',
-    'RMST ratio' = 'RMST: Restricted mean survival time',
-    'RMTL ratio' = 'RMTL: Restricted mean time lost'
-  )
-  compare.name <- switch(compare.method,
-                         cuminc='Generalized linear models for cumulative incidence',
-                         cox=if (ms) 'Fine-Gray model' else 'Cox proportional hazards model',
-                         rmst='Restricted mean survival time model')
+  compare.note <- labels$note
+  compare.name <- labels$name
   footer <- c(
     paste0(compare.note, "; IQR = interquartile range."),
     paste(compare.stat, if (p.compare) "and p value", "were based on",
@@ -411,4 +387,41 @@ sstable.survcomp <- function(
   }
   if (!flextable) class(tab) <- c('ss_survcomp','ss_obj')
   return(tab)
+}
+
+# Labels of the comparison, shared by sstable.survcomp() and
+# sstable.survcomp.subgroup(): the statistic shown in the header (`stat`), the
+# abbreviation note (`note`) and the model name (`name`) used in the footer.
+._survcomp_labels <- function(compare.method, type, ms, call = rlang::caller_env()) {
+  stat <- switch(compare.method,
+                 cox = 'HR',
+                 cuminc = if (is.null(type)) 'Cumul.inc difference'
+                 else switch(type,
+                             diff = 'Cumul.inc difference',
+                             ratio = 'Cumul.inc ratio',
+                             c306_abort('Illegal type for cumulative incidence comparison model: use "diff" or "ratio".',
+                                        call = call)),
+                 rmst = if (is.null(type)) 'RMST difference'
+                 else switch(type,
+                             diff = 'RMST difference',
+                             lost.diff = 'RMTL difference',
+                             ratio = 'RMST ratio',
+                             lost.ratio = 'RMTL ratio',
+                             c306_abort('Illegal type for RMST comparison model: use "diff", "ratio", "lost.diff" or "lost.ratio".',
+                                        call = call)))
+  note <- switch(
+    stat,
+    'HR' = 'HR = hazard ratio',
+    'Cumul.inc difference' = 'Cumul.inc : Cumulative incidence',
+    'Cumul.inc ratio' = 'Cumul.inc : Cumulative incidence',
+    'RMST difference' = 'RMST: Restricted mean survival time',
+    'RMTL difference' = 'RMTL: Restricted mean time loss',
+    'RMST ratio' = 'RMST: Restricted mean survival time',
+    'RMTL ratio' = 'RMTL: Restricted mean time lost'
+  )
+  name <- switch(compare.method,
+                 cuminc = 'Generalized linear models for cumulative incidence',
+                 cox = if (ms) 'Fine-Gray model' else 'Cox proportional hazards model',
+                 rmst = 'Restricted mean survival time model')
+  list(stat = stat, note = note, name = name)
 }

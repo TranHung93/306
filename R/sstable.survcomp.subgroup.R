@@ -228,36 +228,10 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
     }
   }
   ## footer
-  compare.stat <- switch(compare.method,
-                         cox = 'HR',
-                         cuminc = if (is.null(compare.args$type)) 'Cumul.inc difference'
-                         else switch(compare.args$type,
-                                     diff = 'Cumul.inc difference', ratio = 'Cumul.inc ratio',
-                                     c306_abort('Illegal type for cumulative incidence comparison model: use "diff" or "ratio".')),
-                         rmst = if (is.null(compare.args$type)) 'RMST difference'
-                         else switch(compare.args$type,
-                                     diff = 'RMST difference',
-                                     lost.diff = 'RMTL difference',
-                                     ratio = 'RMST ratio',
-                                     lost.ratio = 'RMTL ratio',
-                                     c306_abort('Illegal type for RMST comparison model: use "diff", "ratio", "lost.diff" or "lost.ratio".')))
-  compare.note <- switch(
-    compare.stat,
-    'HR' = 'HR = hazard ratio',
-    'Cumul.inc difference' = 'Cumul.inc : Cumulative incidence',
-    'Cumul.inc ratio' = 'Cumul.inc : Cumulative incidence',
-    'RMST difference' = 'RMST: Restricted mean survival time',
-    'RMTL difference' = 'RMTL: Restricted mean time loss',
-    'RMST ratio' = 'RMST: Restricted mean survival time',
-    'RMTL ratio' = 'RMTL: Restricted mean time lost'
-  )
-  compare.name <- switch(compare.method,
-                         cuminc='Generalized linear models for cumulative incidence',
-                         cox=if (ms) 'Fine-Gray model' else 'Cox proportional hazards model',
-                         rmst='Restricted mean survival time model')
+  labels <- ._survcomp_labels(compare.method, compare.args$type, ms)
   footer <- c(
-    compare.note,
-    paste(compare.stat, "and p value were based on", paste0(compare.name, '.')),
+    labels$note,
+    paste(labels$stat, "and p value were based on", paste0(labels$name, '.')),
     sprintf(
       "Test for heterogeneity is an %s test for interaction between treatment effect and each subgroup in the survival model not including other variables.",
       if (compare.method == 'cox') 'Likelihood-ratio' else 'multivariate Wald'
