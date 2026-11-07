@@ -157,6 +157,13 @@ case, the other numbers in the same table were correct.
   the package is installed normally. The template `.Rproj` was left out of
   the built package by `.Rbuildignore`, so it was only created when the
   package was loaded from source.
+* `sstable.baseline()`, `sstable.ae()`, `sstable.survcomp()` and
+  `sstable.survcomp.subgroup()` with `flextable = TRUE` no longer fail when a
+  group or arm name contains an apostrophe or a backslash (e.g. "O'Brien"). They
+  failed with "unexpected symbol" or "unrecognized escape", because the header
+  labels were pasted into R code and run with `eval(parse())`. (A backslash
+  that forms a valid escape, such as a literal `\t`, did not fail but was
+  shown as a tab.) Output for other names is unchanged.
 
 ## Input checking
 

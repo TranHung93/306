@@ -397,46 +397,13 @@ sstable.survcomp <- function(
   #browser()
   ## flextable
   if (flextable) {
-    ## main table
-    tab <- flextable::flextable(as.data.frame(value))
-    
-    ## header
+    ## header: "Endpoint" spans both header rows
     header1 <- output[1, ]; header2 <- output[2, ]
     header2[1] <- header1[1]
-    assign("tab",
-           eval(parse(text = paste0("flextable::set_header_labels(tab,",
-                                    paste(paste0("V", 1:length(header1)), paste0("'", header1, "'"), sep = "=", collapse = ","),
-                                    ")"))))
-    assign("tab",
-           eval(parse(text = paste0("flextable::add_header(tab,",
-                                    paste(paste0("V", 1:length(header1)), paste0("'", header2, "'"), sep = "=", collapse = ","),
-                                    ", top = FALSE)"))))
-    
-    tab <- flextable::merge_v(tab, part = "header")
-    
+    tab <- ._ss_flextable_two_headers(as.data.frame(value), header1, header2, merge.h = FALSE)
     if (any(value == "-")) footer <- c(footer, "- : value cannot be estimated.")
-    
-    for (k in (1:length(footer))) {
-      tab <- flextable::add_footer(tab, V1 = footer[k], top = FALSE)
-      tab <- flextable::merge_at(tab, i = k, j = 1:length(header1), part = "footer")
-    }
-    
-    ## format
-    ### width
-    tab <- flextable::autofit(tab)
-    ### alignment
-    tab <- flextable::align(tab, j = 1, align = "left", part = "all")
-    ### faces of header
-    tab <- flextable::bold(tab, part = "header")
-    ### background
-    tab <- flextable::bg(tab, i = seq(from = 1, to = nrow(value), by = 2), j = 1:length(header1), bg = bg, part = "body")
-    ### border
-    tabbd <- officer::fp_border(color="black", width = 1.5)
-    tab <- flextable::border_remove(tab)
-    tab <- flextable::hline(tab, border = tabbd, part = "header")
-    tab <- flextable::hline_top(tab, border = tabbd, part = "all")
-    tab <- flextable::hline_bottom(tab, border = tabbd, part = "body")
-    
+    tab <- ._ss_flextable_footer(tab, footer, length(header1))
+    tab <- ._ss_flextable_finish(tab, bg)
   } else {
     tab <- list(table = output,
                 footer = footer)

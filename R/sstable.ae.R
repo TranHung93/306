@@ -570,46 +570,14 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
     #   tab
     # }))
 
-    ## main table
+    ## header: the arm name spans its two columns
     colnames(ae_value) <- rep("", ncol(ae_value))
-    tab <- flextable::flextable(as.data.frame(ae_value))
-
-    ## header
     header1[1] <- header2[1]
     header1[seq(from = 2, to = 2 * length(gr.lev), by = 2)] <- header1[seq(from = 2, to = 2 * length(gr.lev), by = 2) + 1]
-
     if (test) header2[length(header1)] <- header1[length(header1)]
-
-    assign("tab",
-           eval(parse(text = paste0("flextable::set_header_labels(tab,",
-                                    paste(paste0("V", 1:length(header1)), paste0("'", header1, "'"), sep = "=", collapse = ","),
-                                    ")"))))
-    assign("tab",
-           eval(parse(text = paste0("flextable::add_header(tab,",
-                                    paste(paste0("V", 1:length(header1)), paste0("'", header2, "'"), sep = "=", collapse = ","),
-                                    ", top = FALSE)"))))
-
-    tab <- flextable::merge_h(tab, part = "header")
-    tab <- flextable::merge_v(tab, part = "header")
-
-    ## footer
+    tab <- ._ss_flextable_two_headers(as.data.frame(ae_value), header1, header2)
     tab <- ._ae_add_footer(tab, test = test, chisq.test = chisq.test, footer = footer)
-
-    ## format
-    ### width
-    tab <- flextable::autofit(tab)
-    ### alignment
-    tab <- flextable::align(tab, j = 1, align = "left", part = "all")
-    ### faces of header
-    tab <- flextable::bold(tab, part = "header")
-    ### background
-    tab <- flextable::bg(tab, i = seq(from = 1, to = nrow(ae_value), by = 2), j = 1:length(header1), bg = bg, part = "body")
-    ### border
-    tabbd <- officer::fp_border(color="black", width = 1.5)
-    tab <- flextable::border_remove(tab)
-    tab <- flextable::hline(tab, border = tabbd, part = "header")
-    tab <- flextable::hline_top(tab, border = tabbd, part = "all")
-    tab <- flextable::hline_bottom(tab, border = tabbd, part = "body")
+    tab <- ._ss_flextable_finish(tab, bg)
     if (print.aetype.header){
       tab <- flextable::bold(
         tab,
