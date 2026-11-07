@@ -76,10 +76,10 @@ sstable.baseline.edit <- function(value, formula, data, bycol = TRUE, pooledGrou
 
   # update order of variable customize for sstable.baseline.edit - hungtt
   value <- as.data.frame(value)
-  dummy_df <- data.frame(V1= varname, order =seq(1:length(varname))*1000)
+  dummy_df <- data.frame(V1= varname, order =seq_along(varname)*1000)
   value <- full_join(value, dummy_df, by = "V1")
 
-  for (i in 1:nrow(value))
+  for (i in seq_len(nrow(value)))
     {if (is.na(value[i,ncol(value)])) {value[i,ncol(value)] <- (value[i-1,ncol(value)]) + 1}}
 
   # Identify duplicated values in column V1 that are also in varname

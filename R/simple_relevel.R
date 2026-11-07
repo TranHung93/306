@@ -37,7 +37,7 @@ simple_relevel.data.frame <- function(x, ..., by){
     x <- rlang::eval_tidy(data.quo)
   }
   data <- x
-  dep.vars.2 <- sapply(dep.vars, function(dep.var) rlang::quo_name(dep.var))
+  dep.vars.2 <- vapply(dep.vars, function(dep.var) rlang::quo_name(dep.var), character(1))
   by <- rlang::enquo(by)
   by.2 <- rlang::quo_name(by)
   if (!is.factor(data[[by.2]])) data[[by.2]] <- as.factor(data[[by.2]])

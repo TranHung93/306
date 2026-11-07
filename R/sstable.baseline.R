@@ -215,7 +215,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
 
   ## get summary
   value <- do.call(rbind,
-                   lapply(1:ncol(x), function(i) {
+                   lapply(seq_len(ncol(x)), function(i) {
                      sstable.baseline.each(varname = varname[i][[1]], label_list = label_list[i][[1]],
                                            x = x[, i], y = y, z = z, bycol = bycol,
                                            pooledGroup = pooledGroup, statistics = statistics,
@@ -294,15 +294,15 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
 
   continuous <- ifelse(varlist_lower %in% cont_lower, TRUE, ifelse(varlist_lower %in% cate_lower, FALSE, NA)) #assign var type
 
-  continuous <- sapply(1:ncol(x), function(i) {
+  continuous <- vapply(seq_len(ncol(x)), function(i) {
     out <- ifelse(is.na(continuous[i]),
                   ifelse(any(c("factor", "character", "logical") %in% class(x[, i])) |
                            (any(c("numeric", "integer") %in% class(x[, i])) & length(unique(na.omit(x[, i]))) <= 5), FALSE, TRUE),
                   continuous[i])
     return(out)
-  })
+  }, logical(1))
 
-  for (i in (1:ncol(x))) {
+  for (i in seq_len(ncol(x))) {
     if (continuous[i] == FALSE & !is.factor(x[, i])) x[, i] <- factor(x[, i], levels = sort(unique(na.omit(x[, i]))))
   }
 
@@ -311,7 +311,7 @@ sstable.baseline <- function(formula, data, bycol = TRUE, pooledGroup = FALSE, k
     c306_abort("Row-wise variable must be categorical when a third dimension variable exists.", call = call)
 
   ## if use by-row layout, x must be categorical
-  if (bycol == FALSE & any(sapply(1:ncol(x), function(i) is.factor(x[,i])) == FALSE))
+  if (bycol == FALSE & any(vapply(seq_len(ncol(x)), function(i) is.factor(x[,i]), logical(1)) == FALSE))
     c306_abort("Row-wise variable must be categorical in by-row layout (`bycol = FALSE`).", call = call)
 
   ## determine type of z

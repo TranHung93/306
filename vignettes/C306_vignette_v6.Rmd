@@ -323,7 +323,7 @@ baseline.sstable1 <- sstable.baseline(
   data = baseline_data,
   cont = c("Pain_score"),
   pooledGroup = FALSE,
-  flextable = F,
+  flextable = FALSE,
   footer = "we can add any note here and it will appear at the bottom of the table",
   bg = "lightblue" ,
   test= TRUE)
@@ -334,7 +334,7 @@ baseline.sstable2 <- sstable.baseline(
   cont = c("bmi"), 
   statistics = "Mean (sd)",
   pooledGroup = FALSE,
-  flextable = F,
+  flextable = FALSE,
   footer = "we can add any note here and it will appear at the bottom of the table",
   bg = "lightblue" ,
   test= TRUE)
@@ -471,7 +471,7 @@ ae_table <- sstable.ae(
   pcutoff = 0.001,
   chisq.test = TRUE,
   footer = c("Example footnote for adverse event summary table."),
-  flextable = T,
+  flextable = TRUE,
   bg = "#F2EFEE"
 )
 

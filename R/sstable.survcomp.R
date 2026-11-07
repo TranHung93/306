@@ -179,7 +179,7 @@ sstable.survcomp <- function(
                       " (", formatC(100 * risk, digits, format = "f"), ")", sep = "")
   }
   idx <- which(arm.names %in% unique(data[, arm.var]))
-  result[3, 1:length(arm.names)] <- rep("-", length(arm.names))
+  result[3, seq_along(arm.names)] <- rep("-", length(arm.names))
   result[3, idx] <- events.n
   
   
@@ -205,7 +205,7 @@ sstable.survcomp <- function(
         compare.args$etype <- compare.args$cause
         compare.args$cause <- NULL
         fml <- force(update(model, Surv(fgstart,fgstop,fgstatus)~.))
-        fg <- do.call(survival::finegray, compare.args)
+        fg <- do.call(survival::finegray, compare.args) # nolint: object_usage_linter. used in eval(substitute()) below
         eval(substitute(survival::coxph(fml, data = fg,  weights=fgwt), list(fml=fml)))
       }
       est <- coef(fit.coxph)[1:(length(arm.names)-1)] #trinhdhk: if there were more covariables than just arm, subsetting this to only get the arm
@@ -343,7 +343,7 @@ sstable.survcomp <- function(
     # not 1-row matrices, when only one arm is present)
     q <- quantile(fit.surv0, probs = c(0.5, 0.25, 0.75))
     qfit <- do.call(cbind, lapply(q, function(m) if (is.matrix(m)) m else matrix(m, nrow = 1)))
-    result[5:7, 1:length(arm.names)] <- "-"
+    result[5:7, seq_along(arm.names)] <- "-"
     result[5:7, idx] <- apply(formatC(qfit, digits, format = "f"), 1, function(x){
       sapply(1:3, function(z) paste(x[z], " (", x[z + 3], ", ", x[z + 6], ")", sep = ""))
     })

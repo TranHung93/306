@@ -47,7 +47,6 @@ explicit.lm <- function(x, ...){
   mf[[1L]] <- as.name("model.frame")
   names(mf)[2L] <- "formula"
   mf <- eval(mf, parent.frame())
-  y <- model.response(mf)
   x <- model.matrix(lm)
   new_data <- cbind(mf, model.matrix(lm)[,!colnames(x) %in% c('(Intercept)', colnames(mf)), drop=FALSE])
   x_names <- paste0('`', gsub('(^`)|(`$)', '', colnames(x)[-1]), '`')

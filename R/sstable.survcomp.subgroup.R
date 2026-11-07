@@ -111,7 +111,6 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
     data$.subgroup.var <- data[, subgroup.char[k]]
     if (!inherits(data[, subgroup.char[k]], 'factor'))  data[, subgroup.char[k]] <- factor(data[, subgroup.char[k]])
     factor.levels <- levels(data[, subgroup.char[k]])
-    compare.args.subgroup <- compare.args
     # Add interaction test for heterogeneity
     result <- rbind(result, "")
     result[nrow(result), 1] <- ifelse(is.null(attr(data[, subgroup.char[k]], "label")),

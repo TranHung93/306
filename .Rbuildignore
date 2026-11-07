@@ -6,3 +6,4 @@
 ^README\.Rmd$
 ^data-raw$
 ^tests/testthat/fixtures$
+^\.lintr$

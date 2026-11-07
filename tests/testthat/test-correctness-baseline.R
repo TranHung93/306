@@ -2,7 +2,7 @@
 # (table, quantile, wilcox.test, fisher.test, chisq.test) on the same data.
 
 baseline_tab <- function(formula, ...) {
-  d <- baseline_fixture()
+  d <- baseline_fixture() # nolint: object_usage_linter. (defined in helper-data.R)
   sstable.baseline(formula, d, statistics = "median (Q1-Q3)",
                    digits.numeric = "TRUE ~ 4", digits.nonnumeric = "TRUE ~ 4",
                    pdigits = 6, pcutoff = 1e-12, ...)$table

@@ -147,8 +147,9 @@ gg_ajsurvplot2 <- function(formula, data, weights, subset, na.action, main.event
     new.arg
   })
 
-  fg1 <- do.call(survival::finegray, fgargs.each[[1]])
-  fg2 <- do.call(survival::finegray, fgargs.each[[2]])
+  # fg1 and fg2 are used inside eval(substitute()) below
+  fg1 <- do.call(survival::finegray, fgargs.each[[1]]) # nolint: object_usage_linter.
+  fg2 <- do.call(survival::finegray, fgargs.each[[2]]) # nolint: object_usage_linter.
   fml <- force(update(formula, survival::Surv(fgstart,fgstop,fgstatus)~.))
 
   sf1 <- eval(substitute(survival::survfit(fml, data = fg1,  weights=fgwt), list(fml=fml)))
@@ -173,7 +174,7 @@ gg_ajsurvplot2 <- function(formula, data, weights, subset, na.action, main.event
     )
   facet.vars <- formula.tools::get.vars(facet.by)
   for (v in facet.vars) dt$strata <- gsub(
-    paste0('(,\\s)?',v,'=.*(,\\s|$)'), '', dt$strata, perl=T)
+    paste0('(,\\s)?',v,'=.*(,\\s|$)'), '', dt$strata, perl=TRUE)
   plt <- if (all(dt$strata == ''))
    ggplot(dt,aes(x=time, y=estimate, ymin=conf.low, ymax=conf.high, group=Event))
   else

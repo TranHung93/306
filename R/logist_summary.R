@@ -68,7 +68,6 @@ logist_summary <- function(fit, method = c('lik.ratio', 'wald'), stat_digits=2, 
                        lower.CI = exp(ci[,1]), upper.CI = exp(ci[,2]))
 
   has.intercept <- (names(coef(fit))[1]=="(Intercept)")
-  any.ia <- any(attr(terms(formula(fit)),"order")>1)
   logLik.full <- logLik(structure(fit, class = 'glm'))
   x <- names(coef(fit))
   y <- model.response(model.frame(fit, drop.unused.levels = TRUE))

@@ -1,0 +1,44 @@
+linters: lintr::linters_with_defaults(
+    # Style: the package keeps its existing style, so style-only linters are
+    # off (no mass restyling).
+    assignment_linter = NULL,
+    brace_linter = NULL,
+    commas_linter = NULL,
+    commented_code_linter = NULL,
+    function_left_parentheses_linter = NULL,
+    indentation_linter = NULL,
+    infix_spaces_linter = NULL,
+    line_length_linter = NULL,
+    object_name_linter = NULL,
+    paren_body_linter = NULL,
+    pipe_consistency_linter = NULL,
+    pipe_continuation_linter = NULL,
+    quotes_linter = NULL,
+    return_linter = NULL,
+    semicolon_linter = NULL,
+    spaces_inside_linter = NULL,
+    spaces_left_parentheses_linter = NULL,
+    trailing_blank_lines_linter = NULL,
+    trailing_whitespace_linter = NULL,
+    whitespace_linter = NULL,
+    # Correctness linters from the defaults stay on: object_usage_linter
+    # (unused variables), seq_linter (1:length()), T_and_F_symbol_linter,
+    # vector_logic_linter (| and & in if()), equals_na_linter, and others.
+    # Added: debugging and search-path calls that must not be in package code.
+    undesirable_function_linter = lintr::undesirable_function_linter(
+      fun = c(
+        browser = "remove debugging code",
+        debug = "remove debugging code",
+        debugonce = "remove debugging code",
+        require = "use pkg::fun() and Imports",
+        attach = "use pkg::fun() or with()",
+        setwd = "use withr::with_dir()"
+      ),
+      symbol_is_undesirable = FALSE
+    )
+  )
+exclusions: list(
+    # project templates copied into users' projects, not package code
+    "inst/structure"
+  )
+encoding: "UTF-8"

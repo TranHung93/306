@@ -282,7 +282,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
   ae_arm <- merge(idarm, ae, by = "id", all.y = TRUE) %>%
     mutate(arm = addNA(factor(as.character(arm), levels = arm_lev, exclude = NULL), ifany = TRUE),
            aetype = addNA(factor(as.character(aetype), levels = aetype_lev, exclude = NULL), ifany = TRUE))
-  idarm2 <- ae_arm |> select(id, arm)
 
   ## calculate episodes and patients
   ae_count <- ae_arm %>%
@@ -364,7 +363,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
                              rep('',ncol(ae_value)-1-2*length(arm_lev))
       ),.x))
 
-    grouptitle_index <- ae_value.headless %>% group_rows() %>% sapply(., function(x) head(x, 1))
+    grouptitle_index <- ae_value.headless %>% group_rows() %>% vapply(., function(x) head(x, 1), integer(1))
 
     ae_value.headless <-
       ae_value.headless %>%
@@ -410,7 +409,7 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
       return(format.pval(chi.out$p.value,eps = pcutoff, digits = pdigits, scientific = FALSE))
     }
 
-    pval <- sapply(1:nrow(value), function(i) {
+    pval <- sapply(seq_len(nrow(value)), function(i) {
       idx <- seq(from = i, to = length(patient_n), by = nrow(value))
       mat <- matrix(c(patient_n[idx], patient_N[idx] - patient_n[idx]), nrow = 2, byrow = TRUE)
       out <- if (chisq.test) {
@@ -457,8 +456,8 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
       mutate_at(as.data.frame(ae_value, stringsAsFactors = FALSE),
                 vars(matches('(^pt.\\d)|(^ep.\\d)'), dplyr::all_of(dummy.col.name)), as.numeric) %>%
       mutate(
-        pt.all = by(select(., starts_with('pt.')), 1:nrow(.), sum),
-        ep.all = by(select(., starts_with('ep.')), 1:nrow(.), sum)
+        pt.all = by(select(., starts_with('pt.')), seq_len(nrow(.)), sum),
+        ep.all = by(select(., starts_with('ep.')), seq_len(nrow(.)), sum)
       )
 
     ae_value.group <- lapply(seq_along(split.parts),

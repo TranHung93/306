@@ -59,7 +59,7 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
   base_lv <- levels(as.factor(mf[[base_var]]))
   summary_vars <- formula.tools::lhs.vars(formula)
   ._assert_ia(base_var, all_ia$ia.vars)
-  has_base <- sapply(all_ia$ia.vars, function(ia_var) base_var %in% ia_var)
+  has_base <- vapply(all_ia$ia.vars, function(ia_var) base_var %in% ia_var, logical(1))
   base_ia <- sapply(all_ia, `[`, has_base, simplify = FALSE)
   summary_vars.auto <-
     unname(unlist(lapply(base_ia$ia.vars,function(ia.var) ia.var[ia.var != base_var])))
@@ -68,7 +68,6 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
   {
     ._assert_ia(summary_vars, summary_vars.auto)
   } else summary_vars <- summary_vars.auto
-  y <- model.response(mf)
   ci.p <- sapply(base_lv, function(lv){
     new_mf <- mf
     new_mf[[base_var]] <- relevel(as.factor(new_mf[[base_var]]), ref = lv)
@@ -84,11 +83,11 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
     if (method == 'lik.ratio'){
       logLik.full <- logLik(new_model)
       ci.p <- sapply(summary_vars, function(sv){
-        ci.p.sv <- ._ci_p_calc(sv, new_mf, new_mm, new_model, wald = FALSE, logLik.full = logLik.full)
+        ._ci_p_calc(sv, new_mf, new_mm, new_model, wald = FALSE, logLik.full = logLik.full)
       }, simplify = FALSE)
     } else {
       ci.p <- sapply(summary_vars, function(sv){
-        ci.p.sv <- ._ci_p_calc(sv, new_mf, new_mm, new_model, wald = TRUE)
+        ._ci_p_calc(sv, new_mf, new_mm, new_model, wald = TRUE)
       }, simplify = FALSE)
     }
     ci.p.t <- purrr::transpose(ci.p)
@@ -113,7 +112,7 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
                                               p_digits, format = 'f')
                   .out
                 }, simplify = FALSE)
-  if (all(sapply(out, nrow) == 1) & simplify){
+  if (all(vapply(out, nrow, integer(1)) == 1) & simplify){
     msg <- paste('- Effect table for', rownames(out[[1]]))
     grp <- names(out)
     out <- do.call(rbind, out)

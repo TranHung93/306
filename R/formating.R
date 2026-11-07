@@ -29,7 +29,6 @@ myformat.data <- function(data, info){
   #- missing: coding for missing values
 
   ## recognize variable in data
-  allvars <- tolower(names(data))
   flag <- names(data)[tolower(names(data)) %in% tolower(na.omit(info$varname))]
   if (length(flag) == 0) c306_abort("No variable in this data is present in `info$varname`.")
   info <- info[na.omit(match(tolower(flag), tolower(info$varname))),]

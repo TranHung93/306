@@ -23,7 +23,7 @@ getsign <- function(fml){
   }
 
   out <- .getsign(fml)
-  out[length(out):1]
+  out[rev(seq_along(out))]
 }
 
 # extract information from formula for sstable ----------------------------

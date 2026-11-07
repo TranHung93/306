@@ -158,26 +158,26 @@ ss_guess_format <- function(sstable){
 
 #' @exportS3Method ss_guess_format default
 ss_guess_format.default <- function(sstable){
-  guess <- sapply(1:nrow(sstable),
+  guess <- vapply(1:nrow(sstable),
                   function(i){
                     r <- sstable[i,]
                     if (isTRUE(grepl("header", rownames(sstable)[i]))) return("header")
                     if (all(is.na(suppressWarnings(as.numeric(r)))) && i <= 2) return("header")
                     if (sum(r == '', na.rm=TRUE) == ncol(sstable)-1) return("section")
                     return("body")
-                  })
+                  }, character(1))
   return(guess)
 }
 
 #' @exportS3Method ss_guess_format ae_tbl
 ss_guess_format.ae_tbl <- function(sstable){
-  guess <- sapply(1:nrow(sstable),
+  guess <- vapply(1:nrow(sstable),
                   function(i){
                     if (i <= 2) return('header')
                     r <- sstable[i, ]
                     if (sum(r == '', na.rm=TRUE) >= 2) return('section')
                     return('body')
-                  })
+                  }, character(1))
   return(guess)
 }
 
@@ -236,7 +236,6 @@ ss_flextable.ss_obj <- ss_flextable.list
 ss_flextable.default <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
   if (!inherits(sstable, 'formatted_sstable')) sstable <- ss_format(sstable, ..., .guess = TRUE)
   header <- which(grepl("header", rownames(sstable)))
-  body <- which(grepl("body", rownames(sstable)))
   section <-  which(grepl("section", rownames(sstable)))
 
   colnames(sstable) <- NULL
@@ -392,7 +391,6 @@ ss_huxtable.default <- function(sstable, footer = NULL,
   if (missing(caption_pos)) caption_pos <- 'bottomcenter' else caption_pos <- match.arg(caption_pos)
   if (!inherits(sstable, 'formatted_sstable')) sstable <- ss_format(sstable, ..., .guess = TRUE)
   header <- which(grepl("header", rownames(sstable)))
-  body <- which(grepl("body", rownames(sstable)))
   section <-  which(grepl("section", rownames(sstable)))
 
   colnames(sstable) <- NULL
@@ -723,7 +721,7 @@ as_sstable.subgroup_logist_summary <- function(x, include_footnote = TRUE, flext
                    lapply(seq_along(tables),
                           function(i) rbind(headers[i,], tables[[i]])))
   table <- rbind(first_header, table)
-  sstable <- ss_format(table, header = 1, section = (seq_len(length(tables)) - 1)*(nrow(tables[[1]])+1)+2)
+  sstable <- ss_format(table, header = 1, section = (seq_along(tables) - 1)*(nrow(tables[[1]])+1)+2)
   if (flextable) return(ss_flextable(sstable, footer = footer))
   if (include_footnote) return(list(table = sstable, footer = footer))
   sstable
