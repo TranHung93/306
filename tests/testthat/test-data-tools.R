@@ -51,6 +51,23 @@ test_that("inspect.data honours check_missing = FALSE and conditions", {
   expect_false(any(res2$error == "Out of range: age > 100"))
 })
 
+test_that("inspect.each finds missing values for every type, and empty strings where they can occur", {
+  ie <- C306:::inspect.each
+  missing_rows <- function(x) ie(x, seq_along(x), "v", type = "other")$index
+  expect_identical(missing_rows(c(1.5, NA, 3)), 2L)
+  expect_identical(missing_rows(c(1L, NA)), 2L)
+  expect_identical(missing_rows(c(TRUE, NA, FALSE)), 2L)
+  expect_identical(missing_rows(as.Date(c("2024-01-01", NA))), 2L)
+  expect_identical(missing_rows(c("x", "", NA, " ")), 2:3)
+  expect_identical(missing_rows(factor(c("a", "", NA))), 2:3)
+  expect_null(ie(c(1, 2), 1:2, "v", type = "numeric"))
+  # rows from all checks, in check order: missing, below range, above range
+  res <- ie(c(5, NA, -1, 200), c(10L, 20L, 30L, 40L), "age", "numeric", "0;100")
+  expect_identical(res$index, c(20L, 30L, 40L))
+  expect_identical(res$error, c("Missing value for age", "Out of range: age < 0",
+                                "Out of range: age > 100"))
+})
+
 test_that("getlabel uses attributes, units and meta", {
   x <- structure(c(1, 2), label = "Weight", unit = "kg", scale = 10)
   expect_identical(getlabel(x), "Weight [kg]")

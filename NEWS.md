@@ -202,6 +202,13 @@ required by R CMD check). Calls with positional arguments work as before.
   `rbind.ss_obj()` now take the tables through `...`. `rbind(tbl1, tbl2)`,
   positional `header`/`footer`, and `tbl1 = `/`tbl2 = ` all keep working.
 
+## Performance
+
+* `inspect.data()` is about 7 times faster on large data (e.g. 5.8 s to 0.8 s
+  for 20,000 rows × 60 numeric variables). Numeric variables are no longer
+  converted to text to look for empty strings, and each variable's errors are
+  collected before one data frame is built. The output is unchanged.
+
 ## Package infrastructure
 
 * This version is maintained independently at
