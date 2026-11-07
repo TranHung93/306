@@ -6,7 +6,6 @@
 
 ## Check legitibility
 ss_legit <- function(sstable){
-  # requireNamespace('tibble')
   if (!is.matrix(sstable) & !is.data.frame(sstable))
     c306_abort('`sstable` must be a matrix or data frame.', call = NULL)
   return(as.matrix(sstable))
@@ -139,7 +138,6 @@ ss_format <- function(sstable, header = c(), section = c(), body = c(), template
     b <- which(guess == 'body')
     # filling the undecided row with auto guess
     header <- unique(c(h[!h %in% no.guess], header))
-    # if (length(colnames(sstable))) header <- c('colnames', header)
     section <- unique(c(s[!s %in% no.guess], section))
     body <- unique(c(b[!b %in% no.guess], body))
   }

@@ -48,8 +48,6 @@ gg_boxcox.default <- function (object, lambda = seq(-2, 2, 1/10),
                        ylab = "log-Likelihood", ...)
 {
   object <- lm(object, y = TRUE, qr = TRUE, ...)
-  # if (is.null(object$y) || is.null(object$qr))
-  #   object <- update(object, y = TRUE, qr = TRUE, ...)
   y <- object$y
   xqr <- object$qr
   if (any(y <= 0))

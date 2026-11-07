@@ -113,9 +113,6 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
                                               p_digits, format = 'f')
                   .out
                 }, simplify = FALSE)
-  # message('- CI and p-value are based on ',
-  #         switch(method, wald = 'Wald', lik.ratio = 'Likelihood ratio'),
-  #         ' test with 95% level of confidence.')
   if (all(sapply(out, nrow) == 1) & simplify){
     msg <- paste('- Effect table for', rownames(out[[1]]))
     grp <- names(out)

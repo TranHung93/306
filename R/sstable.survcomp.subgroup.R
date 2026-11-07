@@ -78,18 +78,12 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
   if (length(NAs)){
     warning(sprintf('Missing values on observation(s) %s',
                     paste(NAs,collapse=', ')))
-    # data <- data[seq_len(nrow(data))[-NAs],]
     data <- dplyr::slice(data, seq_len(nrow(data))[-NAs])
   }
   compare.method <- match.arg(compare.method)
   fit.surv0 <- survfit(update(base.model, .~1), data=data)
   ms <- inherits(fit.surv0, 'survfitms')
   
-  # arm.var <- if (length(base.model[[3]]) > 1) {
-  #   deparse(base.model[[3]][[2]])
-  # } else {
-  #     deparse(base.model[[3]])
-  #   }
   arm.var <- formula.tools::rhs.vars(base.model)[[1]]
   if (!inherits(data[, arm.var], "factor")) data[, arm.var] <- factor(data[, arm.var])
   
@@ -143,7 +137,6 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
       } else {
         ia.args <- compare.args
         ia.args$add.prop.haz.test <- NULL
-        # ia.args$formula <- ia.model
         ia.args$data <- data
         
         type <- if (is.null(ia.args$type)) 'diff' else ia.args$type
@@ -172,7 +165,6 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
           warning(sprintf('Missing %s on observation(s) %s',
                           subgroup.char[k],
                           paste(NAs,collapse=', ')))
-          # data <- data[seq_len(nrow(data))[-NAs],]
           ia.args$data <- dplyr::slice(data, seq_len(nrow(data))[-NAs])
         }
         

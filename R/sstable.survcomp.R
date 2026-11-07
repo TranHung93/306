@@ -102,14 +102,12 @@ sstable.survcomp <- function(
   if (length(NAs)){
     warning(sprintf('Missing values on observation(s) %s',
                     paste(NAs,collapse=', ')))
-    # data <- data[seq_len(nrow(data))[-NAs],]
     data <- dplyr::slice(data, seq_len(nrow(data))[-NAs])
   }
   
   compare.method <- match.arg(compare.method)
   reference.arm <- match.arg(reference.arm)
   
-  # arm.var <- if (length(model[[3]]) > 1) {deparse(model[[3]][[2]])} else {deparse(model[[3]])}
   arm.var <- formula.tools::rhs.vars(model)[[1]]
   if (!inherits(data[, arm.var], "factor")) data[, arm.var] <- factor(data[, arm.var])
   ### [trinhdhk] 2024-04: reverse level of y for better summary
@@ -259,7 +257,6 @@ sstable.survcomp <- function(
       }
     }
   } else {
-    # requireNamespace('eventglm')
     if (length(events.n) < length(arm.names)) {
       result[3, length(arm.names) + 1] <- "-"
     } else {
@@ -302,7 +299,6 @@ sstable.survcomp <- function(
       }
       
       # Perform rmeanglm
-      # rmeanglm <- eventglm::rmeanglm
       fitter <- if (compare.method == 'rmst') eventglm::rmeanglm else eventglm::cumincglm
       fit.rmst <- do.call(fitter, compare.args)
       est <- coef(fit.rmst)[2:(length(arm.names))] # get the coef for arm

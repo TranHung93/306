@@ -69,9 +69,6 @@ sstable.baseline.edit <- function(value, formula, data, bycol = TRUE, pooledGrou
     y <- factor(c(as.character(y), rep(ypool, nrow(dat))), levels = c(levels(y), ypool), exclude = NULL)
     z <- if (!is.null(z)) factor(c(z, z), levels = unique(na.omit(z))) else NULL
   }
-  # else{
-  #   z <- if (!is.null(z)) factor(z, levels = unique(na.omit(z))) else NULL
-  # }
 
   ## get variable name
   ## (same labels as the first column built by sstable.baseline)

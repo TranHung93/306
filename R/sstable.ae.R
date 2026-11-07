@@ -125,10 +125,8 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
              })
     tbl2 <- tbl2p[[1]]
 
-    # tbl2$table <- tbl2$table[-c(1:(3+n.grade)),]
     for (tbl3 in tbl2p[-1]) tbl2 <- ._do_rbind(tbl2, tbl3, header=c(1:(3+n.grade)))
     out <- ._do_rbind(tbl1, tbl2, header=c(1:(3+n.grade)))
-    # rownames(out)[c(3,4,5,8)] <- 'section'
     if (flextable) {
       out <- ss_flextable(out, bg = bg)
       out <- flextable::delete_part(out, part = "footer")
@@ -198,9 +196,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
   ae_data[[aetype.var]] = as.character(ae_data[[aetype.var]])
   ae_data[[aetype.var]] = structure(ae_data[[aetype.var]], label=lbl)
   if (any(is.na(ae_data[[aetype.var]]))) {
-    #if (is.factor(ae_data[[var]]))
-    #levels(ae_data[[var]]) <- c(levels(ae_data[[var]]), na.text )
-
     ae_data[[aetype.var]][is.na(ae_data[[aetype.var]])] <- na.text
   }
 
@@ -531,13 +526,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
   }
 
   ### footer
-  # footer <- c("**n episode**: total number of events",
-  #             "**n patient**: number of patients with at least one event",
-  #             if (any(value == "-")) "- : value cannot be estimated." else NULL,
-  #             if (test) {paste("p-values are based on",
-  #                              ifelse(chisq.test == FALSE, "Fisher's exact test",
-  #                                     "chi-square test if expected value under null hypothesis > 1 in each cell; otherwise Fisher's exact test is used"))} else NULL,
-  #             footer)
 
 
   if (matrix.raw) {tab <- ae_value}

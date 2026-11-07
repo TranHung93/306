@@ -83,7 +83,6 @@ summarise_f <- summarize_f <- function(.data, ...){
 #' @rdname summarise_f
 #' @export
 summarise_f.data.frame <- function(.data, ...){
-  # .fun <- lapply(rlang::enquos(...), rlang::quo_get_expr)
   .fun <- rlang::enexprs(...)
   group_names <- dplyr::group_vars(.data)
   if (!data.table::is.data.table(.data)) data_tbl <- data.table::as.data.table(.data) else data_tbl <- .data
