@@ -49,79 +49,12 @@ sstable.baseline.edit <- function(value, formula, data, bycol = TRUE, pooledGrou
                                   test = FALSE, pdigits = 3, pcutoff = 0.0001, keepEmptyString = T,
                                   chisq.test = FALSE, correct = FALSE, simulate.p.value = FALSE, B = 2000,
                                   workspace = 1000000, hybrid = FALSE, footer = NULL, flextable = FALSE, bg = "#F2EFEE") {
-  ## get information from formula
-  info <- sstable.formula(formula)
+  ## data, row variables (x), column variable (y), third dimension (z)
+  prep <- ._baseline_prepare(formula, data, keepEmptyGroup = keepEmptyGroup, cont = cont,
+                             cate = cate, bycol = bycol)
+  data <- prep$data; dat <- prep$dat; x <- prep$x
+  y <- prep$y; z <- prep$z; continuous <- prep$continuous
 
-  ## strip the tibble class which causes issue - trinhdhk
-  data <- as.data.frame(data)
-
-  ## get data
-  dat <- model.frame(info$formula0, data = data, na.action = NULL)
-  x <- xlabel <- dat[, info$index$x, drop = FALSE]
-  y <- if (info$index$y > 0) dat[, info$index$y] else NULL
-  z <- if (info$index$z > 0) dat[, info$index$z] else NULL
-
-  ## y must be categorical variable
-  if (!is.null(y)) {
-    if (all(!c("character", "factor", "logical") %in% class(y)) |
-        (any(c("numeric", "integer") %in% class(y)) & length(unique(na.omit(y))) > 5)) {
-      c306_abort("Column-wise variable must be categorical (character, factor, logical, or numeric with at most 5 values).")
-    }
-    if (is.factor(y)){
-      ### [trinhdhk] 2024-04: reverse level of y for better summary
-      y <- ._lv_rev_(y)
-      if (!keepEmptyGroup) y <- droplevels(y)
-      y <- addNA(y, ifany = TRUE)
-    } else {
-      ### reversed like factor arms (and like sstable.ae)
-      y <- factor(as.character(y), levels = sort(unique(as.character(y)), decreasing = TRUE, na.last = TRUE), exclude = NULL)
-    }
-  } else {
-    y <- factor(rep("Total", nrow(dat)))
-  }
-
-  #browser()
-
-  ## determine type of x (argument: cont and cate)
-  varlist <- getvar(formula) #hungtt
-  varlist <- varlist[-length(varlist)] #remove the y name
-
-  # Convert varlist, cont, and cate to lowercase for case-insensitive comparison
-  varlist_lower <- tolower(varlist)
-  cont_lower <- tolower(cont)
-  cate_lower <- tolower(cate)
-
-  continuous <- ifelse(varlist_lower %in% cont_lower, TRUE, ifelse(varlist_lower %in% cate_lower, FALSE, NA)) #assign var type
-
-  continuous <- sapply(1:ncol(x), function(i) {
-    out <- ifelse(is.na(continuous[i]),
-                  ifelse(any(c("factor", "character", "logical") %in% class(x[, i])) |
-                           (any(c("numeric", "integer") %in% class(x[, i])) & length(unique(na.omit(x[, i]))) <= 5), FALSE, TRUE),
-                  continuous[i])
-    return(out)
-  })
-
-
-  for (i in (1:ncol(x))) {
-    if (continuous[i] == FALSE & !is.factor(x[, i])) x[, i] <- factor(x[, i], levels = sort(unique(na.omit(x[, i]))))
-  }
-
-  ## if z exists, x must be categorical
-  if (!is.null(z) & any(continuous == TRUE)) c306_abort("Row-wise variable must be categorical when a third dimension variable exists.")
-
-  ## if use by-row layout, x must be categorical
-  #browser()
-  if (bycol == FALSE & any(sapply(1:ncol(x), function(i) is.factor(x[,i])) == FALSE)) c306_abort("Row-wise variable must be categorical in by-row layout (`bycol = FALSE`).")
-
-  ## determine type of z
-  if (!is.null(z)) {
-    zdiscrete <- any(c("factor", "character", "logical") %in% class(unclass(z))) |
-      (any(c("numeric", "integer") %in% class(unclass(z))) & length(unique(na.omit(z))) <= 5)
-    # if (zcontinuous == FALSE & !is.factor(z)) z <- factor(z, levels = unique(na.omit(z)))
-    if (zdiscrete) z <- factor(z, levels = unique(na.omit(z)))
-  }
-
-  # browser()
   ## digits
   if (length(digits) == 1) {
     digits <- rep(digits, ncol(x))
