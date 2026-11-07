@@ -73,7 +73,6 @@ inspect.data <- function (data, info, id, check_missing = c(TRUE, FALSE), plot =
   else {
     info$check_missing <- FALSE
   }
-  #browser()
   output <- do.call("rbind",
                     lapply(X = 1:ncol(data),
                            FUN = function(x) {

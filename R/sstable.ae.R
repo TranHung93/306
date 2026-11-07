@@ -127,7 +127,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
 
     # tbl2$table <- tbl2$table[-c(1:(3+n.grade)),]
     for (tbl3 in tbl2p[-1]) tbl2 <- ._do_rbind(tbl2, tbl3, header=c(1:(3+n.grade)))
-    # browser()
     out <- ._do_rbind(tbl1, tbl2, header=c(1:(3+n.grade)))
     # rownames(out)[c(3,4,5,8)] <- 'section'
     if (flextable) {
@@ -238,8 +237,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
     return(df)
   }
 
-  # browser()
-
   # Example usage with ae_any data frame mutation
   ae_any <- ae_data  # Assuming ae_data is your original data frame
 
@@ -307,11 +304,9 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
   patient_n <- unlist(spread(select(ae_count, -n_episode), key = arm, value = n_patient)[, -1])
   patient_n[is.na(patient_n)] <- 0
   patient_N <- rep(table(idarm$arm), each = nlevels(ae_arm$aetype))
-  # tryCatch(patient_n/patient_N, warning=function(w) browser())
   patient_p <- patient_n/patient_N
 
   ## table
-  #browser()
   value <- matrix(ncol = nlevels(ae_arm$arm)*3, nrow = nlevels(ae_arm$aetype))
   value[, seq(from = 1, to = nlevels(ae_arm$arm)*2, by = 2)] <- episode_n
   #only show fullfreq when specify - hungttt
@@ -355,13 +350,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
       group_data <- group_data %>%
         mutate(.tmp.group = factor(.tmp.group, levels = c(group.var.priority, setdiff(levels(.tmp.group), group.var.priority)), ordered = TRUE))
     }
-    # } else {
-    #   ## - create a fake grouping
-    #   group_data <- data.frame(ae = aetype_lev.raw, group=1, stringsAsFactors = FALSE)
-    #   names(group_data) <- c(aetype.var, '.tmp.group')
-    # }
-
-    # browser()
 
     ### bind group back to summary table -trinhdhk
     ae_value.headless <-
@@ -380,7 +368,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
                                            })),
                              rep('',ncol(ae_value)-1-2*length(arm_lev))
       ),.x))
-    # browser()
 
     grouptitle_index <- ae_value.headless %>% group_rows() %>% sapply(., function(x) head(x, 1))
 
@@ -396,7 +383,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
       `names<-`(names(ae_value.headless)) %>%
       rbind(ae_value.headless)
   } else ae_value <- as.data.frame(ae_value, stringsAsFactors = FALSE) %>% rename({{aetype.var}} := aename)
-  # browser()
 
   ## test
   if (test) {
@@ -454,7 +440,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
     if (test.anyae.only) {pval[-1] <- ""} #only show test result for anyae - hungtt
 
     ## add grouping row - trinhdhk
-    # browser()
     ae_value <-
       left_join(
         ae_value,
@@ -466,7 +451,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
       mutate(pval = replace_na(as.character(pval), ''))
   }
 
-  # browser()
   ## sorting - trinhdhk
   if (!missing(sort.by)){
     ## - the head will not be sorted.
@@ -523,8 +507,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
                                       }))
     ## - bind the head again
     ae_value <- rbind(ae_value.head, ae_value.sorted) %>% mutate_all(as.character) %>% mutate_all(replace_na, '') %>% select(-pt.all, -ep.all)
-
-    # browser()
   }
 
   ## move missing to bottom - hungtt
@@ -562,14 +544,6 @@ sstable.ae <- function(ae_data, fullid_data, group_data = NULL, id.var,
   else
   {### flextable
   if (flextable) {
-    # return(ss_flextable({
-    #   tab <- list(table = rbind(header1, header2, ae_value),
-    #               footer = footer)
-    #   class(tab$table) <- c('ae_tbl', 'ss_tbl', class(tab$table))
-    #   class(tab) <- c('ss_ae','ss_obj')
-    #   tab
-    # }))
-
     ## header: the arm name spans its two columns
     colnames(ae_value) <- rep("", ncol(ae_value))
     header1[1] <- header2[1]

@@ -111,7 +111,6 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
   # Preparation of models and data
   subgroup.char <- all.vars(subgroup.model)
   
-  #browser()
   for (k in 1:length(subgroup.char)){
     main.model <- update(base.model, as.formula(paste(". ~ . +", subgroup.char[k], sep = "")))
     ia.model <- update(base.model, as.formula(paste(". ~ . +`", arm.var,  "`*", subgroup.char[k], sep = "")))
@@ -159,7 +158,6 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
         # Get max of stop time, is the minimum of last observed time between two arms.
         # The stop time for right cens data is the first column ($time), for interval-cens data it is the second column ($stop)
         # With laziness it is coded as mf[, ncol(mf)-2] (the last two columns are the event status from Surv object, and the arm)
-        # browser()
         minimax.time <- min(by(mf[, ncol(mf)-2], mf[, ncol(mf)], max))
         
         # tau for rmst is capped as minamax.time
@@ -196,7 +194,6 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
         )
         
       }
-    # browser()
     
     result[nrow(result), ncol(result)] <-
       if (is.na(ia.pval)) '-' else
@@ -212,13 +209,6 @@ sstable.survcomp.subgroup <- function(base.model, subgroup.model, overall.model,
         result[nrow(result), 2:(ncol(result) - 1)] <- "-"
         next
       }
-      # if (compare.method=='rmst'){
-      #   compare.args$model.censoring <- if (is.null(compare.args$model.censoring)) 'stratified'
-      #   compare.args$formula.censoring <-
-      #     if (is.null(compare.args$formula.censoring)) update(main.model, NULL ~.) else
-      #       update(compare.args$formula.censoring, as.formula(paste("NULL ~ . +", subgroup.char[k], sep = "")))
-      # }
-      # browser()
       result[nrow(result), 2:(ncol(result) - 1)] <- sstable.survcomp(model = base.model, data = d.subgroup, time=time,
                                                                      reference.arm = reference.arm,
                                                                      compare.method = compare.method, compare.args = compare.args,

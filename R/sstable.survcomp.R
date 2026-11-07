@@ -166,15 +166,6 @@ sstable.survcomp <- function(
   
   fit.surv <- summary(fit.surv0, time = time2, extend = TRUE)
   
-  # [Trinhdhk] This is crap as always returns at inf
-  # if (length(unique(data[, arm.var])) < length(arm.names)) {
-  #   tmp <- fit.surv$table
-  #   dim(tmp) <- c(length(unique(data[, arm.var])), length(tmp))
-  #   colnames(tmp) <- names(fit.surv$table)
-  # } else {
-  #   tmp <- fit.surv$table
-  # }
-  # browser()
   n.event <- if (ms) fit.surv$n.event[,this_cause] else fit.surv$n.event
   events.n <- paste(n.event, fit.surv$n, sep = "/")
   if (add.risk) {
@@ -226,7 +217,6 @@ sstable.survcomp <- function(
         ifelse(is.na(est),"-",
                
                {
-                 # browser()
                  se <- sqrt(fit.coxph$var[[1]]) # trinhdhk: if there were more covariables than just arm, $var returns a var-cov mat, this first element is the var of arm (given arm is the first covariable)
                  z <- abs(est/se)
                  pval <- format.pval((1 - pnorm(z)) * 2, eps = pcutoff, digits = pdigits)
@@ -288,7 +278,6 @@ sstable.survcomp <- function(
       # Get max of stop time, is the minimum of last observed time between two arms.
       # The stop time for right cens data is the first column ($time), for interval-cens data it is the second column ($stop)
       # With laziness it is coded as mf[, ncol(mf)-2] (the last two columns are the event status from Surv object, and the arm)
-      # browser()
       minimax.time <- min(by(mf[, ncol(mf)-2], mf[, ncol(mf)], max))
       max.time <- max(mf[, ncol(mf)-2])
       # tau for rmst is capped as minamax.time
@@ -309,7 +298,6 @@ sstable.survcomp <- function(
           model.lhs[[i]] <- substitute(max.time - old, list(old=old, max.time=max.time))
         }
         formula.tools::lhs(model) <- model.lhs
-        # browser()
         compare.args$formula <- model
       }
       
@@ -347,7 +335,6 @@ sstable.survcomp <- function(
   rownames(result) <- NULL
   
   # add label
-  #browser()
   varname <- all.vars(model)[2:1]
   varlabel <- sapply(varname, function(x){
     ifelse(is.null(attr(data[, x], "label")), x, attr(data[, x], "label"))
@@ -370,7 +357,6 @@ sstable.survcomp <- function(
   }
   rownames(output) <- NULL
   value <- output[-c(1:2), , drop = FALSE]
-  #browser()
   ## flextable
   if (flextable) {
     ## header: "Endpoint" spans both header rows

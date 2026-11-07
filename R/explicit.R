@@ -44,7 +44,6 @@ explicit.lm <- function(x, ...){
                "offset"), names(mf), 0L)
   mf <- mf[c(1, m)]
   mf$drop.unused.levels <- TRUE
-  # browser()
   mf[[1L]] <- as.name("model.frame")
   names(mf)[2L] <- "formula"
   mf <- eval(mf, parent.frame())
@@ -53,7 +52,6 @@ explicit.lm <- function(x, ...){
   new_data <- cbind(mf, model.matrix(lm)[,!colnames(x) %in% c('(Intercept)', colnames(mf)), drop=FALSE])
   x_names <- paste0('`', gsub('(^`)|(`$)', '', colnames(x)[-1]), '`')
   names(x_names) <- colnames(x)[-1]
-  # browser()
   new_fml <- formula(call('~',
                           parse(text = paste(x_names,
                                              collapse = '+'),

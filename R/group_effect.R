@@ -69,7 +69,6 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
     ._assert_ia(summary_vars, summary_vars.auto)
   } else summary_vars <- summary_vars.auto
   y <- model.response(mf)
-  # browser()
   ci.p <- sapply(base_lv, function(lv){
     new_mf <- mf
     new_mf[[base_var]] <- relevel(as.factor(new_mf[[base_var]]), ref = lv)
@@ -96,7 +95,6 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
     ci.lower <- ci.p.t$ci.lower.sv
     ci.upper <- ci.p.t$ci.upper.sv
     p <- ci.p.t$p.sv
-    # browser()
     list(
       log.OR = do.call(c, as.list(unlist(est))),
       OR = do.call(c, as.list(exp(unlist(est)))),
@@ -105,7 +103,6 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
       CI.upper = do.call(c, as.list(exp(unlist(ci.upper)))),
       p.value = do.call(c, as.list(unlist(p))))
   }, simplify = FALSE)
-  # browser()
   out <- lapply(ci.p, function(.x) do.call(cbind, .x))
   out <- sapply(out,
                 function(.out){
@@ -169,7 +166,6 @@ subgroup_effect <- function(formula, model, method = c('lik.ratio', 'wald'), tra
 }
 
 ._ci_p_calc <- function(sv, mf, mm, model, wald, logLik.full = NULL){
-  # browser()
   y <- model.response(mf)
   k <- which(names(mf) == sv) - 1
   iS <- which(attr(mm, 'assign') == k)

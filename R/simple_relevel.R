@@ -40,10 +40,8 @@ simple_relevel.data.frame <- function(x, ..., by){
   dep.vars.2 <- sapply(dep.vars, function(dep.var) rlang::quo_name(dep.var))
   by <- rlang::enquo(by)
   by.2 <- rlang::quo_name(by)
-  # browser()
   if (!is.factor(data[[by.2]])) data[[by.2]] <- as.factor(data[[by.2]])
   for(i in seq_along(dep.vars.2)){
-    # browser()
     dep.var.2 <- dep.vars.2[[i]]
     dep.var <- dep.vars[[i]]
     isolated.data <-
@@ -51,7 +49,6 @@ simple_relevel.data.frame <- function(x, ..., by){
       unique() %>% #remove all dup
       arrange({{dep.var}}) %>% arrange({{by}})# first, sort the data by dep.var to retain prev levels, second by "by"
     dep.var.lv <- isolated.data[[dep.var.2]]
-    # browser()
     data[[dep.var.2]] <- factor(data[[dep.var.2]], levels = dep.var.lv)
   }
   data
@@ -81,7 +78,6 @@ simple_relevel.default <- function(x, by, map, value = c('unsorted', 'sorted', '
                             data.frame(from = rep(name, length(map[[i]])), to = map[[i]])
                           }))
   }
-  # browser()
   stopifnot(setequal(unique(x), map$to))
   stopifnot(setequal(unique(by), map$from))
   map$from <- factor(map$from, levels = levels(by))

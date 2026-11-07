@@ -248,7 +248,6 @@ ss_flextable.default <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
   ## headers
   ss.header <- sstable[header,]
   names(ss.header) <- colnames(sstable)
-  # browser()
 
   ss.header2 <-
       lapply(seq_along(header),
@@ -275,11 +274,9 @@ ss_flextable.default <- function(sstable, footer = NULL, bg = "#F2EFEE", ...){
                return(h)
              }
     )
-  # browser()
 
   ## Create the flextable
   ft <- flextable::flextable(sstable[-header,, drop = FALSE])
-  # browser()
 
   ## header format
   ft <- flextable::set_header_labels(ft, values = ss.header2[[1]])
@@ -407,7 +404,6 @@ ss_huxtable.default <- function(sstable, footer = NULL,
   ## headers pre-processing
   ss.header <- sstable[header,]
   names(ss.header) <- colnames(sstable)
-  # browser()
 
   ss.header2 <-
     lapply(seq_along(header),
@@ -448,7 +444,6 @@ ss_huxtable.default <- function(sstable, footer = NULL,
   }
 
   ## format header
-  # browser()
 
   # merge cols that have same values
   for (i in seq_along(ss.header2)){
@@ -586,7 +581,6 @@ ht_theme_kable <- function(ht, header_rows = 1:2, header_cols = NULL,
       }
     }
   }
-  # browser()
 
   huxtable::bottom_border(ht)[max(header_rows):nrow(ht), ] <- border_width
   huxtable::top_border(ht)[max(header_rows)+1, ] <- border_width*2
@@ -727,7 +721,6 @@ as_sstable.subgroup_logist_summary <- function(x, include_footnote = TRUE, flext
   tables <- lapply(tables, `[`, -1,)
   headers <- matrix(rep('', length(tables) * ncol(tables[[1]])), ncol = ncol(tables[[1]]))
   headers[,1] <- paste(attr(x, 'base_var'), '=', names(tables))
-  # browser()
   table <- do.call(rbind,
                    lapply(seq_along(tables),
                           function(i) rbind(headers[i,], tables[[i]])))

@@ -83,7 +83,6 @@ gg_boxcox.default <- function (object, lambda = seq(-2, 2, 1/10),
     ggplot2::geom_text(ggplot2::aes(x=min(lambda),y=lim, label='95%'), hjust='left', vjust='bottom')+
     ggplot2::ylim(min(loglik, lim), max(loglik, lim))
   la <- xl[mx]
-  # browser()
   if (mx > 1 && mx < m){
     plt <- plt+
       ggplot2::geom_segment(ggplot2::aes(x=la, y=min(loglik), xend=la, yend=Lmax),
@@ -91,7 +90,6 @@ gg_boxcox.default <- function (object, lambda = seq(-2, 2, 1/10),
       ggplot2::geom_text(ggplot2::aes(x=la,y=min(loglik),label=round(la,digits = 2)),color='red',vjust='top',
                          hjust='center')
   }
-  # browser()
   ind <- range((1L:m)[loglik > lim])
   if (loglik[1L] < lim) {
     i <- ind[1L]

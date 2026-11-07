@@ -42,7 +42,6 @@ import.info <- function(table_name, input, output) {
            subset(readxl::read_excel(path = input, sheet = i), (!`Data type` %in% "Title")))
   }
   #### grid sheets
-  #browser()
   if (!is.null(sheet_grid)) {
     grids <- grids[grids$sheet_grid %in% sheet_final, ]
     for (i in seq_len(nrow(grids))) {

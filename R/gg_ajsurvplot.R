@@ -59,14 +59,11 @@ gg_ajsurvplot <- function(formula, data, weights, subset, na.action, etype, coun
 ggsurvfit2 <- rlang::new_function(
   args = rlang::fn_fmls(ggsurvfit::ggsurvfit),
   body = {
-    # require(cli)
-    require(ggsurvfit)
     tt <- ggsurvfit::ggsurvfit |>
     rlang::fn_body() |>
     as.character() |>
     gsub('tidy_survfit', 'C306::tidy_survfit2', x=_)|>
     c('}') |> paste(collapse = '\n') |>
-    # parse(text=_) |>
     rlang::parse_expr()
     environment(tt) <- asNamespace('ggsurvfit')
     tt
@@ -152,7 +149,6 @@ gg_ajsurvplot2 <- function(formula, data, weights, subset, na.action, main.event
 
   fg1 <- do.call(survival::finegray, fgargs.each[[1]])
   fg2 <- do.call(survival::finegray, fgargs.each[[2]])
-  # browser()
   fml <- force(update(formula, survival::Surv(fgstart,fgstop,fgstatus)~.))
 
   sf1 <- eval(substitute(survival::survfit(fml, data = fg1,  weights=fgwt), list(fml=fml)))
@@ -175,7 +171,6 @@ gg_ajsurvplot2 <- function(formula, data, weights, subset, na.action, main.event
         geom_step(linewidth=1) +
         ggsurvfit::theme_ggsurvfit_default()
     )
-  # browser()
   facet.vars <- formula.tools::get.vars(facet.by)
   for (v in facet.vars) dt$strata <- gsub(
     paste0('(,\\s)?',v,'=.*(,\\s|$)'), '', dt$strata, perl=T)

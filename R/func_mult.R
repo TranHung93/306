@@ -48,7 +48,6 @@ mutate_f.grouped_df <- function(.data, ...){
 mutate_f.data.frame <- function(.data, ...){
   group_names <- dplyr::group_vars(.data)
   data_tbl <- if (!data.table::is.data.table(.data))data.table::as.data.table(.data) else .data
-  # browser()
   .dots <- rlang::enexprs(..., .unquote_names = FALSE)
   for (.dot in .dots){
     .expr <- rlang::expr(data_tbl[, !!.dot, by = group_names])
@@ -84,7 +83,6 @@ summarise_f <- summarize_f <- function(.data, ...){
 #' @rdname summarise_f
 #' @export
 summarise_f.data.frame <- function(.data, ...){
-  # browser()
   # .fun <- lapply(rlang::enquos(...), rlang::quo_get_expr)
   .fun <- rlang::enexprs(...)
   group_names <- dplyr::group_vars(.data)
