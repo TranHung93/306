@@ -24,7 +24,7 @@ Description: Functions used by the Biostatistics group of the Oxford
     models, plot competing-risks curves, and import, format and check data
     with an OUCRU-style data dictionary.
 License: MIT + file LICENSE
-URL: https://github.com/TranHung93/306
+URL: https://tranhung93.github.io/306/, https://github.com/TranHung93/306
 BugReports: https://github.com/TranHung93/306/issues
 Encoding: UTF-8
 LazyData: true
