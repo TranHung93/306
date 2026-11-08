@@ -9,3 +9,6 @@
 ^\.lintr$
 ^LICENSE\.md$
 ^TODO\.md$
+^_pkgdown\.yml$
+^\.github$
+^pkgdown$

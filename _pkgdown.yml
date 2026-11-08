@@ -1,0 +1,19 @@
+url: https://tranhung93.github.io/306/
+
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+
+articles:
+  - title: Getting started
+    navbar: ~
+    contents:
+      - C306_vignette_v6
+  - title: Background
+    contents:
+      - sstable
+      - data_analysis_pipeline
