@@ -1,0 +1,156 @@
+---
+title: "Formatting and building custom tables"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Formatting and building custom tables}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE)
+```
+
+The table functions (`sstable.baseline()`, `sstable.ae()`,
+`sstable.survcomp()`, ...) return either a finished `flextable` or, with
+`flextable = FALSE`, an *sstable*: a list with a character matrix `table`
+and a `footer`. This vignette shows how to turn sstables into report tables,
+how to edit them, and how to build a table of your own in the same style.
+
+| Function | What it does |
+|---|---|
+| `ss_flextable()`, `ss_huxtable()` | render an sstable as a flextable or huxtable |
+| `ft_sstheme()`, `ht_theme_kable()`, `ht_theme_markdown()` | apply the sstable look to any flextable or huxtable |
+| `sstable.baseline.edit()` | adds the header and footer to a baseline table you edited |
+| `ss_header()`, `ss_body()`, `ss_section()`, `ss_template()`, `ss_format()` | mark the rows of a hand-made table |
+| `print()` | prints an sstable matrix in the console |
+
+```{r}
+library(C306)
+```
+
+The examples use `baseline_data`, a **simulated** two-arm trial bundled with
+the package.
+
+```{r}
+bl <- baseline_data
+bl$Arm <- factor(bl$Arm, levels = c("Sham procedure", "Intrathecal treatment"))
+tab <- sstable.baseline(age + sex + bmi + ablettscore ~ Arm, data = bl)
+names(tab)
+```
+
+## Rendering: `ss_flextable()` and `ss_huxtable()`
+
+`ss_flextable()` turns an sstable into a `flextable` with bold header rows,
+indented row groups and striped body rows. `add_footer` appends notes to the
+table's own footer:
+
+```{r}
+ss_flextable(tab, add_footer = "Data are simulated.")
+```
+
+Given only the matrix, it uses `footer` instead, and `bg` sets the colour of
+the stripes:
+
+```{r}
+ss_flextable(tab$table, footer = "A custom footer", bg = "#E8F0F8")
+```
+
+`ss_huxtable()` does the same with the `huxtable` package, which also prints
+to the console, LaTeX and Markdown. It needs `huxtable`, which is only
+suggested by C306:
+
+```{r, eval = requireNamespace("huxtable", quietly = TRUE)}
+ss_huxtable(tab, caption = "Baseline characteristics", caption_pos = "top")
+```
+
+## Theming any table
+
+The same look can be applied to tables not made by C306. `ft_sstheme()`
+themes a flextable:
+
+```{r}
+ft_sstheme(flextable::flextable(head(bl[, c("usubjid", "age", "sex", "Arm")])))
+```
+
+`ht_theme_markdown()` (stripes) and `ht_theme_kable()` (borders, like
+`knitr::kable()`) theme a huxtable; `header_rows` says which rows are headers:
+
+```{r, eval = requireNamespace("huxtable", quietly = TRUE)}
+ht <- huxtable::as_hux(head(bl[, c("usubjid", "age", "sex", "Arm")]))
+ht_theme_markdown(ht, header_rows = 1)
+ht_theme_kable(ht, header_rows = 1)
+```
+
+## Printing in the console
+
+An sstable matrix prints as a plain matrix, or, with `huxtable` installed and
+`pretty = TRUE` (the default, set by `options(ss_pretty.print = )`), as a
+formatted text table:
+
+```{r}
+print(tab$table, pretty = FALSE)
+```
+
+## Editing a baseline table: `sstable.baseline.edit()`
+
+To change the content of a baseline table before it is formatted, ask for the
+raw matrix with `matrix.raw = TRUE`, edit its cells, and pass it back to
+`sstable.baseline.edit()` with the same formula and data. It adds the header
+rows and the footer (`footer` adds your own notes). Keep the first column as
+it is: the function uses the variable names there to order the rows.
+
+```{r}
+raw <- sstable.baseline(age + sex ~ Arm, data = bl, matrix.raw = TRUE)
+raw
+raw[1, 3] <- paste0(raw[1, 3], "*")   # flag the age summary of the first arm
+edited <- sstable.baseline.edit(raw, age + sex ~ Arm, data = bl,
+                                footer = "* Illustrative flag added by hand.")
+ss_flextable(edited)
+```
+
+To rename rows, set a `label` attribute on the variables before calling
+`sstable.baseline()` instead, as shown in
+`vignette("C306_vignette_v6", package = "C306")`.
+
+## Building a table from scratch
+
+Any character matrix can be rendered in the sstable style once its rows are
+marked as header, section (a row-group title) or body rows. The functions
+`ss_header()`, `ss_section()` and `ss_body()` do this one kind at a time:
+
+```{r}
+m <- rbind(c("", "Sham procedure", "Intrathecal treatment"),
+           c("Age, years", "50", "48"),
+           c("Sex", "", ""),
+           c("- Female", "30 (22%)", "29 (21%)"),
+           c("- Male", "105 (78%)", "107 (79%)"))
+m <- ss_header(m, 1)
+m <- ss_body(m, c(2, 4, 5))
+m <- ss_section(m, 3)
+rownames(m)
+ss_flextable(ss_format(m, .guess = FALSE))
+```
+
+`ss_format()` does it in one step. Give the rows of each kind, or let it
+guess: header rows come first, a section row has text only in its first
+column, and the rest are body rows. `template` (`"baseline"`, `"survcomp"`
+or `"ae"`, also set with `ss_template()`) chooses the layout rules:
+
+```{r}
+m2 <- rbind(c("", "Sham procedure", "", "Intrathecal treatment", ""),
+            c("Characteristic", "n", "Summary", "n", "Summary"),
+            c("Age, years", "135", "50 (40-60)", "136", "48 (41-55)"),
+            c("Sex", "", "", "", ""),
+            c("- Female", "", "30 (22%)", "", "29 (21%)"))
+f <- ss_format(m2)
+rownames(f)
+ss_flextable(f, footer = "Median (Q1-Q3) or n (%). Illustrative numbers.")
+```
+
+Tables made this way can be stacked with tables made by the package functions
+and with each other; see `as_sstable()` in
+`vignette("regression", package = "C306")` for assembling a table from header
+and body parts.

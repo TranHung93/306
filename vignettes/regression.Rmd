@@ -1,0 +1,158 @@
+---
+title: "Regression models"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Regression models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
+                      warning = FALSE, fig.width = 6, fig.height = 4)
+```
+
+This vignette shows the functions for summarising and checking regression
+models:
+
+| Function | What it does |
+|---|---|
+| `logist_summary()` | odds ratios, 95% CIs and p-values of a logistic regression |
+| `subgroup_effect()` | odds ratios of covariables within each level of an interacting factor |
+| `t()` | transposes a `subgroup_effect()` result |
+| `as_sstable()` | turns these summaries (or a list of table parts) into an sstable |
+| `explicit()` | rewrites a linear model formula with every term spelled out |
+| `gg_boxcox()` | Box-Cox profile likelihood plot for a linear model, with `ggplot2` |
+
+```{r}
+library(C306)
+```
+
+The examples use `baseline_data`, a **simulated** two-arm trial bundled with
+the package, so the estimates illustrate the functions and say nothing about
+the treatment. We model death (`outcome == 4`):
+
+```{r}
+dat <- baseline_data
+dat$Arm <- factor(dat$Arm, levels = c("Sham procedure", "Intrathecal treatment"))
+dat$sex <- factor(dat$sex, levels = c("F", "M"), labels = c("Female", "Male"))
+dat$died <- dat$outcome == 4
+```
+
+## Logistic regression: `logist_summary()`
+
+`logist_summary()` takes a fitted binomial `glm` and returns one row per
+coefficient with the log odds ratio, odds ratio, 95% CI and p-value.
+
+```{r}
+fit <- glm(died ~ Arm + age + sex + apacheii, data = dat, family = binomial)
+logist_summary(fit)
+```
+
+The default `method = "lik.ratio"` gives profile-likelihood CIs and
+likelihood-ratio tests, which behave better than Wald statistics in small
+samples or with rare events. `method = "wald"` gives the Wald versions:
+
+```{r}
+logist_summary(fit, method = "wald")
+```
+
+`stat_digits` and `p_digits` set the decimal places. `verbose = TRUE` prints a
+note on the method, and `flextable = TRUE` returns a report-ready table:
+
+```{r}
+logist_summary(fit, flextable = TRUE)
+```
+
+## Effects within subgroups: `subgroup_effect()`
+
+When a covariable interacts with a factor, its odds ratio differs between the
+levels of that factor. `subgroup_effect()` computes the odds ratio, CI and
+p-value of each interacting covariable within each level. The factor goes on
+the right-hand side of the formula:
+
+```{r}
+fit_ia <- glm(died ~ apacheii * Arm + age * Arm, data = dat, family = binomial)
+subgroup_effect(~ Arm, fit_ia)
+```
+
+Put one covariable on the left-hand side to get a single table with one row
+per level:
+
+```{r}
+subgroup_effect(apacheii ~ Arm, fit_ia, method = "wald")
+```
+
+`t()` regroups the result by covariable instead of by level (the same as
+`transpose = TRUE`):
+
+```{r}
+t(subgroup_effect(~ Arm, fit_ia, method = "wald"))
+```
+
+The model can also be given as a formula, which is then fitted with
+`glm(family = binomial)`:
+
+```{r}
+subgroup_effect(age ~ Arm, died ~ age * Arm, data = dat, flextable = TRUE)
+```
+
+## Converting to sstable: `as_sstable()`
+
+`as_sstable()` converts the result of `logist_summary()` or
+`subgroup_effect()` into an sstable (a list with `table` and `footer`), which
+the table functions in `vignette("custom-tables", package = "C306")` can
+format or combine with other tables:
+
+```{r}
+ss <- as_sstable(logist_summary(fit))
+ss$table
+```
+
+It also assembles a table from parts: a list with `header`, `body` (a named
+list of matrices, one per row group) and an optional `footer`.
+
+```{r}
+parts <- list(
+  header = list(c("", "Sham procedure", "Intrathecal treatment")),
+  body = list(
+    "Age, years" = rbind(c("Mean", "50.1", "49.8"),
+                         c("Median", "51", "49"))
+  ),
+  footer = "Illustrative numbers."
+)
+as_sstable(parts, flextable = TRUE)
+```
+
+## Explicit model formulas: `explicit()`
+
+In a model with an interaction such as `bmi ~ age * sex`, `drop1()` only
+considers dropping the interaction, because the main effects are implied by
+it. `explicit()` refits the model with every term written out, so each main
+effect can be tested or dropped on its own. The fit itself is unchanged.
+
+```{r}
+fit_lm <- lm(bmi ~ age * sex, data = dat)
+fit_explicit <- explicit(fit_lm)
+formula(fit_explicit)
+drop1(fit_explicit)
+```
+
+## Box-Cox plot: `gg_boxcox()`
+
+`gg_boxcox()` is a `ggplot2` version of `MASS::boxcox()`. It plots the profile
+log-likelihood of the Box-Cox power `lambda` for a linear model with a
+positive response, with the 95% confidence interval for `lambda` marked. A
+`lambda` near 0 suggests a log transformation, near 1 no transformation.
+
+```{r}
+gg_boxcox(icudays ~ Arm + age, data = dat)
+```
+
+A fitted `lm` works too, and `lambda` sets the grid:
+
+```{r}
+gg_boxcox(lm(icudays ~ Arm + age, data = dat), lambda = seq(-1, 1, 0.05))
+```

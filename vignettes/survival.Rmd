@@ -1,0 +1,183 @@
+---
+title: "Time-to-event outcomes"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Time-to-event outcomes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
+                      warning = FALSE, fig.width = 7, fig.height = 4.5)
+```
+
+This vignette shows the functions for summarising and plotting time-to-event
+outcomes in a two-arm trial:
+
+| Function | What it does |
+|---|---|
+| `sstable.survcomp()` | events, risk, median time and the arm comparison (Cox, Fine-Gray, RMST or cumulative incidence) |
+| `sstable.survcomp.subgroup()` | the same comparison within subgroups, with a heterogeneity test |
+| `rbind()` | stacks two comparison tables (e.g. two populations) |
+| `gg_ajsurvplot()`, `gg_ajsurvplot2()` | Aalen-Johansen cumulative incidence curves for competing risks |
+| `ggsurvfit2()`, `tidy_survfit2()` | Kaplan-Meier curves and tidy data that keep each stratifying variable as a column |
+
+```{r}
+library(C306)
+library(survival)
+```
+
+## Example data
+
+The package ships `baseline_data`, a **simulated** two-arm trial in tetanus
+(271 participants). It has no follow-up times, so for illustration we derive a
+time-to-event outcome from the days spent in the intensive care unit
+(`icudays`): each participant leaves the ICU either alive (discharge) or by
+death (`outcome == 4`), and follow-up is censored at day 28.
+
+```{r}
+icu <- subset(baseline_data, !is.na(icudays))
+icu$Arm <- factor(icu$Arm, levels = c("Sham procedure", "Intrathecal treatment"))
+icu$time <- pmin(icu$icudays, 28)
+icu$event <- factor(
+  ifelse(icu$icudays > 28, "censor", ifelse(icu$outcome == 4, "death", "discharge")),
+  levels = c("censor", "discharge", "death")
+)
+table(icu$Arm, icu$event)
+```
+
+The first level of `event` is the censoring code, as `survival::Surv()`
+expects for competing-risks data. Because the data are simulated, the numbers
+below illustrate the functions and say nothing about the treatment.
+
+## Comparing two arms: `sstable.survcomp()`
+
+The arm must be the first covariate on the right-hand side of the model. With
+the default `compare.method = "cox"`, the table shows, for each arm, the number
+of events out of the number of participants with the event probability at the
+end of follow-up, the hazard ratio with its 95% CI and p-value, a test for
+proportional hazards and the median (IQR) time to event.
+
+Here the event is discharge alive, and deaths are censored (a cause-specific
+analysis):
+
+```{r}
+sstable.survcomp(Surv(time, event == "discharge") ~ Arm, data = icu)
+```
+
+By default the output is a `flextable`. Use `flextable = FALSE` to get the
+underlying character matrix and footer, which you can edit or combine:
+
+```{r}
+tab <- sstable.survcomp(Surv(time, event == "discharge") ~ Arm, data = icu,
+                        flextable = FALSE)
+tab$table
+tab$footer
+```
+
+Other covariates can be added after the arm; the comparison is then adjusted
+for them:
+
+```{r}
+sstable.survcomp(Surv(time, event == "discharge") ~ Arm + age + sex, data = icu)
+```
+
+### Restricted mean survival time
+
+`compare.method = "rmst"` compares the restricted mean time to event up to
+`time` instead of the hazard. Here it is the mean number of days in the ICU,
+restricted to the first 28 days:
+
+```{r}
+sstable.survcomp(Surv(time, event != "censor") ~ Arm, data = icu, time = 28,
+                 compare.method = "rmst")
+```
+
+`compare.args = list(type = "ratio")` gives a ratio instead of a difference.
+`compare.method = "cuminc"` compares the cumulative incidence at `time` in the
+same way.
+
+### Competing risks
+
+When the left-hand side has a factor event, `sstable.survcomp()` fits a
+Fine-Gray model for the cause named in `compare.args` and reports the
+Aalen-Johansen cumulative incidence. Here death competes with discharge:
+
+```{r}
+sstable.survcomp(Surv(time, event) ~ Arm, data = icu,
+                 compare.args = list(cause = "discharge"))
+```
+
+## Subgroups: `sstable.survcomp.subgroup()`
+
+Give the base model and a one-sided formula with the subgroup variable. The
+table shows the comparison overall and within each subgroup, with a test for
+the arm-by-subgroup interaction:
+
+```{r}
+icu$ablett <- factor(icu$ablettscore, levels = c("I", "II", "III"),
+                     labels = c("Ablett I", "Ablett II", "Ablett III"))
+sstable.survcomp.subgroup(Surv(time, event == "discharge") ~ Arm, ~ ablett,
+                          data = icu)
+```
+
+It accepts the same `compare.method` and `compare.args` as
+`sstable.survcomp()`.
+
+## Stacking tables: `rbind()`
+
+Tables made with `flextable = FALSE` can be stacked, for example to show the
+whole population and a sub-population in one table. The header of the first
+table is kept:
+
+```{r}
+all_pts <- sstable.survcomp(Surv(time, event == "discharge") ~ Arm, data = icu,
+                            medsum = FALSE, flextable = FALSE)
+no_vaso <- sstable.survcomp(Surv(time, event == "discharge") ~ Arm,
+                            data = subset(icu, vaso == "N"),
+                            medsum = FALSE, flextable = FALSE)
+both <- rbind(all_pts, no_vaso)
+ss_flextable(both)
+```
+
+## Cumulative incidence curves
+
+`gg_ajsurvplot()` takes the same formula as `survival::survfit()` and draws
+the Aalen-Johansen cumulative incidence of one event type (`etype`):
+
+```{r}
+gg_ajsurvplot(Surv(time, event) ~ Arm, data = icu, etype = "discharge",
+              fun = "event")
+```
+
+`gg_ajsurvplot2()` draws the main event and the competing event together, one
+panel per arm by default (`facet.by = ~ strata`):
+
+```{r}
+gg_ajsurvplot2(Surv(time, event) ~ Arm, data = icu,
+               main.event = "discharge", competing.event = "death")
+```
+
+Both return `ggplot` objects, so they can be modified with the usual `ggplot2`
+functions.
+
+## Kaplan-Meier curves with several strata
+
+`ggsurvfit::ggsurvfit()` merges all stratifying variables into one `strata`
+column. `ggsurvfit2()` keeps each variable as its own column, so you can facet
+by one variable and colour by another:
+
+```{r}
+fit <- survfit(Surv(time, event == "discharge") ~ Arm + sex, data = icu)
+ggsurvfit2(fit, type = "risk") + ggplot2::facet_wrap(~ sex)
+```
+
+`tidy_survfit2()` returns the same data as a data frame, one column per
+stratifying variable:
+
+```{r}
+head(tidy_survfit2(fit, times = c(7, 14, 21, 28)))
+```

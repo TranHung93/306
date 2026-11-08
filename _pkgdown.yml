@@ -9,11 +9,19 @@ navbar:
     right: [search, github]
 
 articles:
-  - title: Getting started
-    navbar: ~
+  - title: Summary tables
+    navbar: Summary tables
     contents:
       - C306_vignette_v6
-  - title: Background
-    contents:
       - sstable
+      - custom-tables
+  - title: Analysis
+    navbar: Analysis
+    contents:
+      - survival
+      - regression
+  - title: Data management
+    navbar: Data management
+    contents:
       - data_analysis_pipeline
+      - data-management
