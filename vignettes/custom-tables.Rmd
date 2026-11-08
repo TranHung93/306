@@ -97,17 +97,23 @@ print(tab$table, pretty = FALSE)
 ## Editing a baseline table: `sstable.baseline.edit()`
 
 To change the content of a baseline table before it is formatted, ask for the
-raw matrix with `matrix.raw = TRUE`, edit it, and pass it back to
+raw matrix with `matrix.raw = TRUE`, edit its cells, and pass it back to
 `sstable.baseline.edit()` with the same formula and data. It adds the header
-rows and the footer:
+rows and the footer (`footer` adds your own notes). Keep the first column as
+it is: the function uses the variable names there to order the rows.
 
 ```{r}
 raw <- sstable.baseline(age + sex ~ Arm, data = bl, matrix.raw = TRUE)
 raw
-raw[1, 1] <- "Age, years"   # rename the first row
-edited <- sstable.baseline.edit(raw, age + sex ~ Arm, data = bl)
+raw[1, 3] <- paste0(raw[1, 3], "*")   # flag the age summary of the first arm
+edited <- sstable.baseline.edit(raw, age + sex ~ Arm, data = bl,
+                                footer = "* Illustrative flag added by hand.")
 ss_flextable(edited)
 ```
+
+To rename rows, set a `label` attribute on the variables before calling
+`sstable.baseline()` instead, as shown in
+`vignette("C306_vignette_v6", package = "C306")`.
 
 ## Building a table from scratch
 
