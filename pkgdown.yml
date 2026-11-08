@@ -3,9 +3,13 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   C306_vignette_v6: C306_vignette_v6.html
+  custom-tables: custom-tables.html
   data_analysis_pipeline: data_analysis_pipeline.html
+  data-management: data-management.html
+  regression: regression.html
   sstable: sstable.html
-last_built: 2026-11-08T08:52Z
+  survival: survival.html
+last_built: 2026-11-08T11:30Z
 urls:
   reference: https://tranhung93.github.io/306/reference
   article: https://tranhung93.github.io/306/articles

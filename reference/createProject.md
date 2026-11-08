@@ -30,7 +30,7 @@ where the project was created.
 ``` r
 proj <- file.path(tempdir(), "myStudy")
 createProject(proj)
-#> Project myStudy was created in /tmp/RtmpYywTFt
+#> Project myStudy was created in /tmp/RtmpPbSqhg
 list.files(proj)
 #> [1] "Analysis"        "Data"            "Documents"       "InterimAnalysis"
 #> [5] "myStudy.Rproj"  

@@ -33,7 +33,7 @@ fit <- lm(Sepal.Width ~ Sepal.Length * Petal.Width, data = iris)
 fit_explicit <- explicit(fit)
 formula(fit_explicit)
 #> Sepal.Width ~ Sepal.Length + Petal.Width + `Sepal.Length:Petal.Width`
-#> <environment: 0x55bcaffca370>
+#> <environment: 0x55622e2c4a38>
 drop1(fit_explicit)   # the main effects can now be dropped too
 #> Single term deletions
 #> 
