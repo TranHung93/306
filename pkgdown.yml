@@ -1,0 +1,11 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  C306_vignette_v6: C306_vignette_v6.html
+  data_analysis_pipeline: data_analysis_pipeline.html
+  sstable: sstable.html
+last_built: 2026-11-08T08:52Z
+urls:
+  reference: https://tranhung93.github.io/306/reference
+  article: https://tranhung93.github.io/306/articles

@@ -1,0 +1,129 @@
+# C306
+
+This is an independently maintained version of C306, based on
+[oucru-biostats/C306](https://github.com/oucru-biostats/C306).
+
+C306 collects the R tools used by the Biostatistics group of the Oxford
+University Clinical Research Unit (OUCRU) to analyse and report clinical
+studies:
+
+- **report tables**: baseline characteristics, adverse events, and
+  time-to-event comparisons (Cox, Fine–Gray, restricted mean survival
+  time, cumulative incidence), overall and by subgroup, as flextables
+  (Word, HTML, PDF) or plain matrices;
+- **model summaries**: odds ratios with likelihood-ratio or Wald CIs,
+  also within subgroups of an interacting variable;
+- **plots**: Aalen–Johansen curves for competing risks, Box–Cox profile
+  likelihood;
+- **data tools**: import an OUCRU data dictionary, format raw data with
+  it, and check the data for missing and out-of-range values.
+
+## Installation
+
+Install the development version from GitHub:
+
+``` r
+
+# install.packages("remotes")
+remotes::install_github("TranHung93/306")
+```
+
+## Quick start
+
+``` r
+
+library(C306)
+library(survival)
+
+bl <- read.csv(system.file("extdata", "baseline_data.csv", package = "C306"))
+```
+
+**Baseline table.** Each row variable is summarised by arm: continuous
+variables with the statistics you ask for, categorical variables as n
+(%).
+
+``` r
+
+tab <- sstable.baseline(age + sex + icudays ~ Arm, data = bl,
+                        statistics = "median (Q1-Q3)", test = TRUE)
+show_table(tab$table)
+```
+
+| Characteristic | n | Sham procedure (N=135) Summary statistic | n | Intrathecal treatment (N=136) Summary statistic | p value |
+|:---|:---|:---|:---|:---|:---|
+| age | 135 | 49 (38-58) | 136 | 49 (38-60) | 0.896 |
+| sex | 135 |  | 136 |  | 0.879 |
+| \- F |  | 27 (20%) |  | 26 (19%) |  |
+| \- M |  | 108 (80%) |  | 110 (81%) |  |
+| icudays | 134 | 18 (12-27) | 135 | 15 (11-22) | 0.0335 |
+
+Add `flextable = TRUE` (or call `ss_flextable(tab)`) for a formatted
+table that can be saved with
+[`flextable::save_as_docx()`](https://davidgohel.github.io/flextable/reference/save_as_docx.html).
+
+**Adverse events.** Number of episodes and of patients with at least one
+event, by arm:
+
+``` r
+
+ae <- read.csv(system.file("extdata", "ae_data.csv", package = "C306"))
+tab <- sstable.ae(ae_data = ae, fullid_data = bl, id.var = "usubjid",
+                  aetype.var = "ctcaename", grade.var = "ctcaegrade",
+                  arm.var = "Arm", flextable = FALSE)
+show_table(tab$table, rows = 1:6)
+```
+
+| Type of adverse event | n episode | Sham procedure (N=135) n patient | n episode | Intrathecal treatment (N=136) n patient | p value |
+|:---|:---|:---|:---|:---|:---|
+| Any selected adverse event | 222 | 81 (60%) | 312 | 91 (67%) | 0.237 |
+| \- Grade I | 101 | 56 (41%) | 143 | 67 (49%) |  |
+| \- Grade II | 72 | 46 (34%) | 96 | 53 (39%) |  |
+| \- Grade III | 29 | 25 (19%) | 52 | 32 (24%) |  |
+| \- Grade IV | 17 | 14 (10%) | 18 | 16 (12%) |  |
+| \- Grade N/A | 3 | 3 (2%) | 3 | 3 (2%) |  |
+
+**Time to event.** Events, absolute risk, hazard ratio and median
+survival:
+
+``` r
+
+lung2 <- transform(na.omit(lung[, c("time", "status", "sex")]),
+                   arm = factor(sex, labels = c("Male", "Female")))
+tab <- sstable.survcomp(Surv(time, status) ~ arm, data = lung2, flextable = FALSE)
+show_table(tab$table)
+```
+
+| Endpoint | Female (n=90) events/n (risk \[%\]) | Male (n=138) events/n (risk \[%\]) | Comparison HR (95%CI); p-value | Test for proportional hazards p-value |
+|:---|:---|:---|:---|:---|
+| status | 53/90 (91.68) | 112/138 (96.43) | 0.59 (0.42, 0.82); p=0.00149 | 0.0906 |
+| time |  |  |  |  |
+| \- Median (95%CI) | 426.00 (348.00, 550.00) | 270.00 (212.00, 310.00) |  |  |
+| \- Lower IQR (95%CI) | 226.00 (186.00, 340.00) | 144.00 (107.00, 177.00) |  |  |
+| \- Upper IQR (95%CI) | 687.00 (550.00, NA) | 457.00 (387.00, 574.00) |  |  |
+
+Use `compare.method = "rmst"` for a restricted mean survival time
+comparison,
+[`sstable.survcomp.subgroup()`](https://tranhung93.github.io/306/reference/sstable.survcomp.subgroup.md)
+for subgroup analyses, and a competing-risks outcome
+(`Surv(time, event)` with a factor `event`) for Fine–Gray models.
+
+## Main functions
+
+| Area | Functions |
+|----|----|
+| Report tables | [`sstable.baseline()`](https://tranhung93.github.io/306/reference/sstable.baseline.md), [`sstable.ae()`](https://tranhung93.github.io/306/reference/sstable.ae.md), [`sstable.survcomp()`](https://tranhung93.github.io/306/reference/sstable.survcomp.md), [`sstable.survcomp.subgroup()`](https://tranhung93.github.io/306/reference/sstable.survcomp.subgroup.md) |
+| Formatting tables | [`ss_flextable()`](https://tranhung93.github.io/306/reference/ss_flextable.md), [`ss_huxtable()`](https://tranhung93.github.io/306/reference/ss_huxtable.md), [`as_sstable()`](https://tranhung93.github.io/306/reference/as_sstable.md), [`ss_format()`](https://tranhung93.github.io/306/reference/ss_format.md), [`ft_sstheme()`](https://tranhung93.github.io/306/reference/ft_sstheme.md), [`ht_theme_markdown()`](https://tranhung93.github.io/306/reference/ht_theme_markdown.md), [`ht_theme_kable()`](https://tranhung93.github.io/306/reference/ht_theme_kable.md), [`rbind()`](https://rdrr.io/r/base/cbind.html) |
+| Models | [`logist_summary()`](https://tranhung93.github.io/306/reference/logist_summary.md), [`subgroup_effect()`](https://tranhung93.github.io/306/reference/subgroup_effect.md), [`explicit()`](https://tranhung93.github.io/306/reference/explicit.md) |
+| Plots | [`gg_ajsurvplot()`](https://tranhung93.github.io/306/reference/gg_ajsurvplot.md), [`gg_ajsurvplot2()`](https://tranhung93.github.io/306/reference/gg_ajsurvplot2.md), [`ggsurvfit2()`](https://tranhung93.github.io/306/reference/ggsurvfit2.md), [`tidy_survfit2()`](https://tranhung93.github.io/306/reference/tidy_survfit2.md), [`gg_boxcox()`](https://tranhung93.github.io/306/reference/gg_boxcox.md) |
+| Data tools | [`import.info()`](https://tranhung93.github.io/306/reference/import.info.md), [`convert.info()`](https://tranhung93.github.io/306/reference/convert.info.md), [`myformat.data()`](https://tranhung93.github.io/306/reference/myformat.data.md), [`inspect.data()`](https://tranhung93.github.io/306/reference/inspect.data.md), [`getlabel()`](https://tranhung93.github.io/306/reference/getlabel.md), [`labAE()`](https://tranhung93.github.io/306/reference/labAE.md), [`createProject()`](https://tranhung93.github.io/306/reference/createProject.md) |
+| Helpers | [`contSummary()`](https://tranhung93.github.io/306/reference/contSummary.md), [`pct()`](https://tranhung93.github.io/306/reference/pct.md), [`simple_recode()`](https://tranhung93.github.io/306/reference/simple_recode.md), [`simple_relevel()`](https://tranhung93.github.io/306/reference/simple_relevel.md), [`simple_sort()`](https://tranhung93.github.io/306/reference/simple_sort.md), [`ref_lv()`](https://tranhung93.github.io/306/reference/ref_lv.md), [`mutate_f()`](https://tranhung93.github.io/306/reference/mutate_f.md), [`summarise_f()`](https://tranhung93.github.io/306/reference/summarise_f.md) |
+
+See
+[`vignette("C306_vignette_v6", package = "C306")`](https://tranhung93.github.io/306/articles/C306_vignette_v6.md)
+for a detailed guide to the report tables, and `NEWS.md` for changes,
+including the **impact of fixed bugs on previous reports**.
+
+## Authors
+
+Lam Phung Khanh, Trinh Dong Huu Khanh and Tran Thai Hung (maintainer),
+with functions originally written by Marcel Wolbers.

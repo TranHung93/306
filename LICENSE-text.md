@@ -1,0 +1,4 @@
+# License
+
+    YEAR: 2018-2026
+    COPYRIGHT HOLDER: C306 authors
