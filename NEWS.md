@@ -17,7 +17,8 @@ case, the other numbers in the same table were correct.
      and tables built from them (`ss_flextable()`, `ss_huxtable()`, `rbind()`).
    * Affected: `add.risk = TRUE` (the default), with any `compare.method`.
      `sstable.survcomp.subgroup()` always uses it.
-   * Period: 2024-07-09 (commit 40aeabd, "Adding mstate model to survcomp";
+   * Period: 2024-07-09 (upstream oucru-biostats/C306 commit 40aeabd,
+     "Adding mstate model to survcomp";
      versions 0.1.5-022405 to 0.1.5-240715) until this version.
    * What was wrong: the "risk [%]" figure was 100 × the cumulative hazard,
      not the absolute risk (e.g. 232% instead of 92%). It is now 1 − Kaplan–Meier,
@@ -29,8 +30,8 @@ case, the other numbers in the same table were correct.
 2. **Subgroup rows with `reference.arm = "A"`**
    * Function: `sstable.survcomp.subgroup()`.
    * Affected: `reference.arm = "A"`, subgroup rows only (not "All patients").
-   * Period: 2024-06-17 (commit cbe10dc, when `reference.arm` was added) until
-     this version.
+   * Period: 2024-06-17 (upstream oucru-biostats/C306 commit cbe10dc, when
+     `reference.arm` was added) until this version.
    * What was wrong: subgroup rows ignored `reference.arm` and always used arm B
      as the reference, so their HR / RMST / cumulative-incidence comparisons
      were inverted relative to the "All patients" row (e.g. HR 0.54 shown
@@ -40,8 +41,8 @@ case, the other numbers in the same table were correct.
    * Function: `sstable.survcomp.subgroup()`.
    * Affected: `compare.method = "rmst"` or `"cuminc"` with `model.censoring`
      given in `compare.args`; the "Test for heterogeneity" p-value only.
-   * Period: 2024-06-13 (commit 869429c, "add RMST to survcomp") until this
-     version.
+   * Period: 2024-06-13 (upstream oucru-biostats/C306 commit 869429c, "add
+     RMST to survcomp") until this version.
    * What was wrong: the user's `model.censoring` was replaced by the eventglm
      default (`"independent"`) in the interaction test, so the heterogeneity
      p-value used a different censoring model from the one requested (e.g.
@@ -52,17 +53,18 @@ case, the other numbers in the same table were correct.
      `flextable = TRUE` and `transpose = TRUE` output.
    * Affected: all calls, both `method = "lik.ratio"` and `"wald"`; the
      `CI.lower` / `CI.upper` columns only.
-   * Period: 2019-12-26 (commit 5b44416, when the function was added) until
-     this version.
+   * Period: 2019-12-26 (upstream oucru-biostats/C306 commit 5b44416, when
+     the function was added) until this version.
    * What was wrong: the CI was that of the *log* odds ratio, printed next to
      the odds ratio (e.g. OR 1.06 with "CI" (-0.20, 0.32) instead of
      (0.82, 1.37)). It is now the CI of the OR, as in `logist_summary()`. ORs,
      log ORs and p-values were correct.
 
 5. **Drift of the competing-risks curves**
-   * Functions: `gg_ajsurvplot()` (from 2024-06-20, commit 17a757d) and
-     `gg_ajsurvplot2()`, including `.return_data = TRUE` (from 2024-06-25,
-     commit b89f64b), until this version.
+   * Functions: `gg_ajsurvplot()` (from 2024-06-20, upstream
+     oucru-biostats/C306 commit 17a757d) and `gg_ajsurvplot2()`, including
+     `.return_data = TRUE` (from 2024-06-25, upstream commit b89f64b), until
+     this version.
    * Affected: plots with groups on the right-hand side of the formula whose
      censoring patterns differ.
    * What was wrong: the censoring weights were pooled over all groups, so the
@@ -221,6 +223,16 @@ required by R CMD check). Calls with positional arguments work as before.
   <https://github.com/TranHung93/306> (based on oucru-biostats/C306); install
   it with `remotes::install_github("TranHung93/306")`. The package name stays
   C306.
+* The bundled example datasets are now simulated. `inst/extdata/baseline_data.csv`
+  and `inst/extdata/ae_data.csv` used to contain real trial data. They have
+  been replaced by synthetic data with the same columns, types, factor levels
+  and a similar pattern of missing values (IDs `SIM-001` etc.), generated
+  reproducibly by `data-raw/simulate_data.R`. The same data are now also
+  available as documented datasets (`baseline_data`, `ae_data`). Examples,
+  the vignette and the README therefore show different numbers from earlier
+  versions. The real data have been removed from the repository history, so
+  commit hashes differ from those in oucru-biostats/C306; the commits cited
+  above are labelled as upstream commits.
 * Added a LICENSE file, a testthat (3rd edition) test suite, and this NEWS file.
 * `crayon`, `assertthat` and `stringr` are no longer used. `Hmisc` moved from
   Imports to Suggests (it is only used in a vignette). `lifecycle` and the

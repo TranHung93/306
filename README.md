@@ -51,11 +51,11 @@ show_table(tab$table)
 
 | Characteristic | n | Sham procedure (N=135) Summary statistic | n | Intrathecal treatment (N=136) Summary statistic | p value |
 |:---|:---|:---|:---|:---|:---|
-| age | 135 | 50 (41-60) | 136 | 46 (38-57) | 0.0812 |
-| sex | 135 |  | 136 |  | 1 |
-| \- F |  | 22 (16%) |  | 22 (16%) |  |
-| \- M |  | 113 (84%) |  | 114 (84%) |  |
-| icudays | 133 | 16 (8-23) | 136 | 14 (8-21) | 0.25 |
+| age | 135 | 49 (38-58) | 136 | 49 (38-60) | 0.896 |
+| sex | 135 |  | 136 |  | 0.879 |
+| \- F |  | 27 (20%) |  | 26 (19%) |  |
+| \- M |  | 108 (80%) |  | 110 (81%) |  |
+| icudays | 134 | 18 (12-27) | 135 | 15 (11-22) | 0.0335 |
 
 Add `flextable = TRUE` (or call `ss_flextable(tab)`) for a formatted
 table that can be saved with `flextable::save_as_docx()`.
@@ -73,11 +73,11 @@ show_table(tab$table, rows = 1:6)
 
 | Type of adverse event | n episode | Sham procedure (N=135) n patient | n episode | Intrathecal treatment (N=136) n patient | p value |
 |:---|:---|:---|:---|:---|:---|
-| Any selected adverse event | 283 | 88 (65%) | 251 | 84 (62%) | 0.559 |
-| \- Grade I | 26 | 25 (19%) | 32 | 26 (19%) |  |
-| \- Grade II | 208 | 79 (59%) | 192 | 73 (54%) |  |
-| \- Grade III | 40 | 25 (19%) | 19 | 17 (12%) |  |
-| \- Grade IV | 6 | 6 (4%) | 5 | 5 (4%) |  |
+| Any selected adverse event | 222 | 81 (60%) | 312 | 91 (67%) | 0.237 |
+| \- Grade I | 101 | 56 (41%) | 143 | 67 (49%) |  |
+| \- Grade II | 72 | 46 (34%) | 96 | 53 (39%) |  |
+| \- Grade III | 29 | 25 (19%) | 52 | 32 (24%) |  |
+| \- Grade IV | 17 | 14 (10%) | 18 | 16 (12%) |  |
 | \- Grade N/A | 3 | 3 (2%) | 3 | 3 (2%) |  |
 
 **Time to event.** Events, absolute risk, hazard ratio and median

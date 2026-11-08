@@ -8,6 +8,14 @@
 \description{
 Functions used by the Biostatistics group of the Oxford University Clinical Research Unit (OUCRU) to analyse and report clinical studies. They create report-ready summary tables of baseline characteristics, adverse events and time-to-event outcomes (Cox, Fine-Gray, restricted mean survival time and cumulative incidence comparisons, overall and by subgroup), summarise logistic regression models, plot competing-risks curves, and import, format and check data with an OUCRU-style data dictionary.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/TranHung93/306}
+  \item Report bugs at \url{https://github.com/TranHung93/306/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Thai Hung Tran \email{hungtt@oucru.org}
 
